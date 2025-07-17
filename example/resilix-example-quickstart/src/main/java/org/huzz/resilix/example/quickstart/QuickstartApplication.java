@@ -7,7 +7,7 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
  * @author chenji
  * @since 1.0.0
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "org.huzz.resilix")
 public class QuickstartApplication {
     public static void main(String[] args) {
         SpringApplication.run(QuickstartApplication.class, args);

@@ -18,8 +18,9 @@
 
         <lombok.version>1.18.38</lombok.version>
         <spring-cloud.version>4.3.0</spring-cloud.version>
-        <redisson-starter.version>3.50.0</redisson-starter.version>
-        <commons-lang3.version>3.17.0</commons-lang3.version>
+        <redisson.version>3.50.0</redisson.version>
+        <fastjson2.version>2.0.56</fastjson2.version>
+        <commons-lang3.version>3.18.0</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
         <guava.version>33.4.8-jre</guava.version>
     </properties>
@@ -36,9 +37,14 @@
             <version>${spring-cloud.version}</version>
         </dependency>
         <dependency>
+            <groupId>com.alibaba.fastjson2</groupId>
+            <artifactId>fastjson2</artifactId>
+            <version>${fastjson2.version}</version>
+        </dependency>
+        <dependency>
             <groupId>org.redisson</groupId>
-            <artifactId>redisson-spring-boot-starter</artifactId>
-            <version>${redisson-starter.version}</version>
+            <artifactId>redisson</artifactId>
+            <version>${redisson.version}</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>

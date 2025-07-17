@@ -1,10 +1,10 @@
 package org.huzz.resilix.api.run;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.huzz.resilix.api.idempotent.IdempotentJudge;
 import org.huzz.resilix.api.idempotent.IdempotentKey;
 import org.huzz.resilix.api.idempotent.SkippedIdempotentJudge;
@@ -21,9 +21,12 @@ import org.huzz.resilix.api.run.exception.PhaseStoppedException;
 import org.huzz.resilix.api.run.exception.RemoteLaunchFailedException;
 import org.huzz.resilix.api.run.handler.RestApiTriggerRunHandler;
 import org.huzz.resilix.api.run.handler.RunHandler;
+import org.springframework.core.ResolvableType;
+import org.springframework.util.ClassUtils;
 
 import java.util.*;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.stream.Collectors;
@@ -31,81 +34,97 @@ import java.util.stream.Collectors;
 /**
  * 处理器管理器基础类，用于管理所有的处理器，按照阶段顺序执行
  *
- * @param <C> 上下文类型
  * @author chenji
  * @since 1.0.0
  */
 @Slf4j
-public abstract class AbstractRunHandlerManager<C extends RunContext> {
-
+public abstract class AbstractRunHandlerManager implements RunHandlerManager {
     /**
-     * @return 返回异步阶段调用默认的线程池
+     * 存储所有的处理器，按照阶段进行存储
      */
-    @Nonnull
-    protected abstract ExecutorService poolExecutor();
-
+    protected final Map<Phase, RunHandler<RunContext>> handlerMap;
     /**
-     * @return 返回异步阶段回调器
+     * 第一个计划阶段，通常是处理器中阶段最小的那个阶段
      */
-    @Nonnull
-    protected PhaseCallback asyncPhaseCallback() {
-        return new NopePhaseCallback();
-    }
-
-    /**
-     * @return 返回阶段状态检查器
-     */
-    @Nonnull
-    protected PhaseStopStatusChecker phaseStatusChecker() {
-        return new NopePhaseStopStatusChecker();
-    }
-
-    /**
-     * @return 返回额外的上下文操作
-     */
-    @Nonnull
-    protected List<AdditionalContextAction<C>> additionalContextAction() {
-        return ImmutableList.of();
-    }
-
-    /**
-     * @return 返回环境感知缓存
-     */
-    @Nonnull
-    protected Map<AwareCache.Type, AwareCache> envAwareCacheMap() {
-        return ImmutableMap.of();
-    }
-
-    /**
-     * @return 返回全局的幂等判断器
-     */
-    @Nullable
-    protected IdempotentJudge globalIdempotentJudge() {
-        return null;
-    }
-
-    protected final Map<Phase, RunHandler<C>> handlerMap;
     protected final Phase firstPlanPhase;
-    // 存放手动注册的幂等判断器
+    /**
+     * 异步阶段调用默认的线程池
+     */
+    protected final ExecutorService poolExecutor;
+    /**
+     * 异步阶段回调器，用于触发异步阶段
+     */
+    protected final PhaseCallback asyncPhaseCallback;
+    /**
+     * 阶段停止状态检查器，用于检查当前阶段是否已经停止
+     */
+    protected final PhaseStopStatusChecker phaseStopStatusChecker;
+    /**
+     * 返回额外的上下文操作
+     */
+    protected final List<AdditionalContextAction<RunContext>> additionalContextActions;
+    /**
+     * 基于环境的感知缓存，存储在环境感知缓存中
+     */
+    protected final Map<AwareCache.Type, AwareCache> envAwareCacheMap;
+    /**
+     * 默认的阶段记录器
+     */
+    protected final PhaseRecorder<? extends RunContext> phaseRecorder;
+    /**
+     * 全局的幂等判断器
+     */
+    protected final IdempotentJudge globalIdempotentJudge;
+    /**
+     * 手动注册的幂等判断器
+     */
     protected final Map<Phase, IdempotentJudge> idempotentJudgeMap = new HashMap<>();
-
-    protected final PhaseRecorder<?> nopePhaseRecorder = new NopePhaseRecorder();
-
     /**
      * 整个执行链路完成后，不管最后的结果是成功还是失败，一定会执行的逻辑
      */
-    protected final List<Consumer<C>> finallyConsumer = new ArrayList<>();
+    protected final List<Consumer<RunContext>> finallyConsumer = new ArrayList<>();
+    /**
+     * 上下文类的类型
+     */
+    @Getter
+    private final Class<? extends RunContext> cxtClass;
 
-    protected AbstractRunHandlerManager(List<? extends RunHandler<C>> handlers) {
-        handlerMap = handlers.stream().collect(Collectors.toMap(RunHandler::phase, Function.identity()));
-        // 获取到第一个阶段
+    AbstractRunHandlerManager(@Nonnull List<RunHandler<RunContext>> handlers,
+                              @Nullable ExecutorService poolExecutor,
+                              @Nullable PhaseCallback asyncPhaseCallback,
+                              @Nullable PhaseStopStatusChecker phaseStopStatusChecker,
+                              @Nullable List<AdditionalContextAction<RunContext>> additionalContextActions,
+                              @Nullable Map<AwareCache.Type, AwareCache> envAwareCacheMap,
+                              @Nullable PhaseRecorder<? extends RunContext> phaseRecorder,
+                              @Nullable IdempotentJudge globalIdempotentJudge
+    ) {
+        checkHandler(handlers);
+        handlerMap = handlers.stream()
+                .collect(Collectors.collectingAndThen(
+                        Collectors.toMap(RunHandler::phase, Function.identity()),
+                        Collections::unmodifiableMap));
         firstPlanPhase = handlerMap.keySet().stream().min(Comparator.comparingInt(Phase::ordinal)).orElse(null);
-
-        // 设置finallyConsumer
         precessFinallyConsumer(handlers);
+
+        this.poolExecutor = poolExecutor == null ? Executors.newSingleThreadExecutor() : poolExecutor;
+        this.asyncPhaseCallback = asyncPhaseCallback == null ? new NopePhaseCallback() : asyncPhaseCallback;
+        this.phaseStopStatusChecker = phaseStopStatusChecker == null ? new NopePhaseStopStatusChecker() : phaseStopStatusChecker;
+        this.additionalContextActions = additionalContextActions == null ? Collections.emptyList() : additionalContextActions;
+        this.envAwareCacheMap = envAwareCacheMap == null ? Collections.emptyMap() : envAwareCacheMap;
+        this.phaseRecorder = phaseRecorder == null ? new NopePhaseRecorder() : phaseRecorder;
+        this.globalIdempotentJudge = globalIdempotentJudge;
+        this.cxtClass = checkContextClass(handlers.get(0));
     }
 
-    public void start(C context) {
+
+    @Override
+    public void start(RunContext context) throws NullPointerException, IllegalArgumentException {
+        if (context == null) {
+            throw new NullPointerException("RunContext cannot be null");
+        }
+        if (!context.getClass().equals(cxtClass)) {
+            throw new IllegalArgumentException("RunContext type mismatch, expected: " + cxtClass.getName() + ", but found: " + context.getClass().getName());
+        }
         try {
             RunContext.setCurrentCtx(context);
             // 可以支持从任意阶段开始执行
@@ -126,8 +145,8 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
         }
     }
 
-    @SuppressWarnings("unchecked")
-    protected void next(C context, @Nullable Phase phase) {
+
+    private void next(RunContext context, @Nullable Phase phase) {
         if (phase == null) {
             RunContext.removeCurrentCtx();
             return;
@@ -136,7 +155,7 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
             next(context, phase.next());
             return;
         }
-        RunHandler<C> handler = handlerMap.get(phase);
+        RunHandler<RunContext> handler = handlerMap.get(phase);
         if (handler == null) {
             // 如果没有找到对应的处理器，说明在本地没有找到对应的处理器，可能是远程调用触发下一个阶段，这里直接结束
             return;
@@ -149,7 +168,7 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
         context.setException(null);
 
         // 跳过判断
-        List<HandlerRunPredicate<C>> runPredicate = handler.runPredicate();
+        List<HandlerRunPredicate<RunContext>> runPredicate = handler.runPredicate();
         try {
             if (runPredicate.stream().anyMatch(predicate -> !predicate.shouldRun(context))) {
                 next(context, context.getCurrentPhase().next());
@@ -171,11 +190,11 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
         if (phase.isAsync()) {
             // 异步执行
             RunContext duplicate = context.duplicate();
-            ExecutorService poolExecutor = Objects.requireNonNullElseGet(phase.customExecutor(), this::poolExecutor);
+            ExecutorService poolExecutor = Objects.requireNonNullElse(phase.customExecutor(), this.poolExecutor);
             poolExecutor.execute(() -> {
                 // 异步阶段，需要重新设置上下文，因为ThreadLocal是线程隔离的
                 RunContext.setCurrentCtx(duplicate);
-                execute((C) duplicate, handler);
+                execute(duplicate, handler);
             });
             // 因为handler可能是远程服务提供的，因此这里需要使用Context里面的Phase，而不是handler里面的Phase，下同
             next(context, context.getCurrentPhase().next());
@@ -190,50 +209,48 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
     }
 
     @SuppressWarnings("unchecked")
-    protected void execute(C context, RunHandler<C> handler) {
-        PhaseRecorder<C> recorder = handler.getRecorder();
+    private void execute(RunContext context, RunHandler<RunContext> handler) {
+        PhaseRecorder<RunContext> recorder = handler.getRecorder();
         if (recorder == null) {
-            recorder = (PhaseRecorder<C>) nopePhaseRecorder;
+            recorder = (PhaseRecorder<RunContext>) phaseRecorder;
         }
 
         // 当前阶段快照，如果是"远程调用触发下一个阶段"这种阶段的运行，可能会修改掉上下文，所以需要使用快照，给Recorder使用
         RunContext currentPhaseSnapshot = handler instanceof RestApiTriggerRunHandler ? context.duplicate() : context;
 
         try {
-            PhaseStopStatusChecker statusChecker = phaseStatusChecker();
-            statusChecker.check(context);
+            phaseStopStatusChecker.check(context);
 
             // 阶段开始，记录一些需要存储的数据
             logReadyFor(context, recorder);
 
             handler.handle(context);
-            logEnd((C) currentPhaseSnapshot, recorder, null);
+            logEnd(currentPhaseSnapshot, recorder, null);
 
             // 执行成功，发送事件
             Object extraInfo = null;
             if (handler instanceof ExtraInfoProvider provider) {
                 extraInfo = provider.getExtraInfo(context);
             }
-            PhaseCallback phaseCallback = asyncPhaseCallback();
-            phaseCallback.callback(context, extraInfo);
+            asyncPhaseCallback.callback(context, extraInfo);
         } catch (Exception e) {
-            failed(context, (C) currentPhaseSnapshot, e);
+            failed(context, currentPhaseSnapshot, e);
             if (e instanceof RemoteLaunchFailedException) {
                 // 如果是拉起远程失败，这种失败指的是，请求都没有发送出去，需要把原始context也设置一下失败标志
-                failed(context, (C) currentPhaseSnapshot, (Exception) e.getCause());
+                failed(context, currentPhaseSnapshot, (Exception) e.getCause());
             }
             if (e instanceof PhaseStoppedException) {
                 context.setStopped(true);
                 currentPhaseSnapshot.setStopped(true);
             }
 
-            logEnd((C) currentPhaseSnapshot, recorder, e);
+            logEnd(currentPhaseSnapshot, recorder, e);
         } finally {
-            handler.postHandle((C) currentPhaseSnapshot);
+            handler.postHandle(currentPhaseSnapshot);
         }
     }
 
-    protected void failed(C context, C currentPhaseSnapshot, Exception e) {
+    private void failed(RunContext context, RunContext currentPhaseSnapshot, Exception e) {
         context.setSuccess(false);
         context.setException(e);
         currentPhaseSnapshot.setSuccess(false);
@@ -241,7 +258,7 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
     }
 
 
-    protected void logReadyFor(C context, PhaseRecorder<C> recorder) {
+    protected void logReadyFor(RunContext context, PhaseRecorder<RunContext> recorder) {
         try {
             recorder.readyFor(context);
         } catch (Exception e) {
@@ -249,7 +266,7 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
         }
     }
 
-    protected void logEnd(C context, PhaseRecorder<C> recorder, Exception e) {
+    protected void logEnd(RunContext context, PhaseRecorder<RunContext> recorder, Exception e) {
         try {
             recorder.end(context, e);
         } catch (Exception end) {
@@ -257,8 +274,8 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
         }
     }
 
-    private void precessFinallyConsumer(List<? extends RunHandler<C>> handlers) {
-        for (RunHandler<C> handler : handlers) {
+    private void precessFinallyConsumer(List<? extends RunHandler<RunContext>> handlers) {
+        for (RunHandler<RunContext> handler : handlers) {
             finallyConsumer.add(handler::finallyHandle);
         }
     }
@@ -273,7 +290,7 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
      * @throws IdempotentJudgeException 幂等判断异常，表示当前阶段下面的所有阶段都不执行了
      * @see HandlerRunPredicate
      */
-    protected boolean executeIdempotentJudge(C context, Phase phase) throws IdempotentJudgeException {
+    protected boolean executeIdempotentJudge(RunContext context, Phase phase) throws IdempotentJudgeException {
         if (context instanceof IdempotentKey key) {
             // 使用addIdempotentJudge方法注册的幂等判断器优先级最高
             IdempotentJudge registryIdempotentJudge = idempotentJudgeMap.get(phase);
@@ -290,13 +307,10 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
             }
 
             // 全局的幂等判断器优先级最低
-            IdempotentJudge globalIdempotentJudge = globalIdempotentJudge();
             result = executeIdempotentJudge(context, globalIdempotentJudge, key, phase);
             if (result != null) {
                 return result;
             }
-        } else {
-            log.info("当前无需进行幂等判断，阶段：{}", phase);
         }
         return false;
     }
@@ -311,7 +325,7 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
      * @return null：没有执行幂等判断，true：跳过执行，false：不跳过执行
      * @throws IdempotentJudgeException 幂等判断异常，表示当前阶段下面的所有阶段都不执行了
      */
-    private Boolean executeIdempotentJudge(C context, IdempotentJudge idempotentJudge, IdempotentKey key, Phase phase) throws IdempotentJudgeException {
+    private Boolean executeIdempotentJudge(RunContext context, IdempotentJudge idempotentJudge, IdempotentKey key, Phase phase) throws IdempotentJudgeException {
         if (idempotentJudge == null) {
             // 返回null表示没有执行幂等判断，方便后续使用其他的幂等判断器
             return null;
@@ -334,12 +348,11 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
     }
 
     @SuppressWarnings("unchecked")
-    public void safeDoAdditionalAction(C context) {
+    private void safeDoAdditionalAction(RunContext context) {
         try {
-            List<AdditionalContextAction<C>> additionalContextActions = additionalContextAction();
-            for (AdditionalContextAction<C> additionalContextAction : additionalContextActions) {
+            for (AdditionalContextAction<RunContext> additionalContextAction : additionalContextActions) {
                 if (context instanceof AwareCacheRunContext awareCacheRunContext) {
-                    awareCacheRunContext.trySetUpEnvAwareCacheMap(envAwareCacheMap());
+                    awareCacheRunContext.trySetUpEnvAwareCacheMap(envAwareCacheMap);
                     if (additionalContextAction instanceof AwareCacheAdditionalContextAction<?> awareCacheContextAction) {
                         ((AwareCacheAdditionalContextAction<AwareCacheRunContext>) awareCacheContextAction).action(awareCacheRunContext);
                     } else {
@@ -361,9 +374,35 @@ public abstract class AbstractRunHandlerManager<C extends RunContext> {
      * @param idempotentJudge 幂等判断器
      * @return 当前上下文管理器
      */
-    public AbstractRunHandlerManager<C> addIdempotentJudge(Phase phase, IdempotentJudge idempotentJudge) {
+    @Override
+    public RunHandlerManager addIdempotentJudge(Phase phase, IdempotentJudge idempotentJudge) {
         idempotentJudgeMap.put(phase, idempotentJudge);
         return this;
+    }
+
+    protected void checkHandler(List<RunHandler<RunContext>> handlers) {
+        if (CollectionUtils.isEmpty(handlers)) {
+            throw new IllegalArgumentException("处理器列表不能为空");
+        }
+
+        List<String> phaseTypeNames = handlers.stream().map(RunHandler::phase).map(Object::getClass).map(Class::getSimpleName).distinct().toList();
+        if (phaseTypeNames.size() > 1) {
+            throw new IllegalArgumentException("所有的处理器必须是同一种类型的，这一批次的类型：" + String.join(", ", phaseTypeNames));
+        }
+    }
+
+    @SuppressWarnings("unchecked")
+    private Class<? extends RunContext> checkContextClass(RunHandler<RunContext> handler) {
+        ResolvableType resolvableType = ResolvableType.forClass(handler.getClass());
+        ResolvableType genericType = resolvableType.as(RunHandler.class).getGeneric(0);
+        Class<?> resolve = genericType.resolve();
+        if (resolve == null) {
+            throw new IllegalArgumentException("can not resolve RunContext type from handler: " + handler.getClass().getName());
+        }
+        if (!ClassUtils.isAssignable(RunContext.class, resolve)) {
+            throw new IllegalArgumentException("RunHandler must be generic type of RunContext, but found: " + resolve.getName());
+        }
+        return (Class<? extends RunContext>) resolve;
     }
 }
 

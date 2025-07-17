@@ -1,9 +1,12 @@
 package org.huzz.resilix.api.run;
 
+import com.alibaba.fastjson2.JSON;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.Setter;
+import org.huzz.resilix.api.constants.EnvType;
 import org.huzz.resilix.api.run.cache.AwareCache;
+import org.springframework.beans.BeanUtils;
 
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +33,21 @@ public abstract class AbstractRunContext implements RunContext, AwareCacheRunCon
     protected boolean isStopped;
     // 是否因为幂等判断而跳过
     protected boolean isSkipped;
+    // 环境类型
+    protected EnvType envType;
+    // 额外信息
+    @JsonIgnore
+    private Object extra;
+
+    @Override
+    public RunContext duplicate() {
+        return JSON.parseObject(JSON.toJSONString(this), this.getClass());
+    }
+
+    @Override
+    public void cover(RunContext useToCovered) {
+        BeanUtils.copyProperties(useToCovered, this);
+    }
 
     @Override
     public AwareCache awareCache(AwareCache.Type type) {
