@@ -19,6 +19,8 @@
 </dependency>
 ```
 
+可用版本可以在 [Maven Central](https://search.maven.org/artifact/top.huzz/spring-boot-starter-resilix) 上找到。
+
 ### 2. 创建业务流
 
 业务流需要实现 `Phase` 接口，一般情况下，可以直接使用枚举类来实现。下面是一个简单的业务流示例：

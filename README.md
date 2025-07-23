@@ -20,6 +20,8 @@ executable phases, you can use this framework to assemble them into a complete b
 </dependency>
 ```
 
+available versions can be found at [Maven Central](https://search.maven.org/artifact/top.huzz/spring-boot-starter-resilix).
+
 ### 2. Create Business Flow
 
 The business flow needs to implement the `Phase` interface. Typically, you can implement it using an enum class. Here's
