@@ -23,9 +23,10 @@ public interface RunHandlerManager {
     /**
      * Starts the run process using a default context instance created from {@link #getCxtClass()}.
      *
+     * @return a new instance of the run context that is started and ready for use.
      * @throws NewInstanceException if the context class cannot be instantiated, which may occur if the class does not have a no-argument constructor or if instantiation fails for other reasons.
      */
-    default void start() throws NewInstanceException {
+    default RunContext start() throws NewInstanceException {
         Class<? extends RunContext> cxtClass = getCxtClass();
         RunContext runContext;
         try {
@@ -34,6 +35,7 @@ public interface RunHandlerManager {
             throw new NewInstanceException(cxtClass, e);
         }
         start(runContext);
+        return runContext;
     }
 
     /**
