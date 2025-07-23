@@ -134,6 +134,6 @@ Process finished with exit code 0
 
 ## 支持
 
-如需支持，请发送电子邮件至 [huzz-resilix@gmail.com](https://mail.google.com/) 或
+如需支持，请发送电子邮件至 [huzz.resilix@gmail.com](https://mail.google.com/) 或
 提交 [issue](https://github.com/huzz-open/resilix/issues/new)
 

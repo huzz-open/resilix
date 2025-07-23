@@ -138,6 +138,6 @@ Process finished with exit code 0
 
 ## Support
 
-For support, please email [huzz-resilix@gmail.com](https://mail.google.com/) or submit
+For support, please email [huzz.resilix@gmail.com](https://mail.google.com/) or submit
 an [issue](https://github.com/huzz-open/resilix/issues/new)
 
