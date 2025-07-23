@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>resilix-example-use-ctx</artifactId>
+    <name>${project.artifactId}</name>
+    <description>${project.artifactId}</description>
 
     <dependencies>
         <dependency>

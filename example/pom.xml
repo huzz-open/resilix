@@ -11,6 +11,8 @@
 
     <artifactId>resilix-example</artifactId>
     <packaging>pom</packaging>
+    <name>${project.artifactId}</name>
+    <description>The example or Resilix</description>
     <modules>
         <module>resilix-example-quickstart</module>
         <module>resilix-example-use-ctx</module>
@@ -27,11 +29,14 @@
     </dependencyManagement>
 
     <build>
-        <plugins>
-            <plugin>
-                <groupId>org.springframework.boot</groupId>
-                <artifactId>spring-boot-maven-plugin</artifactId>
-            </plugin>
-        </plugins>
+        <pluginManagement>
+            <plugins>
+                <plugin>
+                    <groupId>org.springframework.boot</groupId>
+                    <artifactId>spring-boot-maven-plugin</artifactId>
+                    <version>3.5.3</version>
+                </plugin>
+            </plugins>
+        </pluginManagement>
     </build>
 </project>

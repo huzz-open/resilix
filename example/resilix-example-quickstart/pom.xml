@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>resilix-example-quickstart</artifactId>
+    <name>${project.artifactId}</name>
+    <description>${project.artifactId}</description>
 
     <dependencies>
         <dependency>

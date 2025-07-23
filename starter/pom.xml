@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>spring-boot-starter-resilix</artifactId>
+    <name>${project.artifactId}</name>
+    <description>Spring boot starter for Resilix</description>
 
     <properties>
         <spring-boot.version>3.4.5</spring-boot.version>

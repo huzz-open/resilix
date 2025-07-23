@@ -10,6 +10,8 @@
     </parent>
 
     <artifactId>resilix</artifactId>
+    <name>${project.artifactId}</name>
+    <description>A framework for complex business processing</description>
 
     <properties>
         <lombok.version>1.18.38</lombok.version>
