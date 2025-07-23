@@ -1,8 +1,10 @@
 package top.huzz.resilix.core;
 
+import top.huzz.resilix.idempotent.IdempotentJudge;
+
 /**
  * @author chenji
- * @see io.metersphere.plan.run.idempotent.IdempotentJudge
+ * @see IdempotentJudge
  * @since 1.0.0
  */
 public interface FinallyHandler<C extends RunContext> {
