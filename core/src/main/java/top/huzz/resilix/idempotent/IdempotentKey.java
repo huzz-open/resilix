@@ -1,16 +1,17 @@
 package top.huzz.resilix.idempotent;
 
 /**
- * 幂等运行上下文接口
+ * Idempotent run context interface
  *
  * @author chenji
  * @since 1.0.0
  */
 public interface IdempotentKey {
     /**
-     * 获取幂等标识，用于判断是否是同一个任务，相同的值认为是同一个任务
+     * Get the idempotent identifier, used to determine if it's the same task.
+     * The same value is considered the same task.
      *
-     * @return 幂等标识
+     * @return idempotent identifier
      */
     String idempotentKey();
 }

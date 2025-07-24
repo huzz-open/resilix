@@ -4,7 +4,7 @@ import lombok.Getter;
 import top.huzz.resilix.idempotent.IdempotentKey;
 
 /**
- * 阶段幂等判断异常
+ * Phase idempotent judgment exception
  *
  * @author chenji
  * @since 1.0.0

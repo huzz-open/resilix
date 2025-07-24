@@ -4,7 +4,8 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * 基于线程的环境感知缓存，只适合在本地环境使用，不适合在分布式环境使用。
+ * Thread-based environment-aware cache, suitable only for local environments,
+ * not suitable for distributed environments.
  *
  * @author chenji
  * @since 1.0.0

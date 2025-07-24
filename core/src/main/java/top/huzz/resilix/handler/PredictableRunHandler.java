@@ -10,9 +10,10 @@ import java.util.Comparator;
 import java.util.List;
 
 /**
- * 可预测的运行处理器，可以指定运行的条件，只需要继承该类并实现{@link #predicateClasses()}方法即可
+ * Predictable run handler that allows specifying execution conditions. 
+ * Simply extend this class and implement the {@link #predicateClasses()} method.
  *
- * @param <C> 上下文类型
+ * @param <C> context type
  * @author chenji
  * @since 1.0.0
  */
@@ -28,7 +29,7 @@ public abstract class PredictableRunHandler<C extends RunContext> implements Run
 
         for (Class<?> c : classes) {
             if (!HandlerRunPredicate.class.isAssignableFrom(c)) {
-                throw new IllegalArgumentException("predicateClasses()方法返回的类必须是HandlerRunPredicate的子类，不支持的类：" + c);
+                throw new IllegalArgumentException("Classes returned by predicateClasses() method must be subclasses of HandlerRunPredicate. Unsupported class: " + c);
             }
         }
 
@@ -39,7 +40,7 @@ public abstract class PredictableRunHandler<C extends RunContext> implements Run
     }
 
     /**
-     * @return 返回需要使用的断言类
+     * @return Returns the list of predicate classes to be used
      */
     protected List<Class<?>> predicateClasses() {
         return List.of(AlwaysRunPredicate.class);

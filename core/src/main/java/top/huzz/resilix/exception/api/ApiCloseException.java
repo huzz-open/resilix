@@ -1,7 +1,7 @@
 package top.huzz.resilix.exception.api;
 
 /**
- * 关闭异常
+ * API close exception
  *
  * @author chenji
  * @since 1.0.0

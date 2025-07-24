@@ -14,6 +14,8 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 /**
+ * Extended Bloom Filter that supports conditional insert-after-check operations.
+ * 
  * @author chenji
  * @since 1.0.0
  */
@@ -23,7 +25,8 @@ public class ExtBloomFilter<T> extends RedissonBloomFilter<T> {
         super(commandExecutor, name);
     }
 
-    // 重写containsAsync方法，使其支持在判断后把被判断的值直接插入布隆过滤器，这样可以避免再调用一次put方法
+    // Override containsAsync method to support directly inserting the checked value into the bloom filter
+    // after checking, which avoids calling the put method again
     @Override
     public RFuture<Long> containsAsync(Collection<T> objects) {
         CompletionStage<Long> f = CompletableFuture.completedFuture(null);

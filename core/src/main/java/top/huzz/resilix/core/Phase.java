@@ -7,32 +7,36 @@ import top.huzz.resilix.idempotent.IdempotentKey;
 import java.util.concurrent.ExecutorService;
 
 /**
- * 阶段定义，用于表示一系列具备执行顺序的逻辑
+ * Phase definition, used to represent a series of logic with execution order
  *
  * @author chenji
  * @since 1.0.0
  */
 public interface Phase {
     /**
-     * 序号，值越小越靠前，不能重复。
+     * Sequence number, smaller values come first, cannot be duplicated.
      *
-     * @return 阶段编号
+     * @return phase number
      */
     int ordinal();
 
     /**
-     * @return 是否异步执行
+     * @return whether to execute asynchronously
      */
     default boolean isAsync() {
         return false;
     }
 
     /**
-     * 有一些阶段是需要做幂等处理的，比如Kafka消费阶段，这类消息可能在rebalance的时候会重复消费。
-     * 这里可以定义是否做幂等处理，但需要注意的是，该阶段所在的下文必须实现{@link IdempotentKey}接口。
-     * 如果调用{@link IdempotentKey#idempotentKey()}方法返回的key相同，则认为是同一个任务，再由具体的幂等处理器判断是否已经执行过。
+     * Some phases need idempotent processing, such as Kafka consumption phase, 
+     * which may consume messages repeatedly during rebalance.
+     * Here you can define whether to do idempotent processing, but note that 
+     * the context where this phase is located must implement the {@link IdempotentKey} interface.
+     * If the key returned by calling {@link IdempotentKey#idempotentKey()} method is the same, 
+     * it is considered the same task, and then the specific idempotent processor determines 
+     * whether it has been executed.
      *
-     * @return 幂等处理器
+     * @return idempotent processor
      * @see IdempotentKey
      * @see IdempotentJudge
      */
@@ -42,9 +46,9 @@ public interface Phase {
     }
 
     /**
-     * 如果是异步的任务，可以使用该方法自定义线程池
+     * If it's an asynchronous task, you can use this method to customize the thread pool
      *
-     * @return 自定义线程池
+     * @return custom thread pool
      */
     @Nullable
     default ExecutorService customExecutor() {
@@ -52,19 +56,19 @@ public interface Phase {
     }
 
     /**
-     * @return 是否废弃
+     * @return whether deprecated
      */
     default boolean isDeprecated() {
         return false;
     }
 
     /**
-     * @return 按照顺序返回阶段
+     * @return return phases in order
      */
     Phase[] getValues();
 
     /**
-     * @return 下一个阶段
+     * @return next phase
      */
     default Phase next() {
         if (ordinal() == getValues().length - 1) {

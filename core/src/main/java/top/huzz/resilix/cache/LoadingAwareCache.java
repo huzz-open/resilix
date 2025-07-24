@@ -7,7 +7,8 @@ import top.huzz.resilix.core.RunContext;
 import java.util.concurrent.TimeUnit;
 
 /**
- * 基于线程的环境感知缓存，只适合在本地环境使用，不适合在分布式环境使用。
+ * Thread-based environment-aware cache, suitable only for local environments,
+ * not suitable for distributed environments.
  *
  * @author chenji
  * @since 1.0.0
@@ -33,7 +34,8 @@ public abstract class LoadingAwareCache implements AwareCache {
     public Object get(Object key) {
         Object o = cache.getIfPresent(key);
         if (accessRenewal && o != null) {
-            // 官方的expireAfterAccess设置后，在首次访问后，在过了expireAfterAccess后会直接把key删除掉，这里重新put回去，实现访问续期功能
+            // After setting expireAfterAccess officially, the key will be deleted directly after the expireAfterAccess time 
+            // has passed since the first access. Here we put it back to implement access renewal functionality
             put(key, o);
         }
         return o;

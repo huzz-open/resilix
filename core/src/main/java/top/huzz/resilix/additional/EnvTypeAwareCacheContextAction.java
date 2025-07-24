@@ -6,9 +6,9 @@ import top.huzz.resilix.core.AwareCacheRunContext;
 import top.huzz.resilix.cache.AwareCache;
 
 /**
- * 基于环境缓存附加操作
+ * Environment cache-based additional context action
  *
- * @param <C> 上下文
+ * @param <C> context type
  * @author chenji
  * @since 1.0.0
  */
@@ -22,7 +22,7 @@ public abstract class EnvTypeAwareCacheContextAction<C extends AwareCacheRunCont
     }
 
     /**
-     * @return 返回需要使用的环境感知缓存类型
+     * @return Returns the type of environment-aware cache to be used
      */
     @Nonnull
     public abstract AwareCache.Type getToBeUseAwareCacheType();

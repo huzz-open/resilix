@@ -3,7 +3,7 @@ package top.huzz.resilix.exception;
 import lombok.Getter;
 
 /**
- * 执行单元停止异常
+ * Task execution unit stopped exception
  *
  * @author chenji
  * @since 1.0.0

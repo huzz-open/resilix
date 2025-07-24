@@ -1,15 +1,19 @@
 package top.huzz.resilix.core;
 
 /**
+ * Provides additional information for the execution context
+ *
+ * @param <C> context type
  * @author chenji
  * @since 1.0.0
  */
-public interface ExtraInfoProvider {
+public interface ExtraInfoProvider<C extends RunContext> {
     /**
-     * 获取附加信息
-     * @param context 测试计划运行上下文
-     * @return 附加信息
+     * Get additional information
+     * 
+     * @param context test plan run context
+     * @return additional information
      */
-    Object getExtraInfo(RunContext context);
+    Object apply(C context);
 }
 

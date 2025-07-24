@@ -2,41 +2,42 @@ package top.huzz.resilix.additional;
 
 
 import jakarta.annotation.Nonnull;
+import jakarta.annotation.Nullable;
 import top.huzz.resilix.core.AwareCacheRunContext;
 import top.huzz.resilix.cache.AwareCache;
 
 /**
- * 基于context的附加缓存操作
+ * Context-based additional cache operation
  *
- * @param <C> 上下文
+ * @param <C> context type
  * @author chenji
  * @since 1.0.0
  */
 public interface AwareCacheAdditionalContextAction<C extends AwareCacheRunContext> extends AdditionalContextAction<C> {
 
     /**
-     * 计算要作为缓存key的对象
+     * Calculate the object to be used as cache key
      *
-     * @param context 上下文
-     * @return 缓存key
+     * @param context context
+     * @return cache key
      */
     @Nonnull
     Object calculateKey(C context);
 
     /**
-     * 计算缓存，只有不为空的时候才会被缓存。
-     * 当且仅当useActionCache返回false或查不到缓存结果时，才会执行这个方法。
+     * Calculate cache, only cached when not empty.
+     * This method is executed only when useActionCache returns false or no cache result is found.
      *
-     * @param context 上下文
-     * @return 被缓存的对象
+     * @param context context
+     * @return cached object
      */
     Object calculateValue(C context);
 
 
     /**
-     * 用于控制calculate方法是否执行。
+     * Used to control whether the calculate method is executed.
      *
-     * @return true：当能从Cache中获取到执行结果的时候则不执行calculate方法，否则不执行；false：执行calculate方法
+     * @return true: when execution result can be obtained from Cache, do not execute calculate method, otherwise do not execute; false: execute calculate method
      */
     default boolean useCalculateCache() {
         return false;
@@ -62,7 +63,7 @@ public interface AwareCacheAdditionalContextAction<C extends AwareCacheRunContex
     }
 
     /**
-     * @return 返回需要使用的缓存类型
+     * @return Returns the type of cache to be used
      */
     @Nonnull
     AwareCache.Type getToBeUseAwareCacheType();

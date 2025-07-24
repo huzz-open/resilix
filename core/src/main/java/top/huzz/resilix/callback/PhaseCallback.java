@@ -5,17 +5,17 @@ import jakarta.annotation.Nullable;
 import top.huzz.resilix.core.RunContext;
 
 /**
- * 阶段回调接口
+ * Phase callback interface
  *
  * @author chenji
  * @since 1.0.0
  */
 public interface PhaseCallback {
     /**
-     * 异步阶段回调
+     * Asynchronous phase callback
      *
-     * @param context 运行上下文
-     * @param extra   附加信息
+     * @param context run context
+     * @param extra   additional information
      */
     void callback(RunContext context, @Nullable Object extra);
 }

@@ -13,38 +13,40 @@ import top.huzz.resilix.core.RunContext;
 import java.util.List;
 
 /**
- * 运行处理器接口
+ * Run handler interface
  *
- * @param <C> 上下文类型
+ * @param <C> context type
  * @author chenji
  * @since 1.0.0
  */
 public interface RunHandler<C extends RunContext> extends FinallyHandler<C> {
     /**
-     * 处理器核心运行逻辑
+     * Core logic of the handler
      *
-     * @param context 上下文
-     * @throws Exception 当处理过程出现了不可忽略的异常时，抛出异常，此时认为处理结果是失败的，就不会继续往下执行下一个处理器
+     * @param context execution context
+     * @throws Exception When an unignorable exception occurs during processing, 
+     *                  an exception is thrown. This indicates that the processing result is failed,
+     *                  and the next handler will not be executed.
      */
     void handle(C context) throws Exception;
 
     /**
-     * @return 处理器可以处理的测试计划运行阶段
+     * @return The test plan run phase that this handler can process
      */
     @Nonnull
     Phase phase();
 
     /**
-     * 单个RunHandler的后置处理，不管handle方法是否抛出异常，都会执行
+     * Post-processing for a single RunHandler, executed regardless of whether the handle method throws an exception
      *
-     * @param context 运行上下文
+     * @param context run context
      */
     default void postHandle(C context) {
         // do nothing
     }
 
     /**
-     * @return 阶段记录器
+     * @return Phase recorder
      */
     @SuppressWarnings("unchecked")
     default PhaseRecorder<C> getRecorder() {
@@ -52,7 +54,7 @@ public interface RunHandler<C extends RunContext> extends FinallyHandler<C> {
     }
 
     /**
-     * @return 运行断言器类型列表
+     * @return List of run predicate types
      */
     @Nonnull
     default List<HandlerRunPredicate<C>> runPredicate() {

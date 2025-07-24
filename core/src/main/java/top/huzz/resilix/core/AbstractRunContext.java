@@ -12,6 +12,10 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 /**
+ * Abstract base implementation of RunContext providing common functionality.
+ * This class implements both RunContext and AwareCacheRunContext interfaces
+ * and provides default implementations for context operations.
+ *
  * @author chenji
  * @since 1.0.0
  */
@@ -22,20 +26,20 @@ public abstract class AbstractRunContext implements RunContext, AwareCacheRunCon
     @JsonIgnore
     protected volatile static Map<AwareCache.Type, AwareCache> awareCacheMap = null;
 
-    // 当前阶段是否成功
+    /** Whether the current phase is successful */
     protected boolean success;
-    // 当前阶段异常
+    /** Exception from the current phase */
     @JsonIgnore
     protected Exception exception;
-    // 当前阶段
+    /** Current phase */
     protected Phase currentPhase;
-    // 是否已经停止
+    /** Whether execution has stopped */
     protected boolean isStopped;
-    // 是否因为幂等判断而跳过
+    /** Whether skipped due to idempotent judgment */
     protected boolean isSkipped;
-    // 环境类型
+    /** Environment type */
     protected EnvType envType;
-    // 额外信息
+    /** Additional information */
     @JsonIgnore
     private Object extra;
 

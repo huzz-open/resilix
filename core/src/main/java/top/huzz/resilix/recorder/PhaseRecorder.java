@@ -6,7 +6,8 @@ import jakarta.annotation.Nullable;
 import top.huzz.resilix.core.RunContext;
 
 /**
- * 阶段记录器，每个状态阶段都可以有一个记录器，用于记录阶段的执行结果，比如可以存储到Redis或者数据库中。
+ * Phase recorder. Each phase can have a recorder to record the execution results,
+ * such as storing data to Redis or database.
  *
  * @author chenji
  * @since 1.0.0
@@ -14,22 +15,22 @@ import top.huzz.resilix.core.RunContext;
 public interface PhaseRecorder<C extends RunContext> {
 
     /**
-     * 阶段开始, 马上要开始执行了
+     * Phase start - about to begin execution
      *
-     * @param context 上下文对象
+     * @param context context object
      */
     void readyFor(C context);
 
     /**
-     * 阶段结束
+     * Phase end
      *
-     * @param context 上下文对象
-     * @param e       阶段异常
+     * @param context context object
+     * @param e       phase exception
      */
     void end(C context, @Nullable Exception e);
 
     /**
-     * @return 记录器类型
+     * @return recorder type
      */
     @Nonnull
     default Type getType() {

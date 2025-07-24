@@ -4,7 +4,8 @@ package top.huzz.resilix.core;
 import top.huzz.resilix.exception.PhaseStoppedException;
 
 /**
- * 什么也不做的状态的停止状态检查器
+ * No-operation phase stop status checker that does nothing.
+ * This is used as a default implementation when no specific stop status checking is needed.
  *
  * @author chenji
  * @since 1.0.0

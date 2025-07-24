@@ -4,9 +4,11 @@ package top.huzz.resilix.predicate;
 import top.huzz.resilix.core.RunContext;
 
 /**
- * 对于那些已经被弃用的阶段，最好不要直接去掉枚举内的值，否则因为对存量数据的解析会出现枚举报错，可以使用该断言来避免运行
+ * For deprecated phases, it's better not to directly remove the enum values, 
+ * otherwise parsing existing data will cause enum errors. 
+ * This predicate can be used to avoid execution.
  *
- * @param <C> 上下文类型
+ * @param <C> context type
  * @author chenji
  * @since 1.0.0
  */

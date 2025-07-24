@@ -5,29 +5,29 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 
 /**
- * 幂等判断接口
+ * Idempotent judgment interface
  *
  * @author chenji
  * @since 1.0.0
  */
 public interface IdempotentJudge {
     /**
-     * 判断是否已经执行过，如果key为null，则返回false
+     * Determines whether it has been executed. If key is null, returns false
      *
-     * @param key 幂等标识
-     * @return true：已经执行过；false：未执行过
+     * @param key idempotent identifier
+     * @return true: already executed; false: not executed
      */
     boolean judge(@Nullable IdempotentKey key);
 
     /**
-     * 将key放入幂等判断器中
+     * Put the key into the idempotent judge
      *
-     * @param key 幂等标识
+     * @param key idempotent identifier
      */
     void put(@Nonnull IdempotentKey key);
 
     /**
-     * 销毁
+     * Destroy
      */
     void destroy();
 }

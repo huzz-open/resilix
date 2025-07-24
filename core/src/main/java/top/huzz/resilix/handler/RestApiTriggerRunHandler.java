@@ -4,8 +4,9 @@ package top.huzz.resilix.handler;
 import top.huzz.resilix.core.RunContext;
 
 /**
- * RestApi触发执行处理器
+ * RestApi trigger execution handler
  *
+ * @param <C> context type
  * @author chenji
  * @since 1.0.0
  */

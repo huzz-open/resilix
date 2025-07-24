@@ -4,7 +4,7 @@ package top.huzz.resilix.idempotent;
 import jakarta.annotation.Nullable;
 
 /**
- * 幂等判断接口
+ * Preceding idempotent judgment interface
  *
  * @author chenji
  * @since 1.0.0
@@ -12,37 +12,37 @@ import jakarta.annotation.Nullable;
 public interface PrecedingIdempotentJudge extends IdempotentJudge {
 
     /**
-     * 预判断，如果返回false，则不会执行{@link #judge(IdempotentKey)}方法
+     * Pre-judgment, if it returns false, the {@link #judge(IdempotentKey)} method will not be executed
      *
-     * @param key 幂等标识
-     * @return true：继续执行；false：不执行
+     * @param key idempotent identifier
+     * @return true: continue execution; false: do not execute
      */
     default boolean preJudge(@Nullable IdempotentKey key) {
         return false;
     }
 
     /**
-     * 判断是否已经执行过，如果key为null，则返回false
+     * Determines whether it has been executed. If key is null, returns false
      *
-     * @param key 幂等标识
-     * @return true：已经执行过；false：未执行过
+     * @param key idempotent identifier
+     * @return true: already executed; false: not executed
      */
     default boolean judge(@Nullable IdempotentKey key) {
         if (key == null) {
             return false;
         }
         if (preJudge(key)) {
-            // 如果预判断为true，那表示肯定已经执行过了
+            // If pre-judgment is true, it means it has definitely been executed
             return true;
         }
         return doJudge(key);
     }
 
     /**
-     * 判断是否已经执行过，如果key为null，则返回false
+     * Determines whether it has been executed. If key is null, returns false
      *
-     * @param key 幂等标识
-     * @return true：已经执行过；false：未执行过
+     * @param key idempotent identifier
+     * @return true: already executed; false: not executed
      */
     boolean doJudge(@Nullable IdempotentKey key);
 }

@@ -3,7 +3,7 @@ package top.huzz.resilix.exception;
 import lombok.Getter;
 
 /**
- * 阶段停止异常
+ * Phase stopped exception
  *
  * @author chenji
  * @since 1.0.0

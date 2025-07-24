@@ -1,7 +1,7 @@
 package top.huzz.resilix.exception.api;
 
 /**
- * 连接异常
+ * API connection exception
  *
  * @author chenji
  * @since 1.0.0

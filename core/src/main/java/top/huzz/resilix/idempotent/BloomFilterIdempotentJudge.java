@@ -15,10 +15,15 @@ import java.nio.charset.StandardCharsets;
 import java.time.Duration;
 
 /**
- * 基于布隆过滤器的幂等判断，可用于分布式环境。
- * <p/>如果是分布式的布隆过滤器，需要传入{@link RedissonClient}和布隆过滤器的名称，用于实现分布式的幂等判断。
- * <p/>布隆过滤器是一种空间效率高的数据结构，用于判断一个元素是否在一个集合中，如果判断结果为false，则元素一定不在集合中；如果判断结果为true，则元素可能在集合中，存在一定的误判率。
- * <p/>如果业务场景不允许误判，且允许牺牲一定的性能，那么可以考虑重写{@link #preciseJudge(IdempotentKey)}方法实现精确校验（具体牺牲的性能取决于该方法的执行耗时）。
+ * Bloom filter-based idempotent judgment, suitable for distributed environments.
+ * <p/>For distributed bloom filters, you need to pass in {@link RedissonClient} and the bloom filter name 
+ * to implement distributed idempotent judgment.
+ * <p/>Bloom filter is a space-efficient data structure used to determine whether an element is in a set. 
+ * If the judgment result is false, the element is definitely not in the set; 
+ * if the judgment result is true, the element may be in the set, with a certain false positive rate.
+ * <p/>If the business scenario does not allow false positives and allows sacrificing some performance, 
+ * you can consider overriding the {@link #preciseJudge(IdempotentKey)} method to implement precise verification 
+ * (the specific performance sacrifice depends on the execution time of this method).
  *
  * @author chenji
  * @since 1.0.0
@@ -36,36 +41,36 @@ public class BloomFilterIdempotentJudge implements PrecedingIdempotentJudge {
     static final Duration MAX_DURATION = Duration.ofDays(2);
 
     /**
-     * 创建默认的布隆过滤器
+     * Create a default bloom filter
      *
-     * @param expectedInsertions 预期插入元素数量
-     * @param fpp                误判率
-     * @return 本地布隆过滤器
+     * @param expectedInsertions expected number of elements to be inserted
+     * @param fpp                false positive probability
+     * @return local bloom filter
      */
     public static BloomFilterIdempotentJudge newLocal(int expectedInsertions, double fpp) {
         return new BloomFilterIdempotentJudge(expectedInsertions, fpp, null, null, false, MAX_DURATION);
     }
 
     /**
-     * 创建默认的布隆过滤器，预期插入元素数量为10000，误判率为0.0001，hash函数数量为13
+     * Create a default bloom filter with expected insertions of 10000, false positive probability of 0.0001, and 13 hash functions
      *
-     * @param redissonClient  Redisson客户端
-     * @param distributedName 分布式布隆过滤器的名称
-     * @param cleanIfExists   如果布隆过滤器已经存在，是否清空
+     * @param redissonClient  Redisson client
+     * @param distributedName name of the distributed bloom filter
+     * @param cleanIfExists   whether to clear if the bloom filter already exists
      */
     protected BloomFilterIdempotentJudge(@Nullable RedissonClient redissonClient, @Nullable String distributedName, boolean cleanIfExists) {
         this(DEFAULT_EXPECTED_INSERTIONS, DEFAULT_FPP, redissonClient, distributedName, cleanIfExists, MAX_DURATION);
     }
 
     /**
-     * 创建布隆过滤器
+     * Create a bloom filter
      *
-     * @param expectedInsertions  预期插入元素数量
-     * @param fpp                 误判率
-     * @param redissonClient      Redisson客户端，如果不为null，则会使用Redisson实现布隆过滤器，实现分布式的幂等判断
-     * @param bloomFilterRedisKey 分布式布隆过滤器的名称，如果redissonClient不为null，则必须指定该参数
-     * @param cleanIfExists       如果布隆过滤器已经存在，是否清空
-     * @param duration            过期时间，目前只有分布式布隆过滤器支持过期时间
+     * @param expectedInsertions  expected number of elements to be inserted
+     * @param fpp                 false positive probability
+     * @param redissonClient      Redisson client, if not null, will use Redisson to implement bloom filter for distributed idempotent judgment
+     * @param bloomFilterRedisKey name of the distributed bloom filter, must be specified if redissonClient is not null
+     * @param cleanIfExists       whether to clear if the bloom filter already exists
+     * @param duration            expiration time, currently only distributed bloom filters support expiration time
      */
     protected BloomFilterIdempotentJudge(int expectedInsertions, double fpp,
                                          @Nullable RedissonClient redissonClient, @Nullable String bloomFilterRedisKey, boolean cleanIfExists, @Nullable Duration duration) {
@@ -82,7 +87,7 @@ public class BloomFilterIdempotentJudge implements PrecedingIdempotentJudge {
                 bf.delete();
                 bf.tryInit(expectedInsertions, fpp);
             }
-            // 设置过期时间
+            // Set expiration time
             bf.expire(duration);
             proxy = new Distributed(bf);
         } else {
@@ -97,10 +102,10 @@ public class BloomFilterIdempotentJudge implements PrecedingIdempotentJudge {
             return false;
         }
         if (!proxy.judge(key)) {
-            // 如果布隆过滤器判断不在集合中，直接返回false，这个肯定是未执行过的，布隆过滤器的特性决定了这个是准确的
+            // If bloom filter determines not in the set, directly return false, this is definitely not executed, bloom filter characteristics ensure this is accurate
             return false;
         }
-        // 如果返回了true，需要做精确校验，用于解决布隆过滤器的误判问题
+        // If it returns true, precise verification is needed to solve the bloom filter false positive problem
         return preciseJudge(key);
     }
 
@@ -118,9 +123,9 @@ public class BloomFilterIdempotentJudge implements PrecedingIdempotentJudge {
     }
 
     /**
-     * 做精确校验，用于解决布隆过滤器的误判问题，一般查询数据库里面的数据进行校验
+     * Perform precise verification to solve bloom filter false positive problem, usually by querying database data for verification
      *
-     * @return true表示已经执行过，false表示未执行过
+     * @return true indicates already executed, false indicates not executed
      */
     protected boolean preciseJudge(IdempotentKey key) {
         return false;
@@ -171,7 +176,7 @@ public class BloomFilterIdempotentJudge implements PrecedingIdempotentJudge {
         @Override
         public void put(@Nonnull IdempotentKey key) {
             if (bf instanceof ExtBloomFilter) {
-                // ExtBloomFilter重新了containsAsync方法，使其支持在判断后把被判断的值直接插入布隆过滤器，这样可以避免再调用一次put方法，因此在这里put方法不需要再调用
+                // ExtBloomFilter overrides containsAsync method to support directly inserting the judged value into bloom filter after judgment, avoiding another put method call, so put method doesn't need to be called here
                 return;
             }
             bf.add(key.idempotentKey());

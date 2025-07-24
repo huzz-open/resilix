@@ -4,7 +4,7 @@ package top.huzz.resilix.core;
 import top.huzz.resilix.exception.PhaseStoppedException;
 
 /**
- * 状态的停止状态检查器
+ * Phase stop status checker interface
  *
  * @author chenji
  * @since 1.0.0
@@ -12,10 +12,10 @@ import top.huzz.resilix.exception.PhaseStoppedException;
 public interface PhaseStopStatusChecker {
 
     /**
-     * 检查状态是否停止
+     * Check if the phase status is stopped
      *
-     * @param context 上下文
-     * @throws PhaseStoppedException 当状态停止时抛出异常，执行管理器应当处理这个抛出的异常，以便对停止状态进行处理
+     * @param context context
+     * @throws PhaseStoppedException when phase is stopped, the execution manager should handle this exception to deal with the stop status
      */
     void check(RunContext context) throws PhaseStoppedException;
 }
