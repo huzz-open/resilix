@@ -38,6 +38,7 @@
         <module>core</module>
         <module>example</module>
         <module>starter</module>
+        <module>jaksho</module>
     </modules>
 
     <properties>
@@ -46,6 +47,7 @@
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <revision>1.0.2-SNAPSHOT</revision>
+        <gpg.executable>${env.GPG_EXECUTABLE}</gpg.executable>
     </properties>
 
     <build>

@@ -1,0 +1,17 @@
+spring:
+  application:
+    name: jaksho
+dubbo:
+  application:
+    name: ${spring.application.name}
+    qos-enable: false
+  protocol:
+    name: tri
+    port: 8080
+    triple:
+      verbose: true
+
+logging:
+  level:
+    "org.apache.dubbo.rpc.protocol.tri": debug
+    "org.apache.dubbo.remoting": debug

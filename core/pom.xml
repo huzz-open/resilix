@@ -21,7 +21,7 @@
         <fastjson2.version>2.0.56</fastjson2.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
         <commons-collections4.version>4.4</commons-collections4.version>
-        <commons-beanutils.version>1.9.4</commons-beanutils.version>
+        <commons-beanutils.version>1.11.0</commons-beanutils.version>
         <guava.version>33.4.8-jre</guava.version>
     </properties>
 
