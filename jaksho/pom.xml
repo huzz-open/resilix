@@ -14,6 +14,7 @@
     <modules>
         <module>jaksho</module>
         <module>jaksho-api</module>
+        <module>jaksho-fe</module>
     </modules>
 
     <properties>
