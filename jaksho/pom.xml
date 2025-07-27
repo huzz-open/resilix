@@ -15,6 +15,9 @@
         <module>jaksho</module>
         <module>jaksho-api</module>
         <module>jaksho-fe</module>
+        <module>jaksho-domain</module>
+        <module>jaksho-generator</module>
+        <module>jaksho-common</module>
     </modules>
 
     <properties>
@@ -23,6 +26,9 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <spring-boot.version>3.5.3</spring-boot.version>
         <dubbo.version>3.3.5</dubbo.version>
+        <mybatis-plus.version>3.5.12</mybatis-plus.version>
+        <freemarker.version>2.3.34</freemarker.version>
+        <mariadb.version>3.5.4</mariadb.version>
     </properties>
 
     <dependencyManagement>
@@ -56,6 +62,26 @@
                         <groupId>org.springframework.boot</groupId>
                     </exclusion>
                 </exclusions>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.baomidou</groupId>
+                <artifactId>mybatis-plus-generator</artifactId>
+                <version>${mybatis-plus.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.freemarker</groupId>
+                <artifactId>freemarker</artifactId>
+                <version>${freemarker.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>org.mariadb.jdbc</groupId>
+                <artifactId>mariadb-java-client</artifactId>
+                <version>${mariadb.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
