@@ -20,6 +20,7 @@ import ${pkg};
 ${an.displayName}
 </#list>
 <#if superEntityClass??>
+<#--  feature: 实现Serializable接口，避免waring  -->
 public class ${entity} extends ${superEntityClass}<#if activeRecord><${entity}></#if> <#if entitySerialVersionUID>implements Serializable</#if> {
 <#elseif activeRecord>
 public class ${entity} extends Model<${entity}> {

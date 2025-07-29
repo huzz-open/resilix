@@ -50,7 +50,7 @@ public class TypeRegistryDelegate {
 
     private static void initExtTypeMap() {
         Settings.tableFiledTypeMap.forEach((key, clazz) ->
-                extTypeMap.put(key, new IColumnType() {
+                extTypeMap.put(key, new CustomColumnType() {
                     @Override
                     public String getType() {
                         return clazz.getSimpleName();

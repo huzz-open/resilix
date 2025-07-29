@@ -1,6 +1,8 @@
 spring:
   application:
     name: jaksho
+  config:
+    import: [ "classpath:datasource.yaml" ]
 dubbo:
   application:
     name: ${spring.application.name}

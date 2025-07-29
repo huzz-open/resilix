@@ -29,7 +29,7 @@ public class Settings {
     public static Map<String, Class<?>> tableFiledTypeMap = new LinkedHashMap<>();
 
     static {
-        tableFiledTypeMap.put(TypeRegistryDelegate.calcKey("sr_biz_field_type", "basic_field_type_name"), BasicFieldType.class);
+        tableFiledTypeMap.put(TypeRegistryDelegate.calcKey("sr_biz_field_type", "basic_field_type"), BasicFieldType.class);
     }
 
     static final List<String> listTableSuffix = List.of();    //设置 过滤 表的后缀
