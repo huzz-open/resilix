@@ -25,6 +25,7 @@ public final class BasicFieldType {
     public static final BasicFieldType DOUBLE = new BasicFieldType("double");
     public static final BasicFieldType STRING = new BasicFieldType("string");
     public static final BasicFieldType OBJECT = new BasicFieldType("object");
+    public static final BasicFieldType FILE = new BasicFieldType("file");
 
     private final String name;
 
@@ -43,6 +44,7 @@ public final class BasicFieldType {
             case "double" -> DOUBLE;
             case "string" -> STRING;
             case "object" -> OBJECT;
+            case "file" -> FILE;
             default -> throw new IllegalArgumentException("Unknown BasicFieldType: " + name);
         };
     }
@@ -55,7 +57,7 @@ public final class BasicFieldType {
     public static class BasicFieldTypeSerializer implements ObjectWriter<BasicFieldType> {
         @Override
         public void write(JSONWriter jsonWriter, Object object, Object fieldName, Type fieldType, long features) {
-            jsonWriter.writeString(object.toString());
+            jsonWriter.writeRaw(object.toString());
         }
     }
 

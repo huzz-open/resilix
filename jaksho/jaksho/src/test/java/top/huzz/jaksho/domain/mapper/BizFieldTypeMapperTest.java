@@ -8,6 +8,7 @@ import org.springframework.boot.context.properties.ConfigurationPropertiesScan;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.ComponentScan;
 import top.huzz.jaksho.common.constant.BasicFieldType;
+import top.huzz.jaksho.common.constant.CollectionType;
 import top.huzz.jaksho.domain.entity.BizFieldType;
 
 import java.util.Date;
@@ -33,6 +34,7 @@ public class BizFieldTypeMapperTest {
             bizFieldType.setId(id);
             bizFieldType.setMinimum(0);
             bizFieldType.setMaximum(128);
+            bizFieldType.setCollectionType(CollectionType.LIST);
             bizFieldType.setBasicFieldType(BasicFieldType.STRING);
             bizFieldType.setName("Str128");
             bizFieldType.setDescription("字符串类型");
@@ -47,6 +49,7 @@ public class BizFieldTypeMapperTest {
             Assertions.assertNotNull(selectById);
             Assertions.assertEquals("Str128", selectById.getName());
             Assertions.assertEquals(BasicFieldType.STRING, selectById.getBasicFieldType());
+            Assertions.assertEquals(CollectionType.LIST, selectById.getCollectionType());
         } finally {
             bizFieldTypeMapper.deleteById(id);
         }

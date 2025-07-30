@@ -1,6 +1,7 @@
 package top.huzz.jaksho.generator;
 
 import top.huzz.jaksho.common.constant.BasicFieldType;
+import top.huzz.jaksho.common.constant.CollectionType;
 
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
@@ -30,6 +31,7 @@ public class Settings {
 
     static {
         tableFiledTypeMap.put(TypeRegistryDelegate.calcKey("sr_biz_field_type", "basic_field_type"), BasicFieldType.class);
+        tableFiledTypeMap.put(TypeRegistryDelegate.calcKey("sr_biz_field_type", "collection_type"), CollectionType.class);
     }
 
     static final List<String> listTableSuffix = List.of();    //设置 过滤 表的后缀
