@@ -16,11 +16,11 @@
 </#if>
 </#list>
 <#list table.commonFields as field><#--生成公共字段 --> <#-- feature: 自定义字段处理 -->
-        <result column="${field.name}" property="${field.propertyName}" <#if field.columnType?has_content && field.columnType.flag?has_content>typeHandler="com.baomidou.mybatisplus.extension.handlers.Fastjson2TypeHandler"</#if> />
+        <result column="${field.name}" property="${field.propertyName}" <#if field.columnType?has_content && field.columnType.flag?has_content>typeHandler="top.huzz.jaksho.common.json.CustomFastjson2TypeHandler"</#if> />
 </#list>
 <#list table.fields as field>
 <#if !field.keyFlag><#--生成普通字段 --> <#-- feature: 自定义字段处理 -->
-        <result column="${field.name}" property="${field.propertyName}" <#if field.columnType?has_content && field.columnType.flag?has_content>typeHandler="com.baomidou.mybatisplus.extension.handlers.Fastjson2TypeHandler"</#if> />
+        <result column="${field.name}" property="${field.propertyName}" <#if field.columnType?has_content && field.columnType.flag?has_content>typeHandler="top.huzz.jaksho.common.json.CustomFastjson2TypeHandler"</#if> />
 </#if>
 </#list>
     </resultMap>

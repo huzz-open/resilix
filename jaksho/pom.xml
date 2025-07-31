@@ -29,6 +29,7 @@
         <mybatis-plus.version>3.5.12</mybatis-plus.version>
         <freemarker.version>2.3.34</freemarker.version>
         <mariadb.version>3.5.4</mariadb.version>
+        <guava.version>33.4.8-jre</guava.version>
     </properties>
 
     <dependencyManagement>
@@ -87,6 +88,11 @@
                 <groupId>org.mariadb.jdbc</groupId>
                 <artifactId>mariadb-java-client</artifactId>
                 <version>${mariadb.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.google.guava</groupId>
+                <artifactId>guava</artifactId>
+                <version>${guava.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
