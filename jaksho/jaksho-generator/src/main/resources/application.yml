@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: jaksho-generator
+  config:
+    import: [ "classpath:datasource.yaml" ]

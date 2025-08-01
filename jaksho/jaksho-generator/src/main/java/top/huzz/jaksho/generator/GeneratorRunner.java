@@ -9,55 +9,30 @@ import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import com.baomidou.mybatisplus.generator.fill.Column;
+import jakarta.annotation.Resource;
 import org.apache.ibatis.annotations.Mapper;
-import org.yaml.snakeyaml.Yaml;
+import org.springframework.boot.ApplicationArguments;
+import org.springframework.boot.ApplicationRunner;
+import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
 
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.file.Path;
 import java.util.Collections;
-import java.util.Map;
 
 /**
  * @author chenji
- * @since 1.0.2
+ * @since 1.0.0
  */
-public class DomainGenerator extends Settings {
-    public static void main(String[] args) {
-        try (InputStream input = new FileInputStream(Path.of(domainResourcesPath.toString(), datasourceFile).toString())) {
-            // 创建 Yaml 对象
-            Yaml yaml = new Yaml();
-            // 读取 YAML 文件内容并解析为 Map
-            Map<String, Object> yamlData = yaml.load(input);
-            @SuppressWarnings("unchecked")
-            Map<String, Object> springMap = (Map<String, Object>) yamlData.get("spring");
-            @SuppressWarnings("unchecked")
-            Map<String, String> datasourceMap = (Map<String, String>) springMap.get("datasource");
-            String url = datasourceMap.get("url");
-            String username = datasourceMap.get("username");
-            String password = calcPassword(datasourceMap);
-            create(url, username, password);
-        } catch (IOException e) {
-            System.out.println(e.getMessage());
-            System.exit(1);
-        }
-    }
+@Configuration
+@EnableConfigurationProperties(DataSourceProperties.class)
+public class GeneratorRunner extends Settings implements ApplicationRunner {
 
-    static String calcPassword(Map<String, String> datasourceMap) {
-        String password = datasourceMap.get("password");
-        if (password == null || password.isEmpty()) {
-            throw new IllegalArgumentException("数据库密码不能为空");
-        }
-        if (password.startsWith("${") && password.endsWith("}")) {
-            // 处理占位符形式的密码
-            String passwordEnvName = password.substring(2, password.length() - 1);
-            password = System.getenv(passwordEnvName);
-            if (password == null || password.isEmpty()) {
-                throw new IllegalArgumentException("数据库密码环境变量 " + passwordEnvName + " 未设置或为空");
-            }
-        }
-        return password;
+    @Resource
+    private DataSourceProperties dataSourceProperties;
+
+    @Override
+    public void run(ApplicationArguments args) {
+        create(dataSourceProperties.getUrl(), dataSourceProperties.getUsername(), dataSourceProperties.getPassword());
     }
 
     static void create(String url, String username, String password) {
