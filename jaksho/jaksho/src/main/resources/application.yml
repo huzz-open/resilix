@@ -12,7 +12,10 @@ dubbo:
     port: 8080
     triple:
       verbose: true
-
+  consumer:
+    validation: true
+  provider:
+    validation: true
 logging:
   level:
     "org.apache.dubbo.rpc.protocol.tri": debug

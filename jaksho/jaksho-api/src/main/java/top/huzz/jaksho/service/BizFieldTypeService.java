@@ -1,19 +1,26 @@
 package top.huzz.jaksho.service;
 
-import org.apache.dubbo.remoting.http12.HttpMethods;
+import lombok.Getter;
+import lombok.Setter;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
+import org.hibernate.validator.constraints.Length;
 
 /**
+ * 业务字段类型服务接口
+ *
  * @author chenji
  * @since 1.0.2
  */
-@Mapping("/biz-field-type")
+@Mapping("/sr/biz-field-type")
 public interface BizFieldTypeService {
-    /**
-     * 获取业务字段类型
-     *
-     * @return 业务字段类型
-     */
-    @Mapping(method = HttpMethods.GET, value = "")
-    String getBizFieldType();
+
+    @Mapping("")
+    int create(CreateBizFieldTypeRequest request);
+
+    @Getter
+    @Setter
+    class CreateBizFieldTypeRequest {
+        @Length(max = 5)
+        private String name;
+    }
 }

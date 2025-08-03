@@ -1,1 +1,5 @@
-GET {{endpoint}}/biz-field-type
+POST {{endpoint}}/sr/biz-field-type
+
+{
+    "name": "1112222222"
+}
