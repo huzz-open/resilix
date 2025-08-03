@@ -20,14 +20,13 @@ import com.baomidou.mybatisplus.annotation.TableId;
 import com.baomidou.mybatisplus.annotation.TableLogic;
 import com.baomidou.mybatisplus.annotation.Version;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
-import com.baomidou.mybatisplus.extension.handlers.Fastjson2TypeHandler;
 import com.baomidou.mybatisplus.generator.config.GlobalConfig;
 import com.baomidou.mybatisplus.generator.config.builder.Entity;
 import com.baomidou.mybatisplus.generator.config.po.TableField;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.model.AnnotationAttributes;
 import top.huzz.jaksho.common.json.CustomFastjson2TypeHandler;
-import top.huzz.jaksho.generator.CustomColumnType;
+import top.huzz.jaksho.generator.GeneratorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -103,7 +102,7 @@ public class DefaultTableFieldAnnotationHandler implements ITableFieldAnnotation
 
     private static String getDisplayName(TableField tableField) {
         String displayName;
-        if (tableField.getColumnType() instanceof CustomColumnType) {
+        if (GeneratorUtils.useCustomJSONHandler(tableField)) {
             // feature: 自定义字段处理
             // @TableField(value = "${field.annotationColumnName}", typeHandler = top.huzz.jaksho.common.json.CustomFastjson2TypeHandler.class)
             displayName = String.format("@TableField(value = \"%s\", typeHandler = %s.class)", tableField.getAnnotationColumnName(), CustomFastjson2TypeHandler.class.getName());

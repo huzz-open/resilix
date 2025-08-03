@@ -23,8 +23,7 @@ import com.baomidou.mybatisplus.generator.config.builder.Entity;
 import com.baomidou.mybatisplus.generator.config.po.TableField;
 import com.baomidou.mybatisplus.generator.config.po.TableInfo;
 import com.baomidou.mybatisplus.generator.model.ClassAnnotationAttributes;
-import org.apache.commons.lang3.ClassUtils;
-import top.huzz.jaksho.generator.CustomColumnType;
+import top.huzz.jaksho.generator.GeneratorUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +71,7 @@ public class DefaultTableAnnotationHandler implements ITableAnnotationHandler {
             }
 
             // feature: 自定义字段处理
-            Optional<TableField> anyCustomField = tableInfo.getFields().stream().filter(f -> ClassUtils.isAssignable(f.getColumnType().getClass(), CustomColumnType.class)).findFirst();
+            Optional<TableField> anyCustomField = tableInfo.getFields().stream().filter(GeneratorUtils::useCustomJSONHandler).findFirst();
             String displayName;
             if (anyCustomField.isEmpty()) {
                 //@TableName("${schemaName}${table.name}")

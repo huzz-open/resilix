@@ -11,4 +11,12 @@ import lombok.Getter;
 public abstract class CustomColumnType implements IColumnType {
     // 添加一个自定义flag，为了可以方便的在模板中识别自定义字段
     private final boolean flag = true;
+
+    public boolean isEnum() {
+        try {
+            return Class.forName(getPkg()).isEnum();
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }

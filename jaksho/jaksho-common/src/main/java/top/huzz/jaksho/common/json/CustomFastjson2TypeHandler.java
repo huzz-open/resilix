@@ -28,7 +28,7 @@ public class CustomFastjson2TypeHandler extends Fastjson2TypeHandler {
         CustomJSONType annotation = type.getAnnotation(CustomJSONType.class);
         if (annotation != null) {
             if (annotation.cacheable()) {
-                Object cached = CustomJSONTypeCache.deserializeGet(json);
+                Object cached = CustomJSONTypeCache.deserializeGet(type, json);
                 if (cached != null) {
                     return cached;
                 }
@@ -39,7 +39,7 @@ public class CustomFastjson2TypeHandler extends Fastjson2TypeHandler {
                     Object invoked = type.getMethod(dm, String.class).invoke(dm, json);
                     if (invoked != null) {
                         if (annotation.cacheable()) {
-                            CustomJSONTypeCache.deserializePut(json, invoked);
+                            CustomJSONTypeCache.deserializePut(type, json, invoked);
                         }
                     }
                     return invoked;
@@ -56,7 +56,7 @@ public class CustomFastjson2TypeHandler extends Fastjson2TypeHandler {
         CustomJSONType annotation = type.getAnnotation(CustomJSONType.class);
         if (annotation != null) {
             if (annotation.cacheable()) {
-                String cached = CustomJSONTypeCache.serializeGet(obj);
+                String cached = CustomJSONTypeCache.serializeGet(type, obj);
                 if (cached != null) {
                     return cached;
                 }
@@ -69,7 +69,7 @@ public class CustomFastjson2TypeHandler extends Fastjson2TypeHandler {
                     String invoked = (String) type.getMethod(sm).invoke(obj);
                     if (invoked != null) {
                         if (annotation.cacheable()) {
-                            CustomJSONTypeCache.serializePut(obj, invoked);
+                            CustomJSONTypeCache.serializePut(type, obj, invoked);
                         }
                     }
                     return invoked;
