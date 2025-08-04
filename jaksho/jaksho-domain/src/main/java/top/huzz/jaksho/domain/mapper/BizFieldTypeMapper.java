@@ -6,7 +6,7 @@ import top.huzz.jaksho.domain.entity.BizFieldType;
 
 /**
  * <p>
- *  Mapper 接口
+ * 业务字段类型 Mapper 接口
  * </p>
  *
  * @author mybatis-plus-generator

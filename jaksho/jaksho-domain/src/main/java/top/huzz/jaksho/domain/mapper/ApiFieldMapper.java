@@ -6,7 +6,7 @@ import top.huzz.jaksho.domain.entity.ApiField;
 
 /**
  * <p>
- *  接口关联字段  Mapper 接口
+ * 接口关联字段 Mapper 接口
  * </p>
  *
  * @author mybatis-plus-generator

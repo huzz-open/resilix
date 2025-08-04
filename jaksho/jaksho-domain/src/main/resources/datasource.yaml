@@ -2,7 +2,7 @@ spring:
   datasource:
     username: root
     password: ${DB_PASSWORD}
-    url: jdbc:mariadb://localhost:3306/jaksho_new?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC
+    url: jdbc:mariadb://localhost:3306/jaksho_new?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useInformationSchema=true
     type: com.zaxxer.hikari.HikariDataSource
     driver-class-name: org.mariadb.jdbc.Driver
     hikari:

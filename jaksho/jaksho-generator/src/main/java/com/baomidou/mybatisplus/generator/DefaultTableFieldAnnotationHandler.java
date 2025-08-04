@@ -45,6 +45,11 @@ public class DefaultTableFieldAnnotationHandler implements ITableFieldAnnotation
         GlobalConfig globalConfig = tableInfo.getGlobalConfig();
         Entity entity = tableField.getEntity();
         String comment = tableField.getComment();
+
+        // 将制表符替换成换行符（domain对象的java doc生成不准确的问题，这里临时解决一下，不知道为什么换行符被读取出来就变成了\t）
+        comment = comment.replaceAll("\\t", "\r\n");
+        tableField.setComment(comment);
+
         if (StringUtils.isNotBlank(comment)) {
             if (globalConfig.isSpringdoc()) {
                 //@Schema(description = "${field.comment}")

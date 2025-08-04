@@ -17,7 +17,7 @@ import java.util.Date;
 
 /**
  * <p>
- * 
+ * 对象业务字段类型引用表
  * </p>
  *
  * @author mybatis-plus-generator
@@ -34,49 +34,49 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
     private static final long serialVersionUID = 1L;
 
     /**
-     *  数据库主键id 
+     * 数据库主键id
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**
-     *  该ref所属的业务字段类型数据库主键id（sr_biz_field_type数据库主键id）
+     * 该ref所属的业务字段类型数据库主键id（sr_biz_field_type数据库主键id）
      */
     @TableField("biz_field_type_id")
     private Integer bizFieldTypeId;
 
     /**
-     *  引用的基础字段id（sr_biz_field_type数据库主键id）
+     * 引用的基础字段id（sr_biz_field_type数据库主键id）
      */
     @TableField("ref_id")
     private Integer refId;
 
     /**
-     *  父级id（sr_object_biz_field_type_ref数据库主键），0表示没有父级，也就是说该ref的字段是顶级字段，否则表示该ref的字段是子级字段 
+     * 父级id（sr_object_biz_field_type_ref数据库主键），0表示没有父级，也就是说该ref的字段是顶级字段，否则表示该ref的字段是子级字段
      */
     @TableField("parent_id")
     private Integer parentId;
 
     /**
-     *  排序，值越小越靠前 
+     * 排序，值越小越靠前
      */
     @TableField("order")
     private Integer order;
 
     /**
-     *  创建时间 
+     * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private Date createTime;
 
     /**
-     *  更新时间 
+     * 更新时间
      */
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
 
     /**
-     *  工作空间数据库主键id 
+     * 工作空间数据库主键id
      */
     @TableField(value = "workspace_id", fill = FieldFill.INSERT)
     private Integer workspaceId;

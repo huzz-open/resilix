@@ -1,5 +1,7 @@
 POST {{endpoint}}/sr/biz-field-type
 
 {
-    "name": "1112222222"
+    "name": "password",
+    "collectionType" : "NONE",
+    "basicFieldType": "string"
 }

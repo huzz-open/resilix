@@ -19,7 +19,7 @@ import java.util.Date;
 
 /**
  * <p>
- * 
+ * 业务字段类型
  * </p>
  *
  * @author mybatis-plus-generator
@@ -29,7 +29,7 @@ import java.util.Date;
 @Setter
 @ToString
 @Accessors(chain = true)
-@TableName(value = "sr_biz_field_type", autoResultMap = true)
+@TableName("sr_biz_field_type")
 public class BizFieldType extends BasicProperties implements Serializable {
 
     @Serial
@@ -84,23 +84,23 @@ public class BizFieldType extends BasicProperties implements Serializable {
     /**
      * 基础字段类型名称
      */
-    @TableField(value = "basic_field_type", typeHandler = top.huzz.jaksho.common.json.CustomFastjson2TypeHandler.class)
+    @TableField("basic_field_type")
     private BasicFieldType basicFieldType;
 
     /**
-     *  创建时间 
+     * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private Date createTime;
 
     /**
-     *  更新时间 
+     * 更新时间
      */
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;
 
     /**
-     *  工作空间数据库主键id 
+     * 工作空间数据库主键id
      */
     @TableField(value = "workspace_id", fill = FieldFill.INSERT)
     private Integer workspaceId;

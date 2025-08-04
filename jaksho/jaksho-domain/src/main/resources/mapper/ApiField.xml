@@ -6,7 +6,7 @@
     <resultMap id="BaseResultMap" type="top.huzz.jaksho.domain.entity.ApiField">
         <id column="id" property="id" />
         <result column="api_id" property="apiId"  />
-        <result column="field_type" property="fieldType"  />
+        <result column="field_type" property="fieldType" typeHandler="top.huzz.jaksho.common.json.CustomFastjson2TypeHandler" />
         <result column="biz_field_id" property="bizFieldId"  />
         <result column="field_name" property="fieldName"  />
         <result column="is_file_field" property="isFileField"  />

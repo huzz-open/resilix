@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import top.huzz.jaksho.common.constant.FieldType;
 import top.huzz.jaksho.common.entity.BasicProperties;
 
 import java.io.Serial;
@@ -17,7 +18,7 @@ import java.util.Date;
 
 /**
  * <p>
- *  接口关联字段 
+ * 接口关联字段
  * </p>
  *
  * @author mybatis-plus-generator
@@ -34,78 +35,73 @@ public class ApiField extends BasicProperties implements Serializable {
     private static final long serialVersionUID = 1L;
 
     /**
-     *  数据库主键ID 
+     * 数据库主键ID
      */
     @TableId(value = "id", type = IdType.AUTO)
     private Integer id;
 
     /**
-     *  接口ID 
+     * 接口ID
      */
     @TableField("api_id")
     private Integer apiId;
 
     /**
-     *  字段类型：QUERY,
-    PATH,
-    FORM_DATA,
-    FORM_URLENCODED,
-    JSON,
-    HEADER 
+     * 字段类型
      */
     @TableField("field_type")
-    private String fieldType;
+    private FieldType fieldType;
 
     /**
-     *  标准字段ID，引用sr_biz_field.id 
+     * 标准字段ID，引用sr_biz_field.id
      */
     @TableField("biz_field_id")
     private Integer bizFieldId;
 
     /**
-     *  字段名称 
+     * 字段名称
      */
     @TableField("field_name")
     private String fieldName;
 
     /**
-     *  是否为文件字段：0-否，1-是（仅FORM_DATA时有意义）
+     * 是否为文件字段：0-否，1-是（仅FORM_DATA时有意义）
      */
     @TableField("is_file_field")
     private Byte isFileField;
 
     /**
-     *  是否必填：0-否，1-是 
+     * 是否必填：0-否，1-是
      */
     @TableField("is_required")
     private Byte isRequired;
 
     /**
-     *  字段说明 
+     * 字段说明
      */
     @TableField("description")
     private String description;
 
     /**
-     *  在同一field_type内的排序序号 
+     * 在同一field_type内的排序序号
      */
     @TableField("sort_order")
     private Integer sortOrder;
 
     /**
-     *  工作空间ID 
+     * 工作空间ID
      */
     @TableField(value = "workspace_id", fill = FieldFill.INSERT)
     private Integer workspaceId;
 
     /**
-     *  创建时间 
+     * 创建时间
      */
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private Date createTime;
 
     /**
-     *  更新时间 
+     * 更新时间
      */
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private Date updateTime;

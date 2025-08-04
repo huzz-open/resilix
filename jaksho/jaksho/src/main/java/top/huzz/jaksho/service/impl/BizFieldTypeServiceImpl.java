@@ -11,7 +11,7 @@ import top.huzz.jaksho.service.BizFieldTypeService;
 public class BizFieldTypeServiceImpl implements BizFieldTypeService {
 
     @Override
-    public int create(CreateBizFieldTypeRequest request) {
-        return 1;
+    public Object create(CreateBizFieldTypeRequest request) {
+        return request.getBasicFieldType();
     }
 }

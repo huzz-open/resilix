@@ -19,6 +19,11 @@
 
     <dependencies>
         <dependency>
+            <groupId>top.huzz</groupId>
+            <artifactId>jaksho-common</artifactId>
+            <version>${revision}</version>
+        </dependency>
+        <dependency>
             <groupId>org.apache.dubbo</groupId>
             <artifactId>dubbo</artifactId>
             <scope>compile</scope>

@@ -6,7 +6,7 @@ import top.huzz.jaksho.domain.entity.ApiDefinition;
 
 /**
  * <p>
- *  接口定义表  Mapper 接口
+ * 接口定义表 Mapper 接口
  * </p>
  *
  * @author mybatis-plus-generator
