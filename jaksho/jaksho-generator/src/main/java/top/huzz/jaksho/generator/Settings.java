@@ -38,7 +38,7 @@ public class Settings {
     static final List<String> listTablePrefix = List.of("ac_", "sr_"); //设置 过滤 表的前缀
 
     //基本信息
-    static final String author = "huzz";    //作者
+    static final String author = "mybatis-plus-generator";    //作者
     static final String parent = "top.huzz.jaksho";   //父包名
     static final String module = "domain";   //模块包名
     static final String controller = "controller";

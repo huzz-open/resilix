@@ -9,8 +9,8 @@ import top.huzz.jaksho.domain.entity.BizFieldType;
  *  Mapper 接口
  * </p>
  *
- * @author huzz
- * @since 2025-08-03 05:07:35
+ * @author mybatis-plus-generator
+ * @since 1.0.2
  */
 @Mapper
 public interface BizFieldTypeMapper extends BaseMapper<BizFieldType> {

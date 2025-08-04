@@ -9,8 +9,8 @@ import top.huzz.jaksho.domain.entity.ApiField;
  *  接口关联字段  Mapper 接口
  * </p>
  *
- * @author huzz
- * @since 2025-08-03 05:07:35
+ * @author mybatis-plus-generator
+ * @since 1.0.2
  */
 @Mapper
 public interface ApiFieldMapper extends BaseMapper<ApiField> {

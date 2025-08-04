@@ -10,7 +10,9 @@ import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import com.baomidou.mybatisplus.generator.fill.Column;
 import jakarta.annotation.Resource;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.ibatis.annotations.Mapper;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
@@ -29,13 +31,20 @@ public class GeneratorRunner extends Settings implements ApplicationRunner {
 
     @Resource
     private DataSourceProperties dataSourceProperties;
+    @Value("${since.version:}")
+    private String sinceVersion;
+
 
     @Override
     public void run(ApplicationArguments args) {
-        create(dataSourceProperties.getUrl(), dataSourceProperties.getUsername(), dataSourceProperties.getPassword());
+        if (StringUtils.isEmpty(sinceVersion)) {
+            // 报错，需要强制制定
+            throw new IllegalArgumentException("请指定 since.version 参数");
+        }
+        create(sinceVersion, dataSourceProperties.getUrl(), dataSourceProperties.getUsername(), dataSourceProperties.getPassword());
     }
 
-    static void create(String url, String username, String password) {
+    static void create(String sinceVersion, String url, String username, String password) {
         DataSourceConfig.Builder dataSourceBuilder = new DataSourceConfig.Builder(url, username, password)
                 .typeConvertHandler(new CustomTypeConvertHandler());
         //1、配置数据源
@@ -44,7 +53,7 @@ public class GeneratorRunner extends Settings implements ApplicationRunner {
                 .globalConfig(builder -> {
                     builder.author(author) // 设置作者名
                             .outputDir(domainJavaPath.toString())   // 设置类的输出路径
-                            .commentDate("yyyy-MM-dd hh:mm:ss")   //注释日期
+                            .commentDate(sinceVersion::toString)   //注释日期
                             .dateType(DateType.ONLY_DATE)   //定义生成的实体类中日期的类型 TIME_PACK=LocalDateTime;ONLY_DATE=Date;
                             //.enableSwagger()   //开启 swagger 模式
                             .disableOpenDir();   //禁止打开输出目录，默认打开

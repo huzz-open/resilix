@@ -22,8 +22,8 @@ import java.util.Date;
  * 
  * </p>
  *
- * @author huzz
- * @since 2025-08-03 05:07:35
+ * @author mybatis-plus-generator
+ * @since 1.0.2
  */
 @Getter
 @Setter
