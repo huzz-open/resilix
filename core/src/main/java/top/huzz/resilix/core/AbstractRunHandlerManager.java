@@ -5,12 +5,6 @@ import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import top.huzz.resilix.idempotent.IdempotentJudge;
-import top.huzz.resilix.idempotent.IdempotentKey;
-import top.huzz.resilix.idempotent.SkippedIdempotentJudge;
-import top.huzz.resilix.predicate.HandlerRunPredicate;
-import top.huzz.resilix.recorder.NopePhaseRecorder;
-import top.huzz.resilix.recorder.PhaseRecorder;
 import top.huzz.resilix.additional.AdditionalContextAction;
 import top.huzz.resilix.additional.AwareCacheAdditionalContextAction;
 import top.huzz.resilix.cache.AwareCache;
@@ -21,6 +15,12 @@ import top.huzz.resilix.exception.PhaseStoppedException;
 import top.huzz.resilix.exception.RemoteLaunchFailedException;
 import top.huzz.resilix.handler.RestApiTriggerRunHandler;
 import top.huzz.resilix.handler.RunHandler;
+import top.huzz.resilix.idempotent.IdempotentJudge;
+import top.huzz.resilix.idempotent.IdempotentKey;
+import top.huzz.resilix.idempotent.SkippedIdempotentJudge;
+import top.huzz.resilix.predicate.HandlerRunPredicate;
+import top.huzz.resilix.recorder.NopePhaseRecorder;
+import top.huzz.resilix.recorder.PhaseRecorder;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -198,7 +198,7 @@ public abstract class AbstractRunHandlerManager implements RunHandlerManager {
                 RunContext.setCurrentCtx(duplicate);
                 execute(duplicate, handler);
             });
-                            // Because handler may be provided by remote service, we need to use Phase from Context instead of Phase from handler, same below
+            // Because handler may be provided by remote service, we need to use Phase from Context instead of Phase from handler, same below
             next(context, context.getCurrentPhase().next());
             return;
         }
@@ -290,8 +290,8 @@ public abstract class AbstractRunHandlerManager implements RunHandlerManager {
      * but this way, this feature cannot be extracted. Therefore, it is still implemented
      * separately as a separate feature.
      *
-     * @param context  context
-     * @param phase    phase
+     * @param context context
+     * @param phase   phase
      * @return true: The result of the idempotent judgment is to skip execution, false: Do not skip execution, continue to execute the next phase
      * @throws IdempotentJudgeException If idempotent judgment fails, it means that all phases below the current phase will not be executed
      * @see HandlerRunPredicate
@@ -324,10 +324,10 @@ public abstract class AbstractRunHandlerManager implements RunHandlerManager {
     /**
      * Execute idempotent judgment
      *
-     * @param context          context
-     * @param idempotentJudge  idempotent judge
-     * @param key              idempotent key
-     * @param phase            phase
+     * @param context         context
+     * @param idempotentJudge idempotent judge
+     * @param key             idempotent key
+     * @param phase           phase
      * @return null: No idempotent judgment executed, true: Skip execution, false: Do not skip execution
      * @throws IdempotentJudgeException If idempotent judgment fails, it means that all phases below the current phase will not be executed
      */
@@ -376,8 +376,8 @@ public abstract class AbstractRunHandlerManager implements RunHandlerManager {
     /**
      * Manually register idempotent judge
      *
-     * @param phase            phase
-     * @param idempotentJudge  idempotent judge
+     * @param phase           phase
+     * @param idempotentJudge idempotent judge
      * @return Current context manager
      */
     @Override
@@ -397,24 +397,43 @@ public abstract class AbstractRunHandlerManager implements RunHandlerManager {
         }
     }
 
-    @SuppressWarnings("unchecked")
+
     private Class<? extends RunContext> checkContextClass(RunHandler<RunContext> handler) {
         Class<?> handlerClass = handler.getClass();
+        Class<? extends RunContext> ctxClass;
         while (handlerClass != null) {
             Type genericSuperclass = handlerClass.getGenericSuperclass();
-            if (genericSuperclass instanceof ParameterizedType parameterizedType) {
-                Type[] typeArguments = parameterizedType.getActualTypeArguments();
-                if (typeArguments.length > 0 && typeArguments[0] instanceof Class<?> genericType) {
-                    if (RunContext.class.isAssignableFrom(genericType)) {
-                        return (Class<? extends RunContext>) genericType;
-                    } else {
-                        throw new IllegalArgumentException("RunHandler must be generic type of RunContext, but found: " + genericType.getName());
+            ctxClass = calcCtxType(genericSuperclass);
+            if (ctxClass != null) {
+                return ctxClass;
+            } else {
+                Type[] genericInterfaces = handlerClass.getGenericInterfaces();
+                for (Type genericInterface : genericInterfaces) {
+                    ctxClass = calcCtxType(genericInterface);
+                    if (ctxClass != null) {
+                        return ctxClass;
                     }
                 }
             }
             handlerClass = handlerClass.getSuperclass();
         }
+
         throw new IllegalArgumentException("Cannot resolve RunContext type from handler: " + handler.getClass().getName());
+    }
+
+    @SuppressWarnings("unchecked")
+    protected Class<? extends RunContext> calcCtxType(Type type) {
+        if (type instanceof ParameterizedType parameterizedType) {
+            Type[] typeArguments = parameterizedType.getActualTypeArguments();
+            if (typeArguments.length > 0 && typeArguments[0] instanceof Class<?> genericType) {
+                if (RunContext.class.isAssignableFrom(genericType)) {
+                    return (Class<? extends RunContext>) genericType;
+                } else {
+                    throw new IllegalArgumentException("RunHandler must be generic type of RunContext, but found: " + genericType.getName());
+                }
+            }
+        }
+        return null;
     }
 }
 
