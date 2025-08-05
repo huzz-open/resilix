@@ -18,7 +18,7 @@ import top.huzz.jaksho.common.constant.CollectionType;
 public interface BizFieldTypeService {
 
     @Mapping("")
-    Object create(CreateBizFieldTypeRequest request);
+    Integer create(CreateBizFieldTypeRequest request);
 
     @Getter
     @Setter
