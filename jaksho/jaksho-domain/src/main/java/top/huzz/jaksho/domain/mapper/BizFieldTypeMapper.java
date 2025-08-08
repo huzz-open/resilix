@@ -1,7 +1,7 @@
 package top.huzz.jaksho.domain.mapper;
 
-import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.ibatis.annotations.Mapper;
+import top.huzz.jaksho.common.mapper.ExtBaseMapper;
 import top.huzz.jaksho.domain.entity.BizFieldType;
 
 /**
@@ -13,6 +13,6 @@ import top.huzz.jaksho.domain.entity.BizFieldType;
  * @since 1.0.2
  */
 @Mapper
-public interface BizFieldTypeMapper extends BaseMapper<BizFieldType> {
+public interface BizFieldTypeMapper extends ExtBaseMapper<BizFieldType> {
 
 }

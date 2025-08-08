@@ -11,7 +11,7 @@ import top.huzz.jaksho.common.constant.BasicFieldType;
 import top.huzz.jaksho.common.constant.CollectionType;
 import top.huzz.jaksho.domain.entity.BizFieldType;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 /**
  * @author chenji
@@ -39,7 +39,7 @@ public class BizFieldTypeMapperTest {
             bizFieldType.setName("Str128");
             bizFieldType.setDescription("字符串类型");
             bizFieldType.setWorkspaceId(1);
-            Date now = new Date();
+            LocalDateTime now = LocalDateTime.now();
             bizFieldType.setCreateTime(now);
             bizFieldType.setUpdateTime(now);
 

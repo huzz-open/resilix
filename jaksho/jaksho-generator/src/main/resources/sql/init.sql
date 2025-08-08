@@ -35,27 +35,27 @@ CREATE TABLE IF NOT EXISTS `sr_biz_field_domain`
 
 CREATE TABLE IF NOT EXISTS `sr_biz_field_type`
 (
-    `id`               int(11)                       NOT NULL AUTO_INCREMENT COMMENT '数据库主键id',
-    `name`             varchar(100)                  NOT NULL COMMENT '业务字段类型名称',
-    `description`      varchar(255)                  NOT NULL COMMENT '业务字段类型描述',
+    `id`               int(11)                        NOT NULL AUTO_INCREMENT COMMENT '数据库主键id',
+    `name`             varchar(100)                   NOT NULL COMMENT '业务字段类型名称',
+    `description`      varchar(255) DEFAULT ''        NOT NULL COMMENT '业务字段类型描述',
 
-    `minimum`          int(11)                       NULL COMMENT '最小值或最小长度。在基础字段类型取不同的值的时候有不同的含义。
+    `minimum`          int(11)                        NULL COMMENT '最小值或最小长度。在基础字段类型取不同的值的时候有不同的含义。
      * <p/>当{@link #collectionType}为{@link CollectionType#NONE}时，表示该字段不为集合类型，取值含义如下：
      * <li/>数值类型：设定其取值范围的最小值；
      * <li/>string：设定其最小长度
      * <li/>file：设定文件最小大小
      * <p/>反之，如果该字段为集合类型，则该值表示集合中元素的最小个数。',
-    `maximum`          int(11)                       NULL COMMENT '最大值或最大长度。在基础字段类型取不同的值的时候有不同的含义。
+    `maximum`          int(11)                        NULL COMMENT '最大值或最大长度。在基础字段类型取不同的值的时候有不同的含义。
      * <p/>当{@link #collectionType}为{@link CollectionType#NONE}时，表示该字段不为集合类型，取值含义如下：
      * <li/>数值类型：设定其取值范围的最大值；
      * <li/>string：设定其最大长度
      * <li/>file：设定文件最大大小
      * <p/>反之，如果该字段为集合类型，则该值表示集合中元素的最大个数。',
-    `collection_type`  varchar(10) DEFAULT 'NONE'    NOT NULL COMMENT '集合类型',
-    `basic_field_type` varchar(20)                   NOT NULL COMMENT '基础字段类型名称',
-    `create_time`      datetime    DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
-    `update_time`      datetime    DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
-    `workspace_id`     int(11)     DEFAULT 0         NOT NULL COMMENT '工作空间数据库主键id',
+    `collection_type`  varchar(10)  DEFAULT 'NONE'    NOT NULL COMMENT '集合类型',
+    `basic_field_type` varchar(20)                    NOT NULL COMMENT '基础字段类型名称',
+    `create_time`      datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `update_time`      datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
+    `workspace_id`     int(11)      DEFAULT 0         NOT NULL COMMENT '工作空间数据库主键id',
     PRIMARY KEY (`id`)
 ) COMMENT '业务字段类型';
 

@@ -1,4 +1,4 @@
-package top.huzz.jaksho.biz.phase;
+package top.huzz.jaksho.api.phase;
 
 import top.huzz.resilix.core.Phase;
 
@@ -13,9 +13,19 @@ public enum CreatePhase implements Phase {
     VALIDATE,
 
     /**
-     * 创建阶段，执行实际的创建操作
+     * 创建之前的数据转换阶段，进行必要的数据转换，将输入数据转换为适合创建的格式
      */
-    CREATE,
+    TRANSFORM,
+
+    /**
+     * 存储之前的预处理阶段，进行必要的预处理操作，比如获取存储器
+     */
+    PRE_SAVE,
+
+    /**
+     * 存储阶段，执行实际的创建操作
+     */
+    SAVE,
 
     /**
      * 创建之后的处理阶段，进行必要的后续处理

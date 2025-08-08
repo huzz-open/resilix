@@ -21,6 +21,7 @@ import top.huzz.resilix.idempotent.SkippedIdempotentJudge;
 import top.huzz.resilix.predicate.HandlerRunPredicate;
 import top.huzz.resilix.recorder.NopePhaseRecorder;
 import top.huzz.resilix.recorder.PhaseRecorder;
+import top.huzz.resilix.util.ClassUtils;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -210,7 +211,7 @@ public abstract class AbstractRunHandlerManager implements RunHandlerManager {
         }
     }
 
-    @SuppressWarnings("unchecked")
+    @SuppressWarnings({"unchecked", "rawtypes"})
     private void execute(RunContext context, RunHandler<RunContext> handler) {
         PhaseRecorder<RunContext> recorder = handler.getRecorder();
         if (recorder == null) {
@@ -398,42 +399,23 @@ public abstract class AbstractRunHandlerManager implements RunHandlerManager {
     }
 
 
+    @SuppressWarnings("unchecked")
     private Class<? extends RunContext> checkContextClass(RunHandler<RunContext> handler) {
         Class<?> handlerClass = handler.getClass();
-        Class<? extends RunContext> ctxClass;
-        while (handlerClass != null) {
-            Type genericSuperclass = handlerClass.getGenericSuperclass();
-            ctxClass = calcCtxType(genericSuperclass);
-            if (ctxClass != null) {
-                return ctxClass;
-            } else {
-                Type[] genericInterfaces = handlerClass.getGenericInterfaces();
-                for (Type genericInterface : genericInterfaces) {
-                    ctxClass = calcCtxType(genericInterface);
-                    if (ctxClass != null) {
-                        return ctxClass;
-                    }
-                }
+        List<Type> concreteGenericTypes = ClassUtils.getConcreteGenericTypes(handlerClass);
+        if (CollectionUtils.isEmpty(concreteGenericTypes)) {
+            throw new IllegalArgumentException("Cannot resolve RunContext type from handler: " + handler.getClass().getName());
+        }
+        for (Type concreteGenericType : concreteGenericTypes) {
+            if (concreteGenericType instanceof Class<?> clazz && RunContext.class.isAssignableFrom(clazz)) {
+                return (Class<? extends RunContext>) clazz;
+            } else if (concreteGenericType instanceof ParameterizedType pt
+                    && pt.getRawType() instanceof Class<?> clazz && RunContext.class.isAssignableFrom(clazz)) {
+                return (Class<? extends RunContext>) clazz;
             }
-            handlerClass = handlerClass.getSuperclass();
         }
 
         throw new IllegalArgumentException("Cannot resolve RunContext type from handler: " + handler.getClass().getName());
-    }
-
-    @SuppressWarnings("unchecked")
-    protected Class<? extends RunContext> calcCtxType(Type type) {
-        if (type instanceof ParameterizedType parameterizedType) {
-            Type[] typeArguments = parameterizedType.getActualTypeArguments();
-            if (typeArguments.length > 0 && typeArguments[0] instanceof Class<?> genericType) {
-                if (RunContext.class.isAssignableFrom(genericType)) {
-                    return (Class<? extends RunContext>) genericType;
-                } else {
-                    throw new IllegalArgumentException("RunHandler must be generic type of RunContext, but found: " + genericType.getName());
-                }
-            }
-        }
-        return null;
     }
 }
 

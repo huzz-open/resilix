@@ -10,10 +10,14 @@ import lombok.Getter;
  */
 @Getter
 public class NewInstanceException extends RuntimeException {
-    private final Class<?> clazz;
+    private final String className;
+
+    public NewInstanceException(String clazz, Throwable cause) {
+        super(cause);
+        this.className = clazz;
+    }
 
     public NewInstanceException(Class<?> clazz, Throwable cause) {
-        super(cause);
-        this.clazz = clazz;
+        this(clazz.getName(), cause);
     }
 }

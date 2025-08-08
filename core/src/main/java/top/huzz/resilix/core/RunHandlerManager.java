@@ -3,6 +3,7 @@ package top.huzz.resilix.core;
 import jakarta.annotation.Nonnull;
 import top.huzz.resilix.exception.NewInstanceException;
 import top.huzz.resilix.idempotent.IdempotentJudge;
+import top.huzz.resilix.util.ReflectionUtils;
 
 /**
  * RunHandlerManager is responsible for managing the run process of a specific phase.
@@ -28,12 +29,7 @@ public interface RunHandlerManager {
      */
     default RunContext start() throws NewInstanceException {
         Class<? extends RunContext> cxtClass = getCxtClass();
-        RunContext runContext;
-        try {
-            runContext = cxtClass.getDeclaredConstructor().newInstance();
-        } catch (Exception e) {
-            throw new NewInstanceException(cxtClass, e);
-        }
+        RunContext runContext = ReflectionUtils.newInstance(cxtClass);
         start(runContext);
         return runContext;
     }

@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import com.baomidou.mybatisplus.generator.FastAutoGenerator;
 import com.baomidou.mybatisplus.generator.config.DataSourceConfig;
 import com.baomidou.mybatisplus.generator.config.OutputFile;
-import com.baomidou.mybatisplus.generator.config.rules.DateType;
 import com.baomidou.mybatisplus.generator.config.rules.NamingStrategy;
 import com.baomidou.mybatisplus.generator.engine.FreemarkerTemplateEngine;
 import com.baomidou.mybatisplus.generator.fill.Column;
@@ -18,6 +17,8 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceProperties;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
+import top.huzz.jaksho.common.entity.BasicProperties;
+import top.huzz.jaksho.common.mapper.ExtBaseMapper;
 
 import java.util.Collections;
 
@@ -54,7 +55,7 @@ public class GeneratorRunner extends Settings implements ApplicationRunner {
                     builder.author(author) // 设置作者名
                             .outputDir(domainJavaPath.toString())   // 设置类的输出路径
                             .commentDate(sinceVersion::toString)   //注释日期
-                            .dateType(DateType.ONLY_DATE)   //定义生成的实体类中日期的类型 TIME_PACK=LocalDateTime;ONLY_DATE=Date;
+                            //.dateType(DateType.ONLY_DATE)   //定义生成的实体类中日期的类型 TIME_PACK=LocalDateTime;ONLY_DATE=Date;
                             //.enableSwagger()   //开启 swagger 模式
                             .disableOpenDir();   //禁止打开输出目录，默认打开
                 })
@@ -85,7 +86,7 @@ public class GeneratorRunner extends Settings implements ApplicationRunner {
                             .enableTableFieldAnnotation() // 开启生成实体时生成字段注解
                             .enableColumnConstant()  //开启生成字段常量
                             .enableLombok() //开启 Lombok
-                            .superClass(top.huzz.jaksho.common.entity.BasicProperties.class) // 指定Entity的父类.
+                            .superClass(BasicProperties.class) // 指定Entity的父类.
                             .versionColumnName("version")   //乐观锁字段名(数据库)
                             .versionPropertyName("version") //乐观锁属性名(实体)
                             .logicDeleteColumnName("deleted")   //逻辑删除字段名(数据库)
@@ -114,6 +115,7 @@ public class GeneratorRunner extends Settings implements ApplicationRunner {
                             .enableBaseResultMap()  //启用 BaseResultMap 生成
                             .enableBaseColumnList() //启用 BaseColumnList
                             .formatMapperFileName("%sMapper")   //格式化 mapper 文件名称
+                            .superClass(ExtBaseMapper.class)
                             .mapperAnnotation(Mapper.class)       //开启 @Mapper 注解
                             .formatXmlFileName("%s") //格式化Xml文件名称
                             .formatMapperFileName("%sMapper");   //格式化Mapper文件名称
