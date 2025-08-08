@@ -21,7 +21,9 @@ public class Settings {
     static final List<String> listTable = List.of(
             "sr_biz_field_type",
             "sr_object_biz_field_type_ref",
-
+            "sr_biz_field",
+            "sr_biz_domain",
+            "sr_biz_field_domain",
             "sr_api_definition",
             "sr_api_field"
     );
