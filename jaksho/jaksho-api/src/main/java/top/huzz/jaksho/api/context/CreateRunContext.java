@@ -4,11 +4,11 @@ import jakarta.annotation.Nullable;
 import lombok.Getter;
 import lombok.Setter;
 import top.huzz.jaksho.common.able.DomainDescription;
-import top.huzz.jaksho.common.able.Saver;
 import top.huzz.resilix.core.SimpleRunContext;
 import top.huzz.resilix.util.ReflectionUtils;
 
-import java.util.function.Function;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.function.Supplier;
 
 /**
@@ -33,23 +33,18 @@ public class CreateRunContext<R, T extends DomainDescription> extends SimpleRunC
      * 被创建的对象
      */
     protected final T createdObject;
-
     /**
-     * 保存被创建的对象的函数
+     * 被创建的对象的级联对象。有一些场景是在创建对象时需要同时创建一些级联对象，在数据库里面其实就是以外键或关联字段的形式存在的。
      */
-    protected Saver<T, Integer> saver;
+    protected final List<T> cascadedCreatedObjects = new ArrayList<>();
 
-
-    public CreateRunContext(R createRequest, Class<T> createdClass) {
-        this(createRequest, createdClass, null);
+    public CreateRunContext<R, T> addCascadedCreatedObject(T cascadedCreatedObject) {
+        this.cascadedCreatedObjects.add(cascadedCreatedObject);
+        return this;
     }
 
     public CreateRunContext(R createRequest, Supplier<T> createdObjectSupplier) {
         this(createRequest, null, createdObjectSupplier.get());
-    }
-
-    public CreateRunContext(R createRequest, Function<R, T> createdObjectFunction) {
-        this(createRequest, null, createdObjectFunction.apply(createRequest));
     }
 
     protected CreateRunContext(R createRequest, @Nullable Class<T> createdClass, @Nullable T createdObject) {

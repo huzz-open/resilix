@@ -18,7 +18,7 @@ public enum CreatePhase implements Phase {
     TRANSFORM,
 
     /**
-     * 存储之前的预处理阶段，进行必要的预处理操作，比如获取存储器
+     * 存储之前的预处理阶段，进行必要的预处理操作
      */
     PRE_SAVE,
 

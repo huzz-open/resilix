@@ -10,7 +10,7 @@ import java.lang.annotation.Target;
  * @since 1.0.2
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE_USE})
 public @interface CustomJSONType {
     String serializerMethod() default "toString";
 

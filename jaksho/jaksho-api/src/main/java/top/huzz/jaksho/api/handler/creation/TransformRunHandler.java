@@ -32,7 +32,7 @@ public class TransformRunHandler<R, T extends DomainDescription> extends Predict
         Object createdObject = context.getCreatedObject();
         Objects.requireNonNull(createdObject);
 
-        // 这里提供简单的JSON序列化和反序列化来做数据拷贝
+        // 这里暂时使用copyProperties，后续可以考虑使用更快的setter方法
         BeanUtils.copyProperties(createRequest, createdObject);
     }
 
