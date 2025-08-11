@@ -1,8 +1,8 @@
-package top.huzz.jaksho.api.validation;
+package top.huzz.resilix.validation;
 
 import jakarta.validation.ConstraintValidator;
 import jakarta.validation.ConstraintValidatorContext;
-import top.huzz.jaksho.api.annotation.BizCheck;
+import top.huzz.resilix.annotation.BizCheck;
 
 /**
  * @author huzz

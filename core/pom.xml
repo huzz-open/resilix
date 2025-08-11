@@ -17,6 +17,7 @@
         <lombok.version>1.18.38</lombok.version>
         <spring-cloud.version>4.3.0</spring-cloud.version>
         <jakarta.version>2.1.1</jakarta.version>
+        <boot-validation.version>3.5.3</boot-validation.version>
         <redisson.version>3.50.0</redisson.version>
         <fastjson2.version>2.0.56</fastjson2.version>
         <commons-lang3.version>3.18.0</commons-lang3.version>
@@ -36,6 +37,11 @@
             <groupId>jakarta.annotation</groupId>
             <artifactId>jakarta.annotation-api</artifactId>
             <version>${jakarta.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+            <version>${boot-validation.version}</version>
         </dependency>
 
         <dependency>

@@ -5,7 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
 import org.hibernate.validator.constraints.Length;
-import top.huzz.jaksho.api.annotation.BizCheck;
+import top.huzz.resilix.annotation.BizCheck;
 import top.huzz.jaksho.api.dto.ObjectBizFieldTypeRefDTO;
 import top.huzz.jaksho.common.constant.BasicFieldType;
 import top.huzz.jaksho.common.constant.CollectionType;

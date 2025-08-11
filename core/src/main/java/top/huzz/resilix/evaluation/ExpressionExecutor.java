@@ -7,4 +7,5 @@ package top.huzz.resilix.evaluation;
  * @since 1.0.2
  */
 public interface ExpressionExecutor {
+
 }
