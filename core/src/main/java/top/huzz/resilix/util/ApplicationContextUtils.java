@@ -1,4 +1,4 @@
-package top.huzz.jaksho.util;
+package top.huzz.resilix.util;
 
 import jakarta.annotation.Nonnull;
 import lombok.Getter;

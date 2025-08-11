@@ -10,4 +10,5 @@ package top.huzz.resilix.constants;
  */
 public enum EnvType {
     // Environment types can be added here as needed
+    X, Y
 }

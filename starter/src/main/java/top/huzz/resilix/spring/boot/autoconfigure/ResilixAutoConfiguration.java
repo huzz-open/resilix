@@ -3,8 +3,10 @@ package top.huzz.resilix.spring.boot.autoconfigure;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import top.huzz.resilix.core.*;
 import top.huzz.resilix.handler.RunHandler;
+import top.huzz.resilix.util.ApplicationContextUtils;
 
 import java.util.List;
 
@@ -17,6 +19,7 @@ import java.util.List;
  * @since 1.0.0
  */
 @Configuration
+@Import(ApplicationContextUtils.class)
 public class ResilixAutoConfiguration {
 
     /**
