@@ -15,9 +15,9 @@ import java.lang.annotation.*;
 @Constraint(validatedBy = {BizCheckConstraint.class})
 @Repeatable(BizCheck.List.class)
 public @interface BizCheck {
-    String DEFAULT_WHEN = "true";
+    String ALWAYS_RUN_EXPR = "true";
 
-    String when() default DEFAULT_WHEN;
+    String when() default ALWAYS_RUN_EXPR;
 
     String value();
 
@@ -30,6 +30,11 @@ public @interface BizCheck {
     @Retention(RetentionPolicy.RUNTIME)
     @Target({ElementType.TYPE_USE})
     @interface List {
+        /**
+         * An array of {@link BizCheck} annotations.
+         *
+         * @return the array of BizCheck annotations
+         */
         BizCheck[] value();
     }
 }

@@ -5,10 +5,10 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
 import org.hibernate.validator.constraints.Length;
-import top.huzz.resilix.annotation.BizCheck;
 import top.huzz.jaksho.api.dto.ObjectBizFieldTypeRefDTO;
 import top.huzz.jaksho.common.constant.BasicFieldType;
 import top.huzz.jaksho.common.constant.CollectionType;
+import top.huzz.resilix.annotation.BizCheck;
 
 import java.util.List;
 
@@ -29,9 +29,8 @@ public interface BizFieldTypeService {
     @BizCheck.List({
             // 如果 basicFieldType 是 OBJECT，则校验objectBizFieldTypeRefDTOList字段
             // 这里有几个特性：
-            // 1. BasicFieldType.OBJECT这种写法其实是不对的，因为类要指定全限定名，这里之所以可以这样简写，是因为通过被检查字段basicFieldType的类型来获取真实类型
-            // 2. 这里使用特殊标识`__VALID`，表示对 objectBizFieldTypeRefDTOList字段进行校验，具体如何校验，得看 ObjectBizFieldTypeRefDTO 的定义
-            @BizCheck(when = "#basicFieldType == BasicFieldType.OBJECT", value = "#__VALID(objectBizFieldTypeRefDTOList)"),
+            // 1. 这里使用特殊标识`__VALID`，表示对 objectBizFieldTypeRefDTOList字段进行校验，具体如何校验，得看 ObjectBizFieldTypeRefDTO 的定义
+            @BizCheck(when = "basicFieldType == BasicFieldType.OBJECT", value = "#__VALID(objectBizFieldTypeRefDTOList)"),
     })
     class CreateBizFieldTypeRequest {
         @NotNull

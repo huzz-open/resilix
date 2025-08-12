@@ -1,25 +1,17 @@
 package top.huzz.resilix.validation;
 
-import jakarta.validation.ConstraintValidator;
-import jakarta.validation.ConstraintValidatorContext;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.SneakyThrows;
+import jakarta.validation.*;
 import org.springframework.context.expression.BeanFactoryResolver;
-import org.springframework.expression.EvaluationException;
-import org.springframework.expression.TypeConverter;
-import org.springframework.expression.spel.standard.SpelExpression;
+import org.springframework.expression.BeanResolver;
+import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
-import org.springframework.expression.spel.support.StandardTypeConverter;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import top.huzz.resilix.annotation.BizCheck;
-import top.huzz.resilix.constants.EnvType;
 import top.huzz.resilix.util.ApplicationContextUtils;
 
-import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
-import java.lang.invoke.MethodType;
+import java.util.*;
+import java.util.function.Consumer;
 
 /**
  * @author huzz
@@ -27,81 +19,177 @@ import java.lang.invoke.MethodType;
  */
 public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object> {
 
-    private String when;
-    private String value;
+    private static final SpelExpressionParser PARSER = new SpelExpressionParser();
+    private static volatile BeanResolver beanResolver;
+    private static volatile Validator validator;
+
+    private Expression whenExpr;
+    private boolean alwaysTrue;
+    private Expression valueExpr;
 
     @Override
     public void initialize(BizCheck constraintAnnotation) {
-        this.when = constraintAnnotation.when();
-        this.value = constraintAnnotation.value();
+        String whenExprStr = constraintAnnotation.when();
+        if (BizCheck.ALWAYS_RUN_EXPR.equals(whenExprStr)) {
+            this.alwaysTrue = true;
+        } else {
+            this.whenExpr = PARSER.parseExpression(whenExprStr);
+        }
+        this.valueExpr = PARSER.parseExpression(constraintAnnotation.value());
+
+        initBeanResolver();
+        initValidator();
     }
 
-    @SneakyThrows
     @Override
-    public boolean isValid(Object value, ConstraintValidatorContext context) {
-        StandardTypeLocator typeLocator = new StandardTypeLocator() {
-            @Override
-            public Class<?> findType(String typeName) throws EvaluationException {
-                return super.findType(typeName);
-            }
-        };
-        // 注册自定义类型，就可以省略包名直接使用类名
-        typeLocator.registerImport("top.huzz.resilix.constants");
-        TypeConverter typeConverter = new StandardTypeConverter();
-        SpelExpressionParser parser = new SpelExpressionParser();
-
-        // 依次是调用bean的方法，调用当前对象的name属性，调用变量hello
-        SpelExpression spelExpression = parser.parseRaw("""
-                @bizFieldTypeMapper.toString() + '
-                ' +
-                name + '
-                ' +
-                #test1(#hello) + '
-                ' +
-                test2(#hello) + '
-                ' +
-                test3(#hello) + '
-                ' +
-                (T(EnvType).X == type)"""
-        );
-
-        StandardEvaluationContext ctx = new StandardEvaluationContext(new XXX());
-        ctx.setBeanResolver(new BeanFactoryResolver(ApplicationContextUtils.getApplicationContext()));
-        ctx.setTypeConverter(typeConverter);
+    public boolean isValid(Object input, ConstraintValidatorContext context) {
+        StandardEvaluationContext ctx = new StandardEvaluationContext(input);
+        StandardTypeLocator typeLocator = new StandardTypeLocator();
         ctx.setTypeLocator(typeLocator);
-        ctx.setVariable("hello", "555dadad");
-        MethodHandles.Lookup lookup = MethodHandles.lookup();
-        MethodHandle test1 = lookup.findStatic(BizCheckConstraint.class, "test1", MethodType.methodType(String.class, String.class));
-        ctx.registerFunction("test1", test1);
-        Object value1 = spelExpression.getValue(ctx);
-        System.out.println(value1);
-        return false;
+        ctx.setBeanResolver(beanResolver);
+
+        if (!needToCheck(ctx)) {
+            return true;
+        }
+        try {
+            ctx.registerFunction("__VALID",
+                    BizCheckConstraint.class.getDeclaredMethod("valid", Object.class));
+        } catch (Exception e) {
+            throw new RuntimeException("Register __VALID failed", e);
+        }
+        try {
+            Object result = valueExpr.getValue(ctx);
+            return isValid(result);
+        } catch (Exception e) {
+            if (e.getCause() != null && e.getCause() instanceof ConstraintViolationException cve) {
+                // 把违例挂回到当前约束
+                context.disableDefaultConstraintViolation();
+                if (cve.getConstraintViolations() != null && !cve.getConstraintViolations().isEmpty()) {
+                    for (ConstraintViolation<?> cv : cve.getConstraintViolations()) {
+                        String msg = (cv.getPropertyPath() != null && !cv.getPropertyPath().toString().isEmpty())
+                                ? cv.getPropertyPath() + " " + cv.getMessage()
+                                : cv.getMessage();
+                        context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
+                    }
+                } else {
+                    // 只有消息没有集合时
+                    context.buildConstraintViolationWithTemplate(
+                                    e.getMessage() != null ? e.getMessage() : "Validation failed")
+                            .addConstraintViolation();
+                }
+                return false;
+            }
+            // 任何其它异常也不要冒出去
+            context.disableDefaultConstraintViolation();
+            String msg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
+            context.buildConstraintViolationWithTemplate("BizCheck error: " + msg).addConstraintViolation();
+            return false;
+        }
     }
 
-    @Getter
-    @Setter
-    static class XXX {
-        private String name;
-        private int age;
-        private EnvType type;
 
-        public XXX() {
-            this.name = "huzz";
-            this.age = 18;
-            this.type = EnvType.X;
+    public static void valid(Object any) {
+        if (any == null) {
+            throw new ConstraintViolationException("Object to validate cannot be null", java.util.Collections.emptySet());
+        }
+        Validator v = validator;
+
+        List<String> errors = new ArrayList<>();
+
+        Set<ConstraintViolation<Object>> result = new LinkedHashSet<>();
+
+        Consumer<Object> validateOne = o -> {
+            if (o == null) return;
+            Set<ConstraintViolation<Object>> vs = v.validate(o);
+            result.addAll(vs);
+        };
+
+        if (any instanceof Iterable<?> it) {
+            int i = 0;
+            for (Object e : it) {
+                Set<ConstraintViolation<Object>> vs = v.validate(e);
+                for (ConstraintViolation<?> cv : vs) {
+                    errors.add(buildError(i, cv));
+                }
+                result.addAll(vs);
+                i++;
+            }
+            if (i == 0) {
+                throw new ConstraintViolationException("Iterable to validate cannot be empty", Collections.emptySet());
+            }
+        } else if (any.getClass().isArray()) {
+            int n = java.lang.reflect.Array.getLength(any);
+            if (n == 0) {
+                throw new ConstraintViolationException("Array to validate cannot be empty", Collections.emptySet());
+            }
+            for (int i = 0; i < n; i++) {
+                Object e = java.lang.reflect.Array.get(any, i);
+                Set<ConstraintViolation<Object>> vs = v.validate(e);
+                for (ConstraintViolation<?> cv : vs) {
+                    errors.add(buildError(i, cv));
+                }
+                result.addAll(vs);
+            }
+        } else if (any instanceof java.util.Optional<?> opt) {
+            opt.ifPresent(validateOne);
+        } else if (any instanceof java.util.Map<?, ?> m) {
+            if (m.isEmpty()) {
+                throw new ConstraintViolationException("Map to validate cannot be empty", Collections.emptySet());
+            }
+            for (var en : m.entrySet()) {
+                Set<ConstraintViolation<Object>> vs = v.validate(en.getValue());
+                for (ConstraintViolation<?> cv : vs) {
+                    errors.add(buildError(en.getKey(), cv));
+                }
+                result.addAll(vs);
+            }
+        } else {
+            validateOne.accept(any);
         }
 
-        public static String test2(String world) {
-            return "length2: " + world.length();
-        }
-
-        public String test3(String world) {
-            return "length3: " + world.length();
+        if (!result.isEmpty()) {
+            throw new ConstraintViolationException(String.join(",", errors), result);
         }
     }
 
-    public static String test1(String world) {
-        return "length: " + world.length();
+    private static String buildError(Object key, ConstraintViolation<?> cv) {
+        return "[" + key + "]." + cv.getPropertyPath() + " " + cv.getMessage();
     }
 
+    private boolean isValid(Object result) {
+        if (result == null) {
+            // 没有返回值，只要不报异常，认为是通过校验
+            return true;
+        }
+        if (result instanceof Boolean b) {
+            // 如果返回值是布尔类型，直接返回
+            return b;
+        }
+        // 执行到这里，说明没有抛出异常，也认为是通过校验
+        return true;
+    }
+
+    private boolean needToCheck(StandardEvaluationContext ctx) {
+        return alwaysTrue || (whenExpr != null && Boolean.TRUE.equals(whenExpr.getValue(ctx, Boolean.class)));
+    }
+
+    private void initBeanResolver() {
+        if (beanResolver == null) {
+            synchronized (BizCheckConstraint.class) {
+                if (beanResolver == null) {
+                    beanResolver = new BeanFactoryResolver(ApplicationContextUtils.getApplicationContext());
+                }
+            }
+        }
+    }
+
+    private void initValidator() {
+        if (validator == null) {
+            synchronized (BizCheckConstraint.class) {
+                if (validator == null) {
+                    validator = ApplicationContextUtils.getBean(Validator.class);
+                }
+            }
+        }
+    }
 }
