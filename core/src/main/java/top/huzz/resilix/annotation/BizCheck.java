@@ -26,7 +26,7 @@ import java.lang.annotation.*;
  * <p>
  * <strong>Usage Examples:</strong>
  * </p>
- * <pre>{@code
+ * <pre><code>
  * // Field-level validation
  * public class UserRequest {
  *     &#64;BizCheck(value = "#this.length() > 0", message = "Name cannot be empty")
@@ -35,13 +35,13 @@ import java.lang.annotation.*;
  *     &#64;BizCheck(value = "#checkEmail(#this)", message = "Invalid email format")
  *     private String email;
  * }
- * 
+ *
  * // Class-level validation with cross-field checks
  * &#64;BizCheck.List({
  *     &#64;BizCheck(when = "basicFieldType == BasicFieldType.OBJECT",
  *               value = "#__VALID(objectBizFieldTypeRefDTOList)"),
  *     &#64;BizCheck(when = "minimum != null && maximum != null",
- *               value = "#minimum <= #maximum",
+ *               value = "minimum <= maximum",
  *               message = "Minimum must be less than or equal to maximum"),
  *     &#64;BizCheck(when = "basicFieldType == BasicFieldType.STRING",
  *               value = "#name.length() > 0",
@@ -54,7 +54,7 @@ import java.lang.annotation.*;
  *     private Integer maximum;
  *     private List<ObjectBizFieldTypeRefDTO> objectBizFieldTypeRefDTOList;
  * }
- * }</pre>
+ * </code></pre>
  *
  * @author huzz
  * @see BizCheckFunction
@@ -120,7 +120,7 @@ public @interface BizCheck {
      *
      * @return the validation error message
      */
-    String message() default "业务校验失败";
+    String message() default "{top.huzz.resilix.annotation.BizCheck.message}";
 
     /**
      * Groups for validation.
