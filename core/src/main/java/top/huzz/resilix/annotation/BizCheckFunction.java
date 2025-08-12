@@ -7,8 +7,86 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * 标识这是一个业务检查方法。对于业务检查方法，可以被用到{@link BizCheck}注解上。
- * 实际上，任意一个public方法（包含静态方法）都可以被作为业务检查方法，添加该注解作为标识，为了就是提醒其他人在修改这个业务方法的时候，不要随意修改其方法签名。
+ * Marks a method as a business check function that can be used with the {@link BizCheck} annotation.
+ * <p>
+ * This annotation serves as an identifier for business validation methods. Any public method (including static methods) 
+ * can be used as a business check method. Adding this annotation helps remind other developers not to modify 
+ * the method signature arbitrarily when modifying the business logic.
+ * </p>
+ * <p>
+ * The annotated method should contain business validation logic and can be referenced in {@link BizCheck} 
+ * annotations using the method's unique identifier. The method can be called from both field-level and class-level 
+ * {@link BizCheck} annotations.
+ * </p>
+ * <p>
+ * <strong>Usage Examples:</strong>
+ * </p>
+ * <pre>{@code
+ * // Define business check methods
+ * public class BizUtils {
+ *     &#64;BizCheckFunction("checkCornSpecial")
+ *     public static void checkCorn(String cron) throws InvalidCronExpressionException {
+ *         if (StringUtils.isBlank(cron)) {
+ *             return;
+ *         }
+ *         // validation logic...
+ *     }
+ *     
+ *     &#64;BizCheckFunction
+ *     public static void checkEmail(String email) {
+ *         if (!email.contains("@")) {
+ *             throw new IllegalArgumentException("Invalid email format");
+ *         }
+ *     }
+ * }
+ * 
+ * // Field-level usage
+ * public class DynamicVariableRequest {
+ *     &#64;BizCheck(value = "#checkCornSpecial(#this)")
+ *     private String cron;
+ *     
+ *     &#64;BizCheck(value = "#checkEmail(#this)")
+ *     private String email;
+ * }
+ * 
+ * // Class-level usage with cross-field validation
+ * &#64;BizCheck.List({
+ *     &#64;BizCheck(when = "basicFieldType == BasicFieldType.OBJECT", 
+ *               value = "#__VALID(objectBizFieldTypeRefDTOList)"),
+ *     &#64;BizCheck(when = "basicFieldType == BasicFieldType.STRING", 
+ *               value = "#checkCornSpecial(name)")
+ * })
+ * public class CreateBizFieldTypeRequest {
+ *     private String name;
+ *     private BasicFieldType basicFieldType;
+ *     private List<ObjectBizFieldTypeRefDTO> objectBizFieldTypeRefDTOList;
+ * }
+ * 
+ * // Alternative method reference formats (when no value is specified)
+ * public class ValidationRequest {
+ *     &#64;BizCheck(value = "#checkCorn(#this)")           // Using method name
+ *     private String cron1;
+ *     
+ *     &#64;BizCheck(value = "#BizUtils_checkCorn(#this)")  // Using class_methodName format
+ *     private String cron2;
+ * }
+ * }</pre>
+ * <p>
+ * <strong>Method Reference Formats:</strong>
+ * <ul>
+ *   <li><code>#customId(parameter)</code> - When value is specified in &#64;BizCheckFunction</li>
+ *   <li><code>#methodName(parameter)</code> - Using method name directly</li>
+ *   <li><code>#ClassName_methodName(parameter)</code> - Using class_methodName format</li>
+ * </ul>
+ * </p>
+ * <p>
+ * <strong>Special Functions:</strong>
+ * <ul>
+ *   <li><code>#__VALID(fieldName)</code> - Validates a field using its own validation annotations</li>
+ *   <li><code>#this</code> - References the current field value in field-level validation</li>
+ *   <li><code>fieldName</code> - References other fields in class-level validation</li>
+ * </ul>
+ * </p>
  *
  * @author huzz
  * @see BizCheck
@@ -18,41 +96,14 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface BizCheckFunction {
     /**
-     * 返回方法的唯一id，全局只能存在一个。假如给BizUtils的checkCorn方法添加了该注解，且value返回了"checkCornSpecial"，那么在{@link BizCheck}注解中就可以这样使用
-     * <pre>{@code
-     * public class BizUtils {
-     *     @BizCheckFunction("checkCornSpecial")
-     *     public static void checkCorn(String cron) throws InvalidCronExpressionException {
-     *         if (StringUtils.isBlank(cron)) {
-     *             return;
-     *         }
-     *         // 其他逻辑...
-     *     }
-     * }
-     * public class DynamicVariableRequest {
-     *     @BizCheck(value = "#checkCornSpecial(#corn)")
-     *     private String cron;
-     * }}
-     * </pre>
-     * <p>在没有指定value的情况下，则可以使用两种：“#简单类名_方法名”，“#方法名”</p>
-     * <pre>{@code
-     * public class BizUtils {
-     *     @BizCheckFunction
-     *     public static void checkCorn(String cron) throws InvalidCronExpressionException {
-     *         if (StringUtils.isBlank(cron)) {
-     *             return;
-     *         }
-     *         // 其他逻辑...
-     *     }
-     * }
-     * public class DynamicVariableRequest {
-     *     @BizCheck(value = "#checkCorn(#corn)")
-     *     private String cron;
-     *
-     *     @BizCheck(value = "#BizUtils_checkCorn(#corn2)")
-     *     private String cron2;
-     * }}
-     * </pre>
+     * Returns the unique identifier for the method. This ID must be globally unique.
+     * <p>
+     * If specified, this value will be used as the method identifier in {@link BizCheck} expressions.
+     * If not specified, the method can be referenced using either the method name or the 
+     * "ClassName_methodName" format.
+     * </p>
+     * 
+     * @return the unique identifier for the business check method, or empty string if not specified
      */
     String value() default "";
 }
