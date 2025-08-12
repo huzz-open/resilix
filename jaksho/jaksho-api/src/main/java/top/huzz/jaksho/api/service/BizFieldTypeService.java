@@ -51,6 +51,9 @@ public interface BizFieldTypeService {
         private Integer maximum;
 
         private List<ObjectBizFieldTypeRefDTO> objectBizFieldTypeRefDTOList;
+
+        @BizCheck(value = "#this.length() > 0")
+        private String bcTest;
     }
 
 

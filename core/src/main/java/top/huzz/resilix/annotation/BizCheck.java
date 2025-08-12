@@ -11,7 +11,7 @@ import java.lang.annotation.*;
  * @since 1.0.2
  */
 @Retention(RetentionPolicy.RUNTIME)
-@Target({ElementType.TYPE_USE})
+@Target({ElementType.TYPE_USE, ElementType.FIELD})
 @Constraint(validatedBy = {BizCheckConstraint.class})
 @Repeatable(BizCheck.List.class)
 public @interface BizCheck {

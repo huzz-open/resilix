@@ -10,7 +10,9 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
 import top.huzz.resilix.annotation.BizCheck;
 import top.huzz.resilix.util.ApplicationContextUtils;
 
-import java.util.*;
+import java.util.Collections;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.function.Consumer;
 
 /**
@@ -88,13 +90,11 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
     }
 
 
-    public static void valid(Object any) {
+    private static void valid(Object any) {
         if (any == null) {
             throw new ConstraintViolationException("Object to validate cannot be null", java.util.Collections.emptySet());
         }
         Validator v = validator;
-
-        List<String> errors = new ArrayList<>();
 
         Set<ConstraintViolation<Object>> result = new LinkedHashSet<>();
 
@@ -108,9 +108,6 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
             int i = 0;
             for (Object e : it) {
                 Set<ConstraintViolation<Object>> vs = v.validate(e);
-                for (ConstraintViolation<?> cv : vs) {
-                    errors.add(buildError(i, cv));
-                }
                 result.addAll(vs);
                 i++;
             }
@@ -125,9 +122,6 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
             for (int i = 0; i < n; i++) {
                 Object e = java.lang.reflect.Array.get(any, i);
                 Set<ConstraintViolation<Object>> vs = v.validate(e);
-                for (ConstraintViolation<?> cv : vs) {
-                    errors.add(buildError(i, cv));
-                }
                 result.addAll(vs);
             }
         } else if (any instanceof java.util.Optional<?> opt) {
@@ -138,9 +132,6 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
             }
             for (var en : m.entrySet()) {
                 Set<ConstraintViolation<Object>> vs = v.validate(en.getValue());
-                for (ConstraintViolation<?> cv : vs) {
-                    errors.add(buildError(en.getKey(), cv));
-                }
                 result.addAll(vs);
             }
         } else {
@@ -148,15 +139,11 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
         }
 
         if (!result.isEmpty()) {
-            throw new ConstraintViolationException(String.join(",", errors), result);
+            throw new ConstraintViolationException(result);
         }
     }
 
-    private static String buildError(Object key, ConstraintViolation<?> cv) {
-        return "[" + key + "]." + cv.getPropertyPath() + " " + cv.getMessage();
-    }
-
-    private boolean isValid(Object result) {
+    private static boolean isValid(Object result) {
         if (result == null) {
             // 没有返回值，只要不报异常，认为是通过校验
             return true;
@@ -173,7 +160,7 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
         return alwaysTrue || (whenExpr != null && Boolean.TRUE.equals(whenExpr.getValue(ctx, Boolean.class)));
     }
 
-    private void initBeanResolver() {
+    private static void initBeanResolver() {
         if (beanResolver == null) {
             synchronized (BizCheckConstraint.class) {
                 if (beanResolver == null) {
@@ -183,7 +170,7 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
         }
     }
 
-    private void initValidator() {
+    private static void initValidator() {
         if (validator == null) {
             synchronized (BizCheckConstraint.class) {
                 if (validator == null) {

@@ -3,6 +3,7 @@ POST {{endpoint}}/sr/biz-field-type
 {
     "name": "password",
     "collectionType" : "NONE",
-    "basicFieldType": "object",
-    "objectBizFieldTypeRefDTOList": [{}]
+    "basicFieldType": "string",
+    "objectBizFieldTypeRefDTOList": [{}],
+    "bcTest": "hello"
 }
