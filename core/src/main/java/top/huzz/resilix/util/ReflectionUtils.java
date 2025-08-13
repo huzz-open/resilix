@@ -1,12 +1,24 @@
 package top.huzz.resilix.util;
 
+import jakarta.annotation.Nonnull;
+import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
 import top.huzz.resilix.exception.NewInstanceException;
+
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 /**
  * @author huzz
  * @since 1.0.2
  */
 public final class ReflectionUtils {
+    public static final String[] DEFAULT_SCAN_PACKAGES = {
+            "top.huzz",
+    };
+
     /**
      * create a new instance of the given class using its no-arg constructor
      *
@@ -52,5 +64,23 @@ public final class ReflectionUtils {
         } catch (ClassNotFoundException e) {
             throw new NewInstanceException(className, e);
         }
+    }
+
+    /**
+     * Scan for methods annotated with the specified annotation type in the given base packages.
+     *
+     * @param annotationType the annotation type to look for
+     * @param basePackages   the base packages to scan
+     * @return a set of methods annotated with the specified annotation type
+     */
+    @Nonnull
+    public static Set<Method> reflectionsScanMethods(Class<? extends Annotation> annotationType,
+                                                     String... basePackages) {
+        Set<Method> result = new LinkedHashSet<>();
+        for (String pkg : basePackages) {
+            Reflections reflections = new Reflections(pkg, Scanners.MethodsAnnotated);
+            result.addAll(reflections.getMethodsAnnotatedWith(annotationType));
+        }
+        return result;
     }
 }

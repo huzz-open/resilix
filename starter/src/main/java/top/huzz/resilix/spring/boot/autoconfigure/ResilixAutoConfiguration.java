@@ -4,7 +4,10 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
+import top.huzz.resilix.annotation.BizCheckFunction;
 import top.huzz.resilix.core.*;
+import top.huzz.resilix.evaluation.DefaultAnnotationReducibleMethodProvider;
+import top.huzz.resilix.evaluation.ReducibleMethodProvider;
 import top.huzz.resilix.handler.RunHandler;
 import top.huzz.resilix.util.ApplicationContextUtils;
 
@@ -47,5 +50,11 @@ public class ResilixAutoConfiguration {
         // Initialize the RunHandlerManagerHelper with the factory instance
         RunHandlerManagerHelper.setRunHandlerManagerFactory(managerFactory);
         return managerFactory;
+    }
+
+    @Bean(name = "resilixReducibleMethodProvider")
+    @ConditionalOnMissingBean
+    public ReducibleMethodProvider reducibleMethodProvider() {
+        return new DefaultAnnotationReducibleMethodProvider(BizCheckFunction.class);
     }
 }

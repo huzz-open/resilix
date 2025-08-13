@@ -1,7 +1,6 @@
 package top.huzz.resilix.evaluation;
 
 import java.lang.reflect.Method;
-import java.util.Collection;
 import java.util.Map;
 
 /**
@@ -9,7 +8,8 @@ import java.util.Map;
  * @since 1.0.2
  */
 public interface ReducibleMethodProvider {
-    Collection<Class<?>> classes();
-
+    /**
+     * @return returns a map of method names to Method objects.
+     */
     Map<String, Method> methods();
 }

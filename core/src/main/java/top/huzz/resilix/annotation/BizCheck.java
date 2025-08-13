@@ -44,7 +44,7 @@ import java.lang.annotation.*;
  *               value = "minimum <= maximum",
  *               message = "Minimum must be less than or equal to maximum"),
  *     &#64;BizCheck(when = "basicFieldType == BasicFieldType.STRING",
- *               value = "#name.length() > 0",
+ *               value = "name.length() > 0",
  *               message = "Name is required for string type")
  * })
  * public class CreateBizFieldTypeRequest {

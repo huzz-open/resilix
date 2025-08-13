@@ -1,6 +1,9 @@
 package top.huzz.resilix.validation;
 
-import jakarta.validation.*;
+import jakarta.validation.ConstraintValidator;
+import jakarta.validation.ConstraintValidatorContext;
+import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.Expression;
@@ -8,12 +11,10 @@ import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
 import top.huzz.resilix.annotation.BizCheck;
+import top.huzz.resilix.evaluation.ReducibleMethodProvider;
 import top.huzz.resilix.util.ApplicationContextUtils;
 
-import java.util.Collections;
-import java.util.LinkedHashSet;
-import java.util.Set;
-import java.util.function.Consumer;
+import java.util.List;
 
 /**
  * @author huzz
@@ -23,7 +24,7 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
 
     private static final SpelExpressionParser PARSER = new SpelExpressionParser();
     private static volatile BeanResolver beanResolver;
-    private static volatile Validator validator;
+    private static volatile List<ReducibleMethodProvider> reducibleMethodProviders;
 
     private Expression whenExpr;
     private boolean alwaysTrue;
@@ -40,25 +41,19 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
         this.valueExpr = PARSER.parseExpression(constraintAnnotation.value());
 
         initBeanResolver();
-        initValidator();
+        initReducibleMethodProviders();
     }
 
     @Override
     public boolean isValid(Object input, ConstraintValidatorContext context) {
-        StandardEvaluationContext ctx = new StandardEvaluationContext(input);
-        StandardTypeLocator typeLocator = new StandardTypeLocator();
-        ctx.setTypeLocator(typeLocator);
-        ctx.setBeanResolver(beanResolver);
+        StandardEvaluationContext ctx = buildEvaluationContext(input);
 
         if (!needToCheck(ctx)) {
             return true;
         }
-        try {
-            ctx.registerFunction("__VALID",
-                    BizCheckConstraint.class.getDeclaredMethod("valid", Object.class));
-        } catch (Exception e) {
-            throw new RuntimeException("Register __VALID failed", e);
-        }
+
+        registerFunctions(ctx);
+
         try {
             Object result = valueExpr.getValue(ctx);
             return isValid(result);
@@ -89,58 +84,18 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
         }
     }
 
+    private StandardEvaluationContext buildEvaluationContext(Object input) {
+        StandardEvaluationContext ctx = new StandardEvaluationContext(input);
+        StandardTypeLocator typeLocator = new StandardTypeLocator();
+        ctx.setTypeLocator(typeLocator);
+        ctx.setBeanResolver(beanResolver);
+        return ctx;
+    }
 
-    private static void valid(Object any) {
-        if (any == null) {
-            throw new ConstraintViolationException("Object to validate cannot be null", java.util.Collections.emptySet());
-        }
-        Validator v = validator;
-
-        Set<ConstraintViolation<Object>> result = new LinkedHashSet<>();
-
-        Consumer<Object> validateOne = o -> {
-            if (o == null) return;
-            Set<ConstraintViolation<Object>> vs = v.validate(o);
-            result.addAll(vs);
-        };
-
-        if (any instanceof Iterable<?> it) {
-            int i = 0;
-            for (Object e : it) {
-                Set<ConstraintViolation<Object>> vs = v.validate(e);
-                result.addAll(vs);
-                i++;
-            }
-            if (i == 0) {
-                throw new ConstraintViolationException("Iterable to validate cannot be empty", Collections.emptySet());
-            }
-        } else if (any.getClass().isArray()) {
-            int n = java.lang.reflect.Array.getLength(any);
-            if (n == 0) {
-                throw new ConstraintViolationException("Array to validate cannot be empty", Collections.emptySet());
-            }
-            for (int i = 0; i < n; i++) {
-                Object e = java.lang.reflect.Array.get(any, i);
-                Set<ConstraintViolation<Object>> vs = v.validate(e);
-                result.addAll(vs);
-            }
-        } else if (any instanceof java.util.Optional<?> opt) {
-            opt.ifPresent(validateOne);
-        } else if (any instanceof java.util.Map<?, ?> m) {
-            if (m.isEmpty()) {
-                throw new ConstraintViolationException("Map to validate cannot be empty", Collections.emptySet());
-            }
-            for (var en : m.entrySet()) {
-                Set<ConstraintViolation<Object>> vs = v.validate(en.getValue());
-                result.addAll(vs);
-            }
-        } else {
-            validateOne.accept(any);
-        }
-
-        if (!result.isEmpty()) {
-            throw new ConstraintViolationException(result);
-        }
+    private void registerFunctions(StandardEvaluationContext ctx) {
+        reducibleMethodProviders.stream().map(ReducibleMethodProvider::methods).forEach(methods ->
+                methods.forEach(ctx::registerFunction)
+        );
     }
 
     private static boolean isValid(Object result) {
@@ -170,11 +125,11 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
         }
     }
 
-    private static void initValidator() {
-        if (validator == null) {
+    private static void initReducibleMethodProviders() {
+        if (reducibleMethodProviders == null) {
             synchronized (BizCheckConstraint.class) {
-                if (validator == null) {
-                    validator = ApplicationContextUtils.getBean(Validator.class);
+                if (reducibleMethodProviders == null) {
+                    reducibleMethodProviders = ApplicationContextUtils.listBean(ReducibleMethodProvider.class);
                 }
             }
         }
