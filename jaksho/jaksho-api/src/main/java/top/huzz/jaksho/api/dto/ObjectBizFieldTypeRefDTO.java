@@ -18,5 +18,5 @@ public class ObjectBizFieldTypeRefDTO {
     @NotNull
     private Integer parentId;
     @NotNull
-    private Integer order;
+    private Integer sortOrder;
 }

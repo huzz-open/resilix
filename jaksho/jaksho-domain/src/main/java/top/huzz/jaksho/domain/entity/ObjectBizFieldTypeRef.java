@@ -58,10 +58,10 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
     private Integer parentId;
 
     /**
-     * 排序，值越小越靠前
+     * 在同一层级内的排序序号，值越小越靠前，从0开始
      */
-    @TableField("order")
-    private Integer order;
+    @TableField("sort_order")
+    private Integer sortOrder;
 
     /**
      * 创建时间
@@ -89,7 +89,7 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
 
     public static final String PARENT_ID = "parent_id";
 
-    public static final String ORDER = "order";
+    public static final String SORT_ORDER = "sort_order";
 
     public static final String CREATE_TIME = "create_time";
 

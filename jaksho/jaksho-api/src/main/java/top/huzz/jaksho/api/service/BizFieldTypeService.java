@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
 import org.hibernate.validator.constraints.Length;
+import top.huzz.jaksho.api.CascadedRequestProvider;
 import top.huzz.jaksho.api.dto.ObjectBizFieldTypeRefDTO;
 import top.huzz.jaksho.common.constant.BasicFieldType;
 import top.huzz.jaksho.common.constant.CollectionType;
@@ -29,7 +30,7 @@ public interface BizFieldTypeService {
     @BizCheck.List(
             @BizCheck(when = "basicFieldType == BasicFieldType.OBJECT", value = "#__VALID(objectBizFieldTypeRefDTOList)")
     )
-    class CreateBizFieldTypeRequest {
+    class CreateBizFieldTypeRequest implements CascadedRequestProvider<ObjectBizFieldTypeRefDTO> {
         @NotNull
         @Length(min = 1, max = 100)
         private String name;
@@ -48,7 +49,10 @@ public interface BizFieldTypeService {
         private Integer maximum;
 
         private List<ObjectBizFieldTypeRefDTO> objectBizFieldTypeRefDTOList;
+
+        @Override
+        public List<ObjectBizFieldTypeRefDTO> cascadedRequests() {
+            return objectBizFieldTypeRefDTOList;
+        }
     }
-
-
 }

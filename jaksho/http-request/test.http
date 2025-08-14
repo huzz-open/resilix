@@ -4,6 +4,11 @@ POST {{endpoint}}/sr/biz-field-type
     "name": "password",
     "collectionType" : "NONE",
     "basicFieldType": "object",
-    "objectBizFieldTypeRefDTOList": [{}],
+    "objectBizFieldTypeRefDTOList": [{
+        "bizFieldTypeId": 1,
+        "refId": 2,
+        "parentId": 0,
+        "sortOrder": 1
+    }],
     "bcTest": "hello"
 }

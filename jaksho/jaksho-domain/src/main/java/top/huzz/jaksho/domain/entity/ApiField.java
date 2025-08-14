@@ -83,7 +83,7 @@ public class ApiField extends BasicProperties implements Serializable {
     private String description;
 
     /**
-     * 在同一field_type内的排序序号
+     * 在同一field_type内的排序序号，值越小越靠前，从0开始
      */
     @TableField("sort_order")
     private Integer sortOrder;

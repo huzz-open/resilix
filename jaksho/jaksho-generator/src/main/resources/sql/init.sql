@@ -65,7 +65,7 @@ CREATE TABLE IF NOT EXISTS `sr_object_biz_field_type_ref`
     `biz_field_type_id` int(11)                    NOT NULL COMMENT '该ref所属的业务字段类型数据库主键id（sr_biz_field_type数据库主键id）',
     `ref_id`            int(11)  DEFAULT 0         NOT NULL COMMENT '引用的基础字段id（sr_biz_field_type数据库主键id）',
     `parent_id`         int(11)  DEFAULT 0         NOT NULL COMMENT '父级id（sr_object_biz_field_type_ref数据库主键），0表示没有父级，也就是说该ref的字段是顶级字段，否则表示该ref的字段是子级字段',
-    `order`             int(11)  DEFAULT 0         NOT NULL COMMENT '排序，值越小越靠前',
+    `sort_order`        int(11)  DEFAULT 0         NOT NULL COMMENT '在同一层级内的排序序号，值越小越靠前，从0开始',
     `create_time`       datetime DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`       datetime DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
     `workspace_id`      int(11)  DEFAULT 0         NOT NULL COMMENT '工作空间数据库主键id',
@@ -103,7 +103,7 @@ CREATE TABLE IF NOT EXISTS sr_api_field
 
     `is_required`   tinyint      DEFAULT 0         NOT NULL COMMENT '是否必填：0-否，1-是',
     `description`   varchar(255) DEFAULT ''        NOT NULL COMMENT '字段说明',
-    `sort_order`    int(11)      DEFAULT 0         NOT NULL COMMENT '在同一field_type内的排序序号',
+    `sort_order`    int(11)      DEFAULT 0         NOT NULL COMMENT '在同一field_type内的排序序号，值越小越靠前，从0开始',
     `workspace_id`  int(11)                        NOT NULL COMMENT '工作空间ID',
     `create_time`   datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`   datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
