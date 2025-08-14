@@ -27,9 +27,6 @@ public interface BizFieldTypeService {
     @Getter
     @Setter
     @BizCheck.List(
-            // 如果 basicFieldType 是 OBJECT，则校验objectBizFieldTypeRefDTOList字段
-            // 这里有几个特性：
-            // 1. 这里使用特殊标识`__VALID`，表示对 objectBizFieldTypeRefDTOList字段进行校验，具体如何校验，得看 ObjectBizFieldTypeRefDTO 的定义
             @BizCheck(when = "basicFieldType == BasicFieldType.OBJECT", value = "#__VALID(objectBizFieldTypeRefDTOList)")
     )
     class CreateBizFieldTypeRequest {
@@ -51,9 +48,6 @@ public interface BizFieldTypeService {
         private Integer maximum;
 
         private List<ObjectBizFieldTypeRefDTO> objectBizFieldTypeRefDTOList;
-
-        @BizCheck(value = "#this.length() > 0")
-        private String bcTest;
     }
 
 

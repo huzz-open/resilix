@@ -18,14 +18,14 @@ import java.util.Objects;
  * @since 1.0.2
  */
 @Component
-public class TransformRunHandler<R, T extends DomainDescription> extends PredictableRunHandler<CreateRunContext<R, T>> {
+public class TransformRunHandler<R, T extends DomainDescription, C extends DomainDescription> extends PredictableRunHandler<CreateRunContext<R, T, C>> {
 
-    protected TransformRunHandler(List<HandlerRunPredicate<CreateRunContext<R, T>>> handlerRunPredicates) {
+    protected TransformRunHandler(List<HandlerRunPredicate<CreateRunContext<R, T, C>>> handlerRunPredicates) {
         super(handlerRunPredicates);
     }
 
     @Override
-    public void handle(CreateRunContext<R, T> context) throws Exception {
+    public void handle(CreateRunContext<R, T, C> context) throws Exception {
         Object createRequest = context.getCreateRequest();
         Objects.requireNonNull(createRequest);
 

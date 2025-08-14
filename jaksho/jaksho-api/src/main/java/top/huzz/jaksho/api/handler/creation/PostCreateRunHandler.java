@@ -16,14 +16,14 @@ import java.util.List;
  * @since 1.0.2
  */
 @Component
-public class PostCreateRunHandler<R, T extends DomainDescription> extends PredictableRunHandler<CreateRunContext<R, T>> {
+public class PostCreateRunHandler<R, T extends DomainDescription, C extends DomainDescription> extends PredictableRunHandler<CreateRunContext<R, T, C>> {
 
-    protected PostCreateRunHandler(List<HandlerRunPredicate<CreateRunContext<R, T>>> handlerRunPredicates) {
+    protected PostCreateRunHandler(List<HandlerRunPredicate<CreateRunContext<R, T, C>>> handlerRunPredicates) {
         super(handlerRunPredicates);
     }
 
     @Override
-    public void handle(CreateRunContext<R, T> context) throws Exception {
+    public void handle(CreateRunContext<R, T, C> context) throws Exception {
 
     }
 

@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  */
 @Getter
 @Setter
-public class CreateRunContext<R, T extends DomainDescription> extends SimpleRunContext {
+public class CreateRunContext<R, T extends DomainDescription, C extends DomainDescription> extends SimpleRunContext {
     /**
      * 被创建后分配的ID
      */
@@ -36,18 +36,25 @@ public class CreateRunContext<R, T extends DomainDescription> extends SimpleRunC
     /**
      * 被创建的对象的级联对象。有一些场景是在创建对象时需要同时创建一些级联对象，在数据库里面其实就是以外键或关联字段的形式存在的。
      */
-    protected final List<T> cascadedCreatedObjects = new ArrayList<>();
+    protected final List<C> cascadedCreatedObjects = new ArrayList<>();
+    protected final Supplier<C> cascadedCreatedObjectSupplier;
 
-    public CreateRunContext<R, T> addCascadedCreatedObject(T cascadedCreatedObject) {
+    public CreateRunContext<R, T, C> addCascadedCreatedObject(C cascadedCreatedObject) {
         this.cascadedCreatedObjects.add(cascadedCreatedObject);
         return this;
     }
 
-    public CreateRunContext(R createRequest, Supplier<T> createdObjectSupplier) {
-        this(createRequest, null, createdObjectSupplier.get());
+    public CreateRunContext(R createRequest, Supplier<T> createdObjectSupplier, Supplier<C> cascadedCreatedObjectSupplier) {
+        this(createRequest, null, createdObjectSupplier.get(), cascadedCreatedObjectSupplier);
     }
 
-    protected CreateRunContext(R createRequest, @Nullable Class<T> createdClass, @Nullable T createdObject) {
+    public CreateRunContext(R createRequest, Supplier<T> createdObjectSupplier) {
+        this(createRequest, null, createdObjectSupplier.get(), null);
+    }
+
+    protected CreateRunContext(R createRequest,
+                               @Nullable Class<T> createdClass, @Nullable T createdObject,
+                               @Nullable Supplier<C> cascadedCreatedObjectSupplier) {
         if (createdClass == null && createdObject == null) {
             // 不能同时为空
             throw new IllegalArgumentException("createdClass and createdObject cannot both be null");
@@ -58,6 +65,7 @@ public class CreateRunContext<R, T extends DomainDescription> extends SimpleRunC
 
         this.createRequest = createRequest;
         this.createdObject = createdObject;
+        this.cascadedCreatedObjectSupplier = cascadedCreatedObjectSupplier;
     }
 
 }

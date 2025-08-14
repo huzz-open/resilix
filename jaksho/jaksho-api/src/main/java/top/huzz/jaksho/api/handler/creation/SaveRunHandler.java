@@ -19,14 +19,14 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class SaveRunHandler<R, T extends DomainDescription> extends PredictableRunHandler<CreateRunContext<R, T>> {
+public class SaveRunHandler<R, T extends DomainDescription, C extends DomainDescription> extends PredictableRunHandler<CreateRunContext<R, T, C>> {
 
-    protected SaveRunHandler(List<HandlerRunPredicate<CreateRunContext<R, T>>> handlerRunPredicates) {
+    protected SaveRunHandler(List<HandlerRunPredicate<CreateRunContext<R, T, C>>> handlerRunPredicates) {
         super(handlerRunPredicates);
     }
 
     @Override
-    public void handle(CreateRunContext<R, T> context) throws Exception {
+    public void handle(CreateRunContext<R, T, C> context) throws Exception {
         int id = SaveHelper.save(context.getCreatedObject(), context.getCascadedCreatedObjects());
         context.setId(id);
     }
