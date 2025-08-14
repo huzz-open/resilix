@@ -6,8 +6,8 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import top.huzz.resilix.annotation.BizCheckFunction;
 import top.huzz.resilix.core.*;
-import top.huzz.resilix.evaluation.DefaultAnnotationReducibleMethodProvider;
-import top.huzz.resilix.evaluation.ReducibleMethodProvider;
+import top.huzz.resilix.validation.DefaultAnnotationReducibleMethodProvider;
+import top.huzz.resilix.validation.ReducibleMethodProvider;
 import top.huzz.resilix.handler.RunHandler;
 import top.huzz.resilix.util.ApplicationContextUtils;
 

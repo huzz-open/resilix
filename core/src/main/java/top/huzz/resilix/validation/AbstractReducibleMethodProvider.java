@@ -1,4 +1,4 @@
-package top.huzz.resilix.evaluation;
+package top.huzz.resilix.validation;
 
 import lombok.extern.slf4j.Slf4j;
 

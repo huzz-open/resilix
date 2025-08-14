@@ -1,4 +1,4 @@
-package top.huzz.resilix.evaluation;
+package top.huzz.resilix.validation;
 
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
