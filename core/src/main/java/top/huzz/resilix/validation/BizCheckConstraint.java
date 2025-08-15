@@ -57,30 +57,34 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
             Object result = valueExpr.getValue(ctx);
             return isValid(result);
         } catch (Exception e) {
-            if (e.getCause() != null && e.getCause() instanceof ConstraintViolationException cve) {
-                // 把违例挂回到当前约束
-                context.disableDefaultConstraintViolation();
-                if (cve.getConstraintViolations() != null && !cve.getConstraintViolations().isEmpty()) {
-                    for (ConstraintViolation<?> cv : cve.getConstraintViolations()) {
-                        String msg = (cv.getPropertyPath() != null && !cv.getPropertyPath().toString().isEmpty())
-                                ? cv.getPropertyPath() + " " + cv.getMessage()
-                                : cv.getMessage();
-                        context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
-                    }
-                } else {
-                    // 只有消息没有集合时
-                    context.buildConstraintViolationWithTemplate(
-                                    e.getMessage() != null ? e.getMessage() : "Validation failed")
-                            .addConstraintViolation();
+            return handleException(context, e);
+        }
+    }
+
+    private boolean handleException(ConstraintValidatorContext context, Exception e) {
+        if (e.getCause() != null && e.getCause() instanceof ConstraintViolationException cve) {
+            // 把违例挂回到当前约束
+            context.disableDefaultConstraintViolation();
+            if (cve.getConstraintViolations() != null && !cve.getConstraintViolations().isEmpty()) {
+                for (ConstraintViolation<?> cv : cve.getConstraintViolations()) {
+                    String msg = (cv.getPropertyPath() != null && !cv.getPropertyPath().toString().isEmpty())
+                            ? cv.getPropertyPath() + " " + cv.getMessage()
+                            : cv.getMessage();
+                    context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
                 }
-                return false;
+            } else {
+                // 只有消息没有集合时
+                context.buildConstraintViolationWithTemplate(
+                                e.getMessage() != null ? e.getMessage() : "Validation failed")
+                        .addConstraintViolation();
             }
+        } else {
             // 任何其它异常也不要冒出去
             context.disableDefaultConstraintViolation();
             String msg = (e.getMessage() != null) ? e.getMessage() : e.getClass().getSimpleName();
             context.buildConstraintViolationWithTemplate("BizCheck error: " + msg).addConstraintViolation();
-            return false;
         }
+        return false;
     }
 
     private StandardEvaluationContext buildEvaluationContext(Object input) {
