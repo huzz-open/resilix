@@ -9,7 +9,7 @@ import top.huzz.jaksho.api.CascadedRequestProvider;
 import top.huzz.jaksho.api.dto.ObjectBizFieldTypeRefDTO;
 import top.huzz.jaksho.common.constant.BasicFieldType;
 import top.huzz.jaksho.common.constant.CollectionType;
-import top.huzz.resilix.annotation.BizCheck;
+import top.huzz.resilix.validation.annotation.BizCheck;
 
 import java.util.List;
 
@@ -33,15 +33,18 @@ public interface BizFieldTypeService {
     class CreateBizFieldTypeRequest implements CascadedRequestProvider<ObjectBizFieldTypeRefDTO> {
         @NotNull
         @Length(min = 1, max = 100)
+        @BizCheck("#__UNIQUE")
         private String name;
 
         @Length(max = 255)
         private String description;
 
         @NotNull
+        @BizCheck("__UNIQUE")
         private CollectionType collectionType;
 
         @NotNull
+        @BizCheck("#__UNIQUE(#this)")
         private BasicFieldType basicFieldType;
 
         private Integer minimum;

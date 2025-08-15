@@ -1,4 +1,4 @@
-package top.huzz.resilix.annotation;
+package top.huzz.resilix.validation.annotation;
 
 
 import java.lang.annotation.ElementType;

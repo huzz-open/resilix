@@ -10,10 +10,12 @@ import org.springframework.expression.Expression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
-import top.huzz.resilix.annotation.BizCheck;
 import top.huzz.resilix.util.ApplicationContextUtils;
+import top.huzz.resilix.validation.annotation.BizCheck;
 
+import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author huzz
@@ -23,24 +25,36 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
 
     private static final SpelExpressionParser PARSER = new SpelExpressionParser();
     private static volatile BeanResolver beanResolver;
-    private static volatile List<ReducibleMethodProvider> reducibleMethodProviders;
+    private static volatile List<ExpressionConverter> expressionConverters;
 
     private Expression whenExpr;
     private boolean alwaysTrue;
     private Expression valueExpr;
+    private BizCheck bizCheck;
 
     @Override
     public void initialize(BizCheck constraintAnnotation) {
+        this.bizCheck = constraintAnnotation;
+        initBeanResolver();
+        initExpressionConverters();
+
+
         String whenExprStr = constraintAnnotation.when();
         if (BizCheck.ALWAYS_RUN_EXPR.equals(whenExprStr)) {
             this.alwaysTrue = true;
         } else {
-            this.whenExpr = PARSER.parseExpression(whenExprStr);
+            this.whenExpr = PARSER.parseExpression(beforeParseExpression(whenExprStr));
         }
-        this.valueExpr = PARSER.parseExpression(constraintAnnotation.value());
+        this.valueExpr = PARSER.parseExpression(beforeParseExpression(constraintAnnotation.value()));
+    }
 
-        initBeanResolver();
-        initReducibleMethodProviders();
+    private String beforeParseExpression(String expr) {
+        for (ExpressionConverter expressionConverter : expressionConverters) {
+            if (expressionConverter != null) {
+                expr = expressionConverter.convert(expr, bizCheck);
+            }
+        }
+        return expr;
     }
 
     @Override
@@ -96,9 +110,8 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
     }
 
     private void registerFunctions(StandardEvaluationContext ctx) {
-        reducibleMethodProviders.stream().map(ReducibleMethodProvider::methods).forEach(methods ->
-                methods.forEach(ctx::registerFunction)
-        );
+        Map<String, Method> functions = Validations.getFunctions();
+        functions.forEach(ctx::registerFunction);
     }
 
     private static boolean isValid(Object result) {
@@ -128,11 +141,11 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
         }
     }
 
-    private static void initReducibleMethodProviders() {
-        if (reducibleMethodProviders == null) {
+    private static void initExpressionConverters() {
+        if (expressionConverters == null) {
             synchronized (BizCheckConstraint.class) {
-                if (reducibleMethodProviders == null) {
-                    reducibleMethodProviders = ApplicationContextUtils.listBean(ReducibleMethodProvider.class);
+                if (expressionConverters == null) {
+                    expressionConverters = ApplicationContextUtils.listBean(ExpressionConverter.class);
                 }
             }
         }

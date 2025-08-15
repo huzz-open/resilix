@@ -1,15 +1,17 @@
 package top.huzz.resilix.spring.boot.autoconfigure;
 
+import jakarta.validation.Validation;
+import jakarta.validation.Validator;
+import jakarta.validation.ValidatorFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import top.huzz.resilix.annotation.BizCheckFunction;
 import top.huzz.resilix.core.*;
-import top.huzz.resilix.validation.DefaultAnnotationReducibleMethodProvider;
-import top.huzz.resilix.validation.ReducibleMethodProvider;
 import top.huzz.resilix.handler.RunHandler;
 import top.huzz.resilix.util.ApplicationContextUtils;
+import top.huzz.resilix.validation.*;
+import top.huzz.resilix.validation.annotation.BizCheckFunction;
 
 import java.util.List;
 
@@ -56,5 +58,25 @@ public class ResilixAutoConfiguration {
     @ConditionalOnMissingBean
     public ReducibleMethodProvider reducibleMethodProvider() {
         return new DefaultAnnotationReducibleMethodProvider(BizCheckFunction.class);
+    }
+
+    @Bean(name = "resilixValidations")
+    @ConditionalOnMissingBean
+    public Validations validations(List<ReducibleMethodProvider> reducibleMethodProviders, Validator validator) {
+        return new Validations(reducibleMethodProviders, validator);
+    }
+
+    @Bean(name = "resilixExpressionConverter")
+    @ConditionalOnMissingBean
+    public ExpressionConverter expressionConverter() {
+        return new ShortFunctionCallConverter();
+    }
+
+    @Bean(name = "resilixvalidator")
+    @ConditionalOnMissingBean(Validator.class)
+    public Validator validator() {
+        try (ValidatorFactory factory = Validation.buildDefaultValidatorFactory()) {
+            return factory.getValidator();
+        }
     }
 }

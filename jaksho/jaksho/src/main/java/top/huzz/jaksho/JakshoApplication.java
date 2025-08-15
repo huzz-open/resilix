@@ -10,7 +10,7 @@ import top.huzz.jaksho.api.autoconfigure.BucketAutoconfigure;
  * @author chenji
  * @since 1.0.2
  */
-@SpringBootApplication
+@SpringBootApplication(scanBasePackages = "top.huzz")
 @EnableDubbo
 @Import(BucketAutoconfigure.class)
 public class JakshoApplication {

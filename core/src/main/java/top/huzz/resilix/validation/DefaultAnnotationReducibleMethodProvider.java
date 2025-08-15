@@ -2,7 +2,7 @@ package top.huzz.resilix.validation;
 
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
-import top.huzz.resilix.annotation.BizCheckFunction;
+import top.huzz.resilix.validation.annotation.BizCheckFunction;
 
 import java.lang.reflect.Method;
 import java.util.Set;
