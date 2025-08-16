@@ -19,57 +19,61 @@ import java.util.Map;
  */
 public class AbleCacheRegistryConfiguration {
 
-    private static final String MAPPER_SUFFIX = "Mapper";
+	private static final String MAPPER_SUFFIX = "Mapper";
 
-    @Bean
-    @ConditionalOnMissingBean
-    public DomainMapperTrans<ExtBaseMapper<?>> domainMapperTrans() {
-        return domainClass -> {
-            String mapperClassName = domainClass.getName().replace("entity", "mapper") + MAPPER_SUFFIX;
-            return ReflectionUtils.forName(mapperClassName);
-        };
-    }
+	@Bean
+	@ConditionalOnMissingBean
+	public DomainMapperTrans<ExtBaseMapper<?>> domainMapperTrans() {
+		return domainClass -> {
+			String mapperClassName = domainClass.getName().replace("entity", "mapper") + MAPPER_SUFFIX;
+			return ReflectionUtils.forName(mapperClassName);
+		};
+	}
 
-    @Bean
-    @ConditionalOnMissingBean
-    public SaverBuilder<? extends DomainDescription, ?> domainBasedSaverProvider(ApplicationContext applicationContext, DomainMapperTrans<ExtBaseMapper<?>> domainMapperTrans) {
-        DomainBasedSaverProvider<? extends DomainDescription, ?> domainBasedSaverProvider = new DomainBasedSaverProvider<>(new HashMap<>());
-        Map<String, ? extends Saver<? extends DomainDescription, ?>> saverMap = domainBasedSaverProvider.getSaverMap();
+	@Bean
+	@ConditionalOnMissingBean
+	public SaverBuilder<? extends DomainDescription, ?> domainBasedSaverProvider(ApplicationContext applicationContext, DomainMapperTrans<ExtBaseMapper<?>> domainMapperTrans) {
+		DomainBasedSaverProvider<? extends DomainDescription, ?> domainBasedSaverProvider = new DomainBasedSaverProvider<>(new HashMap<>());
+		Map<String, ? extends Saver<? extends DomainDescription, ?>> saverMap = domainBasedSaverProvider.getSaverMap();
 
-        CacheInitializer ableCacheInitializer = new DomainDescriptionAbleCacheInitializer(
-                applicationContext,
-                domainMapperTrans,
-                saverMap,
-                DomainDescription.class,
-                "top.huzz.jaksho.domain"
-        );
-        ableCacheInitializer.init();
+		DomainDescriptionAbleCacheInitializer ableCacheInitializer = new DomainDescriptionAbleCacheInitializer(
+				applicationContext,
+				domainMapperTrans,
+				saverMap,
+				DomainDescription.class,
+				"top.huzz.jaksho.domain"
+		);
+		ableCacheInitializer.init();
 
-        return domainBasedSaverProvider;
-    }
+		DomainMapperCache.init(ableCacheInitializer.mapperMap);
+
+		return domainBasedSaverProvider;
+	}
 
 
-    static class DomainDescriptionAbleCacheInitializer extends AbleCacheInitializer<DomainDescription> {
+	static class DomainDescriptionAbleCacheInitializer extends AbleCacheInitializer<DomainDescription> {
+		private final Map<String, ExtBaseMapper<?>> mapperMap = new HashMap<>();
+		private final ApplicationContext applicationContext;
+		private final DomainMapperTrans<ExtBaseMapper<?>> domainMapperTrans;
 
-        private final ApplicationContext applicationContext;
-        private final DomainMapperTrans<ExtBaseMapper<?>> domainMapperTrans;
+		public DomainDescriptionAbleCacheInitializer(ApplicationContext applicationContext, DomainMapperTrans<ExtBaseMapper<?>> domainMapperTrans,
+													 Map<String, ? extends Saver<? extends DomainDescription, ?>> saverMap, Class<DomainDescription> ableClass, String... packagesToScan) {
+			super(saverMap, ableClass, packagesToScan);
+			this.applicationContext = applicationContext;
+			this.domainMapperTrans = domainMapperTrans;
+		}
 
-        public DomainDescriptionAbleCacheInitializer(ApplicationContext applicationContext, DomainMapperTrans<ExtBaseMapper<?>> domainMapperTrans,
-                                                     Map<String, ? extends Saver<? extends DomainDescription, ?>> saverMap, Class<DomainDescription> ableClass, String... packagesToScan) {
-            super(saverMap, ableClass, packagesToScan);
-            this.applicationContext = applicationContext;
-            this.domainMapperTrans = domainMapperTrans;
-        }
+		@Override
+		protected Object buildKey(DomainDescription instanceAble) {
+			return instanceAble.name();
+		}
 
-        @Override
-        protected Object buildKey(Class<DomainDescription> instanceAbleClass) {
-            return ReflectionUtils.newInstance(instanceAbleClass).name();
-        }
-
-        @Override
-        protected Object buildValue(Class<DomainDescription> instanceAbleClass) {
-            Class<ExtBaseMapper<?>> baseMapperClass = domainMapperTrans.trans(instanceAbleClass);
-            return applicationContext.getBean(baseMapperClass);
-        }
-    }
+		@Override
+		protected Object buildValue(DomainDescription instanceAble) {
+			Class<ExtBaseMapper<?>> baseMapperClass = domainMapperTrans.trans(instanceAble.getClass());
+			ExtBaseMapper<?> extBaseMapper = applicationContext.getBean(baseMapperClass);
+			mapperMap.put(instanceAble.name(), extBaseMapper);
+			return extBaseMapper;
+		}
+	}
 }

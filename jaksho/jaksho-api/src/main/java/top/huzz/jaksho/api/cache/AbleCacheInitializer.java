@@ -2,6 +2,7 @@ package top.huzz.jaksho.api.cache;
 
 import io.github.classgraph.ClassInfo;
 import jakarta.annotation.Nonnull;
+import lombok.extern.slf4j.Slf4j;
 import top.huzz.jaksho.common.able.Able;
 import top.huzz.resilix.util.ClassUtils;
 import top.huzz.resilix.util.ReflectionUtils;
@@ -16,58 +17,60 @@ import java.util.Map;
  * @author huzz
  * @since 1.0.2
  */
+@Slf4j
 public abstract class AbleCacheInitializer<A extends Able> extends AbstractCacheInitializer {
-    private static final String[] BASE_PACKAGE = new String[]{"top.huzz"};
+	private static final String[] BASE_PACKAGE = new String[]{"top.huzz"};
 
-    protected final Class<A> ableClass;
-    protected final String[] packagesToScan;
+	protected final Class<A> ableClass;
+	protected final String[] packagesToScan;
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public AbleCacheInitializer(Map cache, Class<A> ableClass, final String... packagesToScan) {
-        super(cache);
-        this.ableClass = ableClass;
-        this.packagesToScan = (packagesToScan == null || packagesToScan.length == 0) ? BASE_PACKAGE : packagesToScan;
-    }
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public AbleCacheInitializer(Map cache, Class<A> ableClass, final String... packagesToScan) {
+		super(cache);
+		this.ableClass = ableClass;
+		this.packagesToScan = (packagesToScan == null || packagesToScan.length == 0) ? BASE_PACKAGE : packagesToScan;
+	}
 
-    @Nonnull
-    @Override
-    protected Map<Object, Object> findAll() {
-        Map<Object, Object> scanResult = new HashMap<>();
-        ClassUtils.doWithClassImpl(ableClass, classInfo -> {
-            if (filter(classInfo)) {
-                String name = classInfo.getName();
-                Class<A> instanceAbleClass = ReflectionUtils.forName(name);
-                scanResult.put(buildKey(instanceAbleClass), buildValue(instanceAbleClass));
-            }
-        }, packagesToScan);
-        return scanResult;
-    }
+	@Nonnull
+	@Override
+	protected Map<Object, Object> findAll() {
+		Map<Object, Object> scanResult = new HashMap<>();
+		ClassUtils.doWithClassImpl(ableClass, classInfo -> {
+			if (filter(classInfo)) {
+				String name = classInfo.getName();
+				Class<A> instanceAbleClass = ReflectionUtils.forName(name);
+				A instance = ReflectionUtils.newInstance(instanceAbleClass);
+				scanResult.put(buildKey(instance), buildValue(instance));
+			}
+		}, packagesToScan);
+		return scanResult;
+	}
 
-    /**
-     * 过滤类信息，排除掉抽象类、接口、注解以及匿名内部类等不需要的类
-     *
-     * @param classInfo 类信息
-     * @return true 如果类信息符合要求，false 如果类信息不符合要求
-     */
-    protected boolean filter(ClassInfo classInfo) {
-        return !(classInfo.isAbstract() || classInfo.isInterfaceOrAnnotation() || classInfo.isAnonymousInnerClass());
-    }
+	/**
+	 * 过滤类信息，排除掉抽象类、接口、注解以及匿名内部类等不需要的类
+	 *
+	 * @param classInfo 类信息
+	 * @return true 如果类信息符合要求，false 如果类信息不符合要求
+	 */
+	protected boolean filter(ClassInfo classInfo) {
+		return !(classInfo.isAbstract() || classInfo.isInterfaceOrAnnotation() || classInfo.isAnonymousInnerClass());
+	}
 
-    /**
-     * 构建缓存的键，默认使用类的Class对象作为键，子类可以重写此方法以实现自定义的键构建逻辑
-     *
-     * @param instanceAbleClass 能力类实例class
-     * @return 缓存键
-     */
-    protected Object buildKey(Class<A> instanceAbleClass) {
-        return instanceAbleClass;
-    }
+	/**
+	 * 构建缓存的键，默认使用类的Class对象作为键，子类可以重写此方法以实现自定义的键构建逻辑
+	 *
+	 * @param instance 能力类实例
+	 * @return 缓存键
+	 */
+	protected Object buildKey(A instance) {
+		return instance.getClass();
+	}
 
-    /**
-     * 构建缓存的值，子类需要实现具体的构建逻辑
-     *
-     * @param instanceAbleClass 能力类实例class
-     * @return 缓存值
-     */
-    protected abstract Object buildValue(Class<A> instanceAbleClass);
+	/**
+	 * 构建缓存的值，子类需要实现具体的构建逻辑
+	 *
+	 * @param instance 能力类实例
+	 * @return 缓存值
+	 */
+	protected abstract Object buildValue(A instance);
 }

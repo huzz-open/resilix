@@ -1,5 +1,6 @@
 package top.huzz.jaksho.service.impl;
 
+import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
