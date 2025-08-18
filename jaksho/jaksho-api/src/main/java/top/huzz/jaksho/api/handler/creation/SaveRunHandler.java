@@ -21,20 +21,20 @@ import java.util.List;
 @Slf4j
 public class SaveRunHandler<R, T extends DomainDescription, C extends DomainDescription> extends PredictableRunHandler<CreateRunContext<R, T, C>> {
 
-    protected SaveRunHandler(List<HandlerRunPredicate<CreateRunContext<R, T, C>>> handlerRunPredicates) {
-        super(handlerRunPredicates);
-    }
+	protected SaveRunHandler(List<HandlerRunPredicate<CreateRunContext<R, T, C>>> handlerRunPredicates) {
+		super(handlerRunPredicates);
+	}
 
-    @Override
-    public void handle(CreateRunContext<R, T, C> context) throws Exception {
-        int id = SaveHelper.save(context.getCreatedObject(), context.getCascadedCreatedObjects());
-        context.setId(id);
-    }
+	@Override
+	public void handle(CreateRunContext<R, T, C> context) throws Exception {
+		int id = SaveHelper.save(context.getCreatedObject(), context.getCascadedCreatedObjects(), context.getCascadedCreatedObjectIdSetter());
+		context.setId(id);
+	}
 
-    @Nonnull
-    @Override
-    public Phase phase() {
-        return CreatePhase.SAVE;
-    }
+	@Nonnull
+	@Override
+	public Phase phase() {
+		return CreatePhase.SAVE;
+	}
 
 }
