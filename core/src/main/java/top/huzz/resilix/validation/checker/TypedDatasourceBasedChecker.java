@@ -10,59 +10,67 @@ import java.util.Objects;
  * @since 1.0.2
  */
 public class TypedDatasourceBasedChecker extends AbstractDatasourceBasedChecker {
-    protected final DatasourceBasedCheckFunctionProvider datasourceBasedCheckFunctionProvider;
-    protected final Type type;
+	protected final DatasourceBasedCheckFunctionProvider datasourceBasedCheckFunctionProvider;
+	protected final Type type;
 
-    protected TypedDatasourceBasedChecker(DatasourceBasedCheckFunctionProvider datasourceBasedCheckFunctionProvider, Type type, String domainKey, @Nonnull String... fields) {
-        super(domainKey, fields);
-        Objects.requireNonNull(type);
-        Objects.requireNonNull(datasourceBasedCheckFunctionProvider);
-        this.datasourceBasedCheckFunctionProvider = datasourceBasedCheckFunctionProvider;
-        this.type = type;
-    }
+	protected TypedDatasourceBasedChecker(DatasourceBasedCheckFunctionProvider datasourceBasedCheckFunctionProvider, Type type, String domainKey, @Nonnull String... fields) {
+		super(domainKey, fields);
+		Objects.requireNonNull(type);
+		Objects.requireNonNull(datasourceBasedCheckFunctionProvider);
+		this.datasourceBasedCheckFunctionProvider = datasourceBasedCheckFunctionProvider;
+		this.type = type;
+	}
 
-    @Nonnull
-    @Override
-    public DatasourceBasedCheckFunction getCheckFunction() {
-        return datasourceBasedCheckFunctionProvider.getCheckFunction(type, domainKey, fields);
-    }
+	@Nonnull
+	@Override
+	public DatasourceBasedCheckFunction getCheckFunction() {
+		return datasourceBasedCheckFunctionProvider.getCheckFunction(type, domainKey, fields);
+	}
 
-    /**
-     * Interface representing the type of the checker.
-     */
-    public interface Type extends StringGroupable {
-        /**
-         * Returns the unique identifier for this checker type.
-         *
-         * @return the unique identifier
-         */
-        @Nonnull
-        String id();
+	/**
+	 * Interface representing the type of the checker.
+	 */
+	public interface Type extends StringGroupable {
+		/**
+		 * Returns the unique identifier for this checker type.
+		 *
+		 * @return the unique identifier
+		 */
+		@Nonnull
+		String id();
 
-        @Override
-        default String getGroupId() {
-            return id();
-        }
-    }
+		@Override
+		default String getGroupId() {
+			return id();
+		}
+	}
 
-    /**
-     * Enum representing built-in checker types.
-     */
-    public enum BuiltIn implements Type {
-        UNIQUE("__unique"),
+	/**
+	 * Enum representing built-in checker types.
+	 */
+	public enum BuiltIn implements Type {
+		/**
+		 * Check if unique
+		 */
+		UNIQUE("__unique"),
 
-        ;
+		/**
+		 * Check if exists
+		 */
+		EXIST("__exist"),
 
-        private final String id;
+		;
 
-        BuiltIn(String id) {
-            this.id = id;
-        }
+		private final String id;
 
-        @Nonnull
-        @Override
-        public String id() {
-            return id;
-        }
-    }
+		BuiltIn(String id) {
+			this.id = id;
+		}
+
+		@Nonnull
+		@Override
+		public String id() {
+			return id;
+		}
+	}
 }

@@ -14,6 +14,6 @@ public interface GroupedDatasourceBasedOperationDescription extends DatasourceBa
      */
     @Override
     default String getGroupId() {
-        return getDomainKey() + String.join(":", getFields());
+        return getDomainKey() + "|" +String.join(":", getFields());
     }
 }

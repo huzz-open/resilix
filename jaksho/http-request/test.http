@@ -1,12 +1,12 @@
 POST {{endpoint}}/sr/biz-field-type
 
 {
-    "name": "password2333",
+    "name": "pass",
     "collectionType" : "NONE",
-    "basicFieldType": "string",
+    "basicFieldType": "object",
     "objectBizFieldTypeRefDTOList": [{
         "bizFieldTypeId": 1,
-        "refId": 2,
+        "refId": 9,
         "parentId": 0,
         "sortOrder": 1
     }],
