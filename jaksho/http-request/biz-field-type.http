@@ -8,6 +8,5 @@ POST {{endpoint}}/sr/biz-field-type
         "refId": 1,
         "parentId": 0,
         "sortOrder": 1
-    }],
-    "bcTest": "hello"
+    }]
 }

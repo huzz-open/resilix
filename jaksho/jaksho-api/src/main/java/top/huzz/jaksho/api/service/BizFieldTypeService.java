@@ -31,7 +31,6 @@ public interface BizFieldTypeService {
 			@BizCheck(when = "basicFieldType == BasicFieldType.OBJECT", value = "#__VALID(objectBizFieldTypeRefDTOList)"),
 	})
 	class CreateBizFieldTypeRequest implements CascadedRequestProvider<ObjectBizFieldTypeRefDTO> {
-		@NotNull
 		@Length(min = 1, max = 100)
 		@BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.BizFieldType', #this)")
 		private String name;

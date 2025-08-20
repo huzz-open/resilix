@@ -8,6 +8,7 @@ import org.hibernate.validator.internal.engine.constraintvalidation.ConstraintVa
 import org.springframework.context.expression.BeanFactoryResolver;
 import org.springframework.expression.BeanResolver;
 import org.springframework.expression.Expression;
+import org.springframework.expression.PropertyAccessor;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
 import org.springframework.expression.spel.support.StandardTypeLocator;
@@ -15,6 +16,7 @@ import top.huzz.resilix.util.ApplicationContextUtils;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -118,6 +120,9 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
 		StandardTypeLocator typeLocator = new StandardTypeLocator();
 		ctx.setTypeLocator(typeLocator);
 		ctx.setBeanResolver(beanResolver);
+		ArrayList<PropertyAccessor> propertyAccessors = new ArrayList<>();
+		propertyAccessors.add(new FieldCapturingReflectivePropertyAccessor());
+		ctx.setPropertyAccessors(propertyAccessors);
 		return ctx;
 	}
 

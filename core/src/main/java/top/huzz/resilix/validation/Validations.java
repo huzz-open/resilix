@@ -6,6 +6,7 @@ import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import jakarta.validation.Validator;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import top.huzz.resilix.validation.annotation.BizCheckFunction;
@@ -219,7 +220,7 @@ public class Validations implements ApplicationRunner {
 		 *
 		 * @param type      the type of the checker
 		 * @param domainKey a key representing the domain in which to check uniqueness
-		 * @param fields    optional fields to specify which attributes to check for uniqueness, split by commas
+		 * @param fields    optional fields to specify which attributes to check, split by commas
 		 * @param any       the object or objects to check for uniqueness
 		 * @return true if the object is unique, false otherwise
 		 * @throws ConstraintViolationException if the domain key is null or blank, or if the object to check is null
@@ -229,21 +230,24 @@ public class Validations implements ApplicationRunner {
 				throw new ConstraintViolationException("Domain key cannot be null or blank", Collections.emptySet());
 			}
 			if (any == null) {
-				throw new ConstraintViolationException("Object to check uniqueness cannot be null", Collections.emptySet());
+				throw new ConstraintViolationException("Object to check cannot be null", Collections.emptySet());
 			}
 
 			ValidationContext validationContext = getValidationContext();
 			Objects.requireNonNull(validationContext, "Validation context must not be null");
 
+			String[] useToCheckFields = null;
+			if (StringUtils.isNotBlank(fields)) {
+				useToCheckFields = fields.split(",");
+				if (useToCheckFields.length != any.length) {
+					throw new ConstraintViolationException("Number of fields does not match number of objects to check", Collections.emptySet());
+				}
+			}
 			validationContext.executeCustomValidation(
-					(constraintDescriptor, path) -> {
-						String[] fieldArr = new String[]{path.asString()};
-						if (fields != null) {
-							fieldArr = fields.split(",");
-						}
-						Checker checker = typedDatasourceBasedCheckerProvider.getChecker(type, domainKey, fieldArr);
+					(constraintDescriptor, fs, entityFields) -> {
+						Checker checker = typedDatasourceBasedCheckerProvider.getChecker(type, domainKey, fs);
 						checker.check(any);
-					});
+					}, useToCheckFields);
 			return true;
 		}
 	}

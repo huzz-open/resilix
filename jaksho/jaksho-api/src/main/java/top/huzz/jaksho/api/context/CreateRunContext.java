@@ -1,7 +1,7 @@
 package top.huzz.jaksho.api.context;
 
-import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
+import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import top.huzz.jaksho.common.able.DomainDescription;
@@ -16,6 +16,7 @@ import java.util.function.Supplier;
 /**
  * @param <R> 创建请求的对象类型
  * @param <T> 数据库实体对象
+ * @param <C> 级联创建的对象类型
  * @author chenji
  * @since 1.0.2
  */
@@ -49,7 +50,7 @@ public class CreateRunContext<R, T extends DomainDescription, C extends DomainDe
 	 * 级联创建对象的ID设置器
 	 * 用于在创建对象后设置级联创建对象的ID
 	 */
-	@Nonnull
+	@NotNull
 	protected BiConsumer<C, Integer> cascadedCreatedObjectIdSetter;
 
 
