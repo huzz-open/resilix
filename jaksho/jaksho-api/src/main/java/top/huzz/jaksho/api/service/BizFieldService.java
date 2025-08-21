@@ -1,6 +1,5 @@
 package top.huzz.jaksho.api.service;
 
-import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
@@ -22,7 +21,6 @@ public interface BizFieldService {
 	@Getter
 	@Setter
 	class CreateBizFieldRequest {
-		@NotNull
 		@Length(min = 1, max = 100)
 		@BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.BizField', #this)")
 		private String name;

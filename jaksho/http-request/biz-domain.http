@@ -1,0 +1,6 @@
+POST {{endpoint}}/sr/biz-domain
+
+{
+    "name": "user",
+    "description": "用户域对象"
+}
