@@ -91,21 +91,10 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
 
 	private boolean handleException(ConstraintValidatorContext context, Exception e) {
 		Throwable cause = e.getCause();
-		String message = cause.getMessage();
 		if (cause instanceof ConstraintViolationException cve) {
-			// 把违例挂回到当前约束
-			context.disableDefaultConstraintViolation();
-			if (cve.getConstraintViolations() != null && !cve.getConstraintViolations().isEmpty()) {
-				for (ConstraintViolation<?> cv : cve.getConstraintViolations()) {
-					String msg = (cv.getPropertyPath() != null && !cv.getPropertyPath().toString().isEmpty())
-							? cv.getPropertyPath() + " " + cv.getMessage()
-							: cv.getMessage();
-					context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
-				}
-			} else {
-				String errMsg = (message == null || message.isBlank()) ? "Validation failed" : message;
-				context.buildConstraintViolationWithTemplate(errMsg).addConstraintViolation();
-			}
+			handleException(context, cve);
+		} else if (e instanceof ConstraintViolationException cve) {
+			handleException(context, cve);
 		} else {
 			// 任何其它异常也不要冒出去
 			context.disableDefaultConstraintViolation();
@@ -113,6 +102,23 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
 			context.buildConstraintViolationWithTemplate("BizCheck error: " + msg).addConstraintViolation();
 		}
 		return false;
+	}
+
+	private void handleException(ConstraintValidatorContext context, ConstraintViolationException cve) {
+		String message = cve.getMessage();
+		// 把违例挂回到当前约束
+		context.disableDefaultConstraintViolation();
+		if (cve.getConstraintViolations() != null && !cve.getConstraintViolations().isEmpty()) {
+			for (ConstraintViolation<?> cv : cve.getConstraintViolations()) {
+				String msg = (cv.getPropertyPath() != null && !cv.getPropertyPath().toString().isEmpty())
+						? cv.getPropertyPath() + " " + cv.getMessage()
+						: cv.getMessage();
+				context.buildConstraintViolationWithTemplate(msg).addConstraintViolation();
+			}
+		} else {
+			String errMsg = (message == null || message.isBlank()) ? "Validation failed" : message;
+			context.buildConstraintViolationWithTemplate(errMsg).addConstraintViolation();
+		}
 	}
 
 	private StandardEvaluationContext buildEvaluationContext(Object input) {
