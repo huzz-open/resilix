@@ -20,7 +20,3 @@ logging:
   level:
     "org.apache.dubbo.rpc.protocol.tri": debug
     "org.apache.dubbo.remoting": debug
-
-mybatis-plus:
-  configuration:
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl

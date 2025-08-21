@@ -2,6 +2,6 @@ POST {{endpoint}}/sr/biz-field
 
 {
     "name": "password",
-    "bizFieldTypeId": 661,
-    "description": ""
+    "bizFieldTypeId": 1,
+    "description": "test"
 }
