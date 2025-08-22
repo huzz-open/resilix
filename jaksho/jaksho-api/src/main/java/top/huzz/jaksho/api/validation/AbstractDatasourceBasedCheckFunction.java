@@ -5,7 +5,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.validation.ConstraintViolationException;
 import top.huzz.jaksho.api.cache.DomainMapperCache;
-import top.huzz.jaksho.common.able.DomainDescription;
+import top.huzz.jaksho.common.entity.BasicProperties;
 import top.huzz.jaksho.common.mapper.ExtBaseMapper;
 import top.huzz.resilix.validation.ValidationContext;
 import top.huzz.resilix.validation.Validations;
@@ -24,7 +24,7 @@ import java.util.function.Supplier;
  * @author chenji
  * @since 1.0.0
  */
-public abstract class AbstractDatasourceBasedCheckFunction<T extends DomainDescription, W, R> implements DatasourceBasedChecker.DatasourceBasedCheckFunction {
+public abstract class AbstractDatasourceBasedCheckFunction<T extends BasicProperties, W, R> implements DatasourceBasedChecker.DatasourceBasedCheckFunction {
 
     private static final Map<String, ExtBaseMapper<?>> MAPPER_MAP = new HashMap<>();
 

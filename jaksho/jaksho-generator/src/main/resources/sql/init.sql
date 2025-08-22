@@ -7,7 +7,8 @@ CREATE TABLE IF NOT EXISTS `sr_biz_field`
     `create_time`       datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`       datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
     `workspace_id`      int(11)                        NOT NULL COMMENT '工作空间ID',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE uk_biz_field_name (`workspace_id`, `name`)
 ) COMMENT '业务字段';
 
 CREATE TABLE IF NOT EXISTS `sr_biz_domain`
@@ -18,7 +19,8 @@ CREATE TABLE IF NOT EXISTS `sr_biz_domain`
     `create_time`  datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`  datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
     `workspace_id` int(11)                        NOT NULL COMMENT '工作空间ID',
-    PRIMARY KEY (`id`)
+    PRIMARY KEY (`id`),
+    UNIQUE uk_biz_domain_name (`workspace_id`, `name`)
 ) COMMENT '业务领域';
 
 CREATE TABLE IF NOT EXISTS `sr_biz_field_domain`
@@ -31,7 +33,7 @@ CREATE TABLE IF NOT EXISTS `sr_biz_field_domain`
     `update_time`       datetime DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
     `workspace_id`      int(11)                    NOT NULL COMMENT '工作空间ID',
     PRIMARY KEY (`id`),
-    UNIQUE uk_biz_field_domain (`biz_field_id`, `biz_domain_id`, `biz_field_type_id`)
+    UNIQUE uk_biz_field_domain (`workspace_id`, `biz_field_id`, `biz_domain_id`, `biz_field_type_id`)
 ) COMMENT '业务字段领域';
 
 CREATE TABLE IF NOT EXISTS `sr_biz_field_type`

@@ -6,7 +6,7 @@ import jakarta.annotation.Nonnull;
 import jakarta.annotation.Nullable;
 import jakarta.validation.ConstraintViolationException;
 import org.springframework.stereotype.Component;
-import top.huzz.jaksho.common.able.DomainDescription;
+import top.huzz.jaksho.common.entity.BasicProperties;
 import top.huzz.jaksho.common.mapper.ExtBaseMapper;
 import top.huzz.resilix.validation.checker.TypedDatasourceBasedChecker;
 
@@ -19,7 +19,7 @@ import java.util.function.Supplier;
  * @since 1.0.2
  */
 @Component
-public class UniqueDatasourceBasedCheckFunctionProvider<T extends DomainDescription> extends TypedDatasourceBasedCheckFunction<T, QueryWrapper<T>, Boolean> {
+public class UniqueDatasourceBasedCheckFunctionProvider<T extends BasicProperties> extends TypedDatasourceBasedCheckFunction<T, QueryWrapper<T>, Boolean> {
     @Nullable
     @Override
     protected ConstraintViolationException buildException(Boolean checkResult, String domainKey, String[] fields, Object[] values) {

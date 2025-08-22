@@ -10,11 +10,18 @@ import top.huzz.resilix.core.StringGroupable;
  * @since 1.0.2
  */
 public interface Checker extends StringGroupable {
-	/**
-	 * Checks the validity of the provided values.
-	 *
-	 * @param values the values to check
-	 * @throws ConstraintViolationException if the values violate any constraints
-	 */
-	void check(Object... values) throws ConstraintViolationException;
+    /**
+     * Checks the validity of the provided values.
+     *
+     * @param values the values to check
+     * @throws ConstraintViolationException if the values violate any constraints
+     */
+    void check(Object... values) throws ConstraintViolationException;
+
+    /**
+     * Interface representing the type of the checker.
+     */
+    interface Type {
+
+    }
 }
