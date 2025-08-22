@@ -1,0 +1,7 @@
+POST {{endpoint}}/sr/biz-field-domain
+
+{
+    "bizFieldId": 1,
+    "bizDomainId": 2,
+    "bizFieldTypeId": 1
+}

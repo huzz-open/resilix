@@ -7,7 +7,7 @@ import org.hibernate.validator.constraints.Length;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
 /**
- * 业务字段类型服务接口
+ * 业务字段服务接口
  *
  * @author chenji
  * @since 1.0.2
