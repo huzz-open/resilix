@@ -1,9 +1,34 @@
 POST {{endpoint}}/sr/biz-field-type
 
 {
-    "name": "pass3",
+    "name": "Password",
     "collectionType" : "NONE",
-    "basicFieldType": "object",
+    "basicFieldType": "string",
+    "minimum": 6,
+    "maximum": 255
+}
+
+###
+POST {{endpoint}}/sr/biz-field-type
+
+{
+    "name": "PasswordEncrypted",
+    "description": "Encrypted password field",
+    "collectionType" : "NONE",
+    "basicFieldType": "string",
+    "minimum": 255,
+    "maximum": 1000
+}
+
+###
+POST {{endpoint}}/sr/biz-field-type
+
+{
+    "name": "Password",
+    "collectionType" : "NONE",
+    "basicFieldType": "string",
+    "minimum": 6,
+    "maximum": 255,
     "objectBizFieldTypeRefDTOList": [{
         "refId": 1,
         "parentId": 0,

@@ -3,5 +3,5 @@ POST {{endpoint}}/sr/biz-field
 {
     "name": "password",
     "bizFieldTypeId": 1,
-    "description": "test"
+    "description": "a password field",
 }

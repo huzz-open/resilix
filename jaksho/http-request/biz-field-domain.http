@@ -3,5 +3,5 @@ POST {{endpoint}}/sr/biz-field-domain
 {
     "bizFieldId": 1,
     "bizDomainId": 1,
-    "bizFieldTypeId": 1
+    "bizFieldTypeId": 2
 }
