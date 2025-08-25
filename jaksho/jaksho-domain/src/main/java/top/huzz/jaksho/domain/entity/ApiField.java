@@ -59,6 +59,12 @@ public class ApiField extends BasicProperties implements Serializable {
     private Integer bizFieldId;
 
     /**
+     * 业务字段领域ID，引用sr_biz_field_domain.id。与bizFieldId互斥，优先使用此字段
+     */
+    @TableField("biz_field_domain_id")
+    private Integer bizFieldDomainId;
+
+    /**
      * 字段名称
      */
     @TableField("field_name")
@@ -113,6 +119,8 @@ public class ApiField extends BasicProperties implements Serializable {
     public static final String FIELD_TYPE = "field_type";
 
     public static final String BIZ_FIELD_ID = "biz_field_id";
+
+    public static final String BIZ_FIELD_DOMAIN_ID = "biz_field_domain_id";
 
     public static final String FIELD_NAME = "field_name";
 
