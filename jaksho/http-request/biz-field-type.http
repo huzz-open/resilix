@@ -12,6 +12,26 @@ POST {{endpoint}}/sr/biz-field-type
 POST {{endpoint}}/sr/biz-field-type
 
 {
+    "name": "Str64",
+    "collectionType" : "NONE",
+    "basicFieldType": "string",
+    "maximum": 64
+}
+
+###
+POST {{endpoint}}/sr/biz-field-type
+
+{
+    "name": "Str128",
+    "collectionType" : "NONE",
+    "basicFieldType": "string",
+    "maximum": 128
+}
+
+###
+POST {{endpoint}}/sr/biz-field-type
+
+{
     "name": "PasswordEncrypted",
     "description": "Encrypted password field",
     "collectionType" : "NONE",

@@ -5,7 +5,7 @@ import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
 import top.huzz.jaksho.api.phase.CreatePhase;
 import top.huzz.jaksho.api.service.BizFieldDomainService;
-import top.huzz.jaksho.common.able.DomainDescription;
+import top.huzz.jaksho.common.entity.BasicProperties;
 import top.huzz.jaksho.domain.entity.BizFieldDomain;
 import top.huzz.resilix.core.RunHandlerManager;
 import top.huzz.resilix.core.RunHandlerManagerHelper;
@@ -21,7 +21,7 @@ public class BizFieldDomainServiceImpl implements BizFieldDomainService {
     @Transactional
     public Integer create(CreateBizFieldDomainRequest request) {
         RunHandlerManager manager = RunHandlerManagerHelper.build(CreatePhase.class);
-        CreateRunContext<CreateBizFieldDomainRequest, BizFieldDomain, DomainDescription> context = new CreateRunContext<>(request, BizFieldDomain::new);
+        CreateRunContext<CreateBizFieldDomainRequest, BizFieldDomain, BasicProperties> context = new CreateRunContext<>(request, BizFieldDomain::new);
         manager.start(context);
         if (!context.isSuccess()) {
             throw new RuntimeException(context.getException());

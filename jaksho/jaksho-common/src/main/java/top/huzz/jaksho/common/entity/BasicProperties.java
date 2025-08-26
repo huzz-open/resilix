@@ -8,7 +8,12 @@ import top.huzz.jaksho.common.able.DomainDescription;
  */
 public abstract class BasicProperties implements DomainDescription {
 
+    public Integer getId() {
+        return null;
+    }
+
     public abstract Integer getWorkspaceId();
+
 
     public abstract BasicProperties setWorkspaceId(Integer workspaceId);
 }

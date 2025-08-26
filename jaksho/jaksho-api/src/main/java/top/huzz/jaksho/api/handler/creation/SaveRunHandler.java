@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component;
 import top.huzz.jaksho.api.context.CreateRunContext;
 import top.huzz.jaksho.api.helper.SaveHelper;
 import top.huzz.jaksho.api.phase.CreatePhase;
-import top.huzz.jaksho.common.able.DomainDescription;
+import top.huzz.jaksho.common.entity.BasicProperties;
 import top.huzz.resilix.core.Phase;
 import top.huzz.resilix.handler.PredictableRunHandler;
 import top.huzz.resilix.predicate.HandlerRunPredicate;
@@ -19,22 +19,27 @@ import java.util.List;
  */
 @Component
 @Slf4j
-public class SaveRunHandler<R, T extends DomainDescription, C extends DomainDescription> extends PredictableRunHandler<CreateRunContext<R, T, C>> {
+public class SaveRunHandler<R, T extends BasicProperties, C extends BasicProperties> extends PredictableRunHandler<CreateRunContext<R, T, C>> {
 
-	protected SaveRunHandler(List<HandlerRunPredicate<CreateRunContext<R, T, C>>> handlerRunPredicates) {
-		super(handlerRunPredicates);
-	}
+    protected SaveRunHandler(List<HandlerRunPredicate<CreateRunContext<R, T, C>>> handlerRunPredicates) {
+        super(handlerRunPredicates);
+    }
 
-	@Override
-	public void handle(CreateRunContext<R, T, C> context) throws Exception {
-		int id = SaveHelper.save(context.getCreatedObject(), context.getCascadedCreatedObjects(), context.getCascadedCreatedObjectIdSetter());
-		context.setId(id);
-	}
+    @Override
+    public void handle(CreateRunContext<R, T, C> context) throws Exception {
+        int id = SaveHelper.save(
+                context.getCreatedObject(),
+                context.getCascadedCreatedObjects(),
+                context.getCascadedCreatedObjectIdSetter(),
+                context.getCreatedObjectConsumer()
+        );
+        context.setId(id);
+    }
 
-	@Nonnull
-	@Override
-	public Phase phase() {
-		return CreatePhase.SAVE;
-	}
+    @Nonnull
+    @Override
+    public Phase phase() {
+        return CreatePhase.SAVE;
+    }
 
 }
