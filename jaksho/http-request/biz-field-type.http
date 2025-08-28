@@ -44,12 +44,11 @@ POST {{endpoint}}/sr/biz-field-type
 POST {{endpoint}}/sr/biz-field-type
 
 {
-    "name": "ObjectTest",
+    "name": "ObjectTest2",
     "collectionType" : "NONE",
     "basicFieldType": "object",
     "objectBizFieldTypeRefDTOList": [{
-        "refId": 1,
-        "parentId": 0,
+        "bizFieldDomainId": 1,
         "sortOrder": 1
     }]
 }

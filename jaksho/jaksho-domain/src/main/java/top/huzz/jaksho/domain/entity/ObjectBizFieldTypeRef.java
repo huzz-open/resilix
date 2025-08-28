@@ -46,16 +46,10 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
     private Integer bizFieldTypeId;
 
     /**
-     * 引用的基础字段id（sr_biz_field_type数据库主键id）
+     * 标准字段ID，引用sr_biz_field_domain.id
      */
-    @TableField("ref_id")
-    private Integer refId;
-
-    /**
-     * 父级id（sr_object_biz_field_type_ref数据库主键），0表示没有父级，也就是说该ref的字段是顶级字段，否则表示该ref的字段是子级字段
-     */
-    @TableField("parent_id")
-    private Integer parentId;
+    @TableField("biz_field_domain_id")
+    private Integer bizFieldDomainId;
 
     /**
      * 在同一层级内的排序序号，值越小越靠前，从0开始
@@ -85,9 +79,7 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
 
     public static final String BIZ_FIELD_TYPE_ID = "biz_field_type_id";
 
-    public static final String REF_ID = "ref_id";
-
-    public static final String PARENT_ID = "parent_id";
+    public static final String BIZ_FIELD_DOMAIN_ID = "biz_field_domain_id";
 
     public static final String SORT_ORDER = "sort_order";
 

@@ -12,10 +12,8 @@ import top.huzz.resilix.validation.annotation.BizCheck;
 @Getter
 @Setter
 public class ObjectBizFieldTypeRefDTO {
-	@BizCheck("#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizField', #this)")
-	private Integer refId;
-	@NotNull
-	private Integer parentId;
-	@NotNull
-	private Integer sortOrder;
+    @BizCheck("#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizField', #this)")
+    private Integer bizFieldDomainId;
+    @NotNull
+    private Integer sortOrder;
 }

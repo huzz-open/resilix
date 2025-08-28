@@ -64,14 +64,14 @@ CREATE TABLE IF NOT EXISTS `sr_biz_field_type`
 
 CREATE TABLE IF NOT EXISTS `sr_object_biz_field_type_ref`
 (
-    `id`                int(11) AUTO_INCREMENT     NOT NULL COMMENT '数据库主键id',
-    `biz_field_type_id` int(11)                    NOT NULL COMMENT '该ref所属的业务字段类型数据库主键id（sr_biz_field_type数据库主键id）',
-    `ref_id`            int(11)  DEFAULT 0         NOT NULL COMMENT '引用的基础字段id（sr_biz_field_type数据库主键id）',
-    `parent_id`         int(11)  DEFAULT 0         NOT NULL COMMENT '父级id（sr_object_biz_field_type_ref数据库主键），0表示没有父级，也就是说该ref的字段是顶级字段，否则表示该ref的字段是子级字段',
-    `sort_order`        int(11)  DEFAULT 0         NOT NULL COMMENT '在同一层级内的排序序号，值越小越靠前，从0开始',
-    `create_time`       datetime DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
-    `update_time`       datetime DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
-    `workspace_id`      int(11)  DEFAULT 0         NOT NULL COMMENT '工作空间数据库主键id',
+    `id`                  int(11) AUTO_INCREMENT     NOT NULL COMMENT '数据库主键id',
+    `biz_field_type_id`   int(11)                    NOT NULL COMMENT '该ref所属的业务字段类型数据库主键id（sr_biz_field_type数据库主键id）',
+    `biz_field_domain_id` int(11)  DEFAULT 0         NOT NULL COMMENT '标准字段ID，引用sr_biz_field_domain.id',
+    `sort_order`          int(11)  DEFAULT 0         NOT NULL COMMENT '在同一层级内的排序序号，值越小越靠前，从0开始',
+    `create_time`         datetime DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `update_time`         datetime DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
+    `workspace_id`        int(11)  DEFAULT 0         NOT NULL COMMENT '工作空间数据库主键id',
+    INDEX idx_field_type_id_field_domain_id (`workspace_id`, `biz_field_type_id`, `biz_field_domain_id`),
     PRIMARY KEY (`id`)
 ) COMMENT '对象业务字段类型引用表';
 
