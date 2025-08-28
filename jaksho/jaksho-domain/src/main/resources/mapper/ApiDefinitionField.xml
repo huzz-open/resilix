@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
-<mapper namespace="top.huzz.jaksho.domain.mapper.ApiFieldMapper">
+<mapper namespace="top.huzz.jaksho.domain.mapper.ApiDefinitionFieldMapper">
 
     <!-- 通用查询映射结果 -->
-    <resultMap id="BaseResultMap" type="top.huzz.jaksho.domain.entity.ApiField">
+    <resultMap id="BaseResultMap" type="top.huzz.jaksho.domain.entity.ApiDefinitionField">
         <id column="id" property="id" />
         <result column="api_id" property="apiId"  />
-        <result column="field_type" property="fieldType" typeHandler="top.huzz.jaksho.common.json.CustomFastjson2TypeHandler" />
-        <result column="biz_field_id" property="bizFieldId"  />
+        <result column="field_type" property="fieldType"  />
+        <result column="biz_field_domain_id" property="bizFieldDomainId"  />
         <result column="field_name" property="fieldName"  />
         <result column="is_file_field" property="isFileField"  />
         <result column="is_required" property="isRequired"  />
@@ -20,7 +20,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, api_id, field_type, biz_field_id, field_name, is_file_field, is_required, description, sort_order, workspace_id, create_time, update_time
+        id, api_id, field_type, biz_field_domain_id, field_name, is_file_field, is_required, description, sort_order, workspace_id, create_time, update_time
     </sql>
 
 </mapper>

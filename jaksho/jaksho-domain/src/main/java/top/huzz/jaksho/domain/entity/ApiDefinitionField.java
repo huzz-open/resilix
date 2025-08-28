@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
-import top.huzz.jaksho.common.constant.FieldType;
 import top.huzz.jaksho.common.entity.BasicProperties;
 
 import java.io.Serial;
@@ -28,8 +27,8 @@ import java.time.LocalDateTime;
 @Setter
 @ToString
 @Accessors(chain = true)
-@TableName("sr_api_field")
-public class ApiField extends BasicProperties implements Serializable {
+@TableName("sr_api_definition_field")
+public class ApiDefinitionField extends BasicProperties implements Serializable {
 
     @Serial
     private static final long serialVersionUID = 1L;
@@ -50,13 +49,13 @@ public class ApiField extends BasicProperties implements Serializable {
      * 字段类型
      */
     @TableField("field_type")
-    private FieldType fieldType;
+    private String fieldType;
 
     /**
-     * 标准字段ID，引用sr_biz_field.id
+     * 标准字段ID，引用sr_biz_field_domain.id
      */
-    @TableField("biz_field_id")
-    private Integer bizFieldId;
+    @TableField("biz_field_domain_id")
+    private Integer bizFieldDomainId;
 
     /**
      * 字段名称
@@ -112,7 +111,7 @@ public class ApiField extends BasicProperties implements Serializable {
 
     public static final String FIELD_TYPE = "field_type";
 
-    public static final String BIZ_FIELD_ID = "biz_field_id";
+    public static final String BIZ_FIELD_DOMAIN_ID = "biz_field_domain_id";
 
     public static final String FIELD_NAME = "field_name";
 
