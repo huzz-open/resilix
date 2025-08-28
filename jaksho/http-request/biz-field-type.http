@@ -44,11 +44,9 @@ POST {{endpoint}}/sr/biz-field-type
 POST {{endpoint}}/sr/biz-field-type
 
 {
-    "name": "Password",
+    "name": "ObjectTest",
     "collectionType" : "NONE",
-    "basicFieldType": "string",
-    "minimum": 6,
-    "maximum": 255,
+    "basicFieldType": "object",
     "objectBizFieldTypeRefDTOList": [{
         "refId": 1,
         "parentId": 0,
