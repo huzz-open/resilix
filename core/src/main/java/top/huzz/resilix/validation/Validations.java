@@ -264,7 +264,6 @@ public class Validations implements ApplicationRunner {
      * @throws ConstraintViolationException if validation fails
      */
     @BizCheckFunction("__VALID")
-
     private static void valid(Object any) {
         if (any == null) {
             throw new ConstraintViolationException("Object to validate cannot be null", java.util.Collections.emptySet());
