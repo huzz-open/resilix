@@ -77,18 +77,18 @@ CREATE TABLE IF NOT EXISTS `sr_object_biz_field_type_ref`
 
 CREATE TABLE IF NOT EXISTS sr_api_definition
 (
-    `id`                int(11) AUTO_INCREMENT         NOT NULL COMMENT '数据库主键ID',
-    `name`              varchar(200)                   NOT NULL COMMENT '接口名称',
-    `method`            varchar(10)                    NOT NULL COMMENT 'HTTP方法',
-    `path`              varchar(500)                   NOT NULL COMMENT '接口路径，如: /users/{userId}',
-    `description`       varchar(255) DEFAULT ''        NOT NULL COMMENT '接口描述',
-    `body_type`         varchar(30)  DEFAULT 'NONE'    NOT NULL COMMENT '请求体类型',
-    `raw_type`          varchar(20)  DEFAULT 'TEXT'    NOT NULL COMMENT 'raw类型的子类型，当body_type=RAW起作用',
-    `raw_text_field_id` int(11)      DEFAULT -1        NOT NULL COMMENT '当body_type=RAW且raw_type=TEXT时，指定对应的标准字段ID',
-    `workspace_id`      int(11)                        NOT NULL COMMENT '工作空间ID',
-    `create_time`       datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
-    `update_time`       datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
-    `remark`            varchar(255) DEFAULT ''        NOT NULL COMMENT '备注',
+    `id`                    int(11) AUTO_INCREMENT         NOT NULL COMMENT '数据库主键ID',
+    `name`                  varchar(100)                   NOT NULL COMMENT '接口名称',
+    `method`                varchar(10)                    NOT NULL COMMENT 'HTTP方法',
+    `path`                  varchar(200)                   NOT NULL COMMENT '接口路径，如: /users/{userId}',
+    `description`           varchar(255) DEFAULT ''        NOT NULL COMMENT '接口描述',
+    `body_type`             varchar(30)  DEFAULT 'NONE'    NOT NULL COMMENT '请求体类型',
+    `raw_type`              varchar(20)  DEFAULT 'TEXT'    NOT NULL COMMENT 'raw类型的子类型，当body_type=RAW起作用',
+    `raw_biz_field_type_id` int(11)      DEFAULT -1        NOT NULL COMMENT '当body_type=RAW且raw_type=TEXT时，指定对应的业务字段类型id',
+    `workspace_id`          int(11)                        NOT NULL COMMENT '工作空间ID',
+    `create_time`           datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `update_time`           datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
+    `remark`                varchar(255) DEFAULT ''        NOT NULL COMMENT '备注',
 
     PRIMARY KEY (`id`)
 ) COMMENT '接口定义表';

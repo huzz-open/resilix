@@ -11,7 +11,7 @@
         <result column="description" property="description"  />
         <result column="body_type" property="bodyType" typeHandler="top.huzz.jaksho.common.json.CustomFastjson2TypeHandler" />
         <result column="raw_type" property="rawType" typeHandler="top.huzz.jaksho.common.json.CustomFastjson2TypeHandler" />
-        <result column="raw_text_field_id" property="rawTextFieldId"  />
+        <result column="raw_biz_field_type_id" property="rawBizFieldTypeId"  />
         <result column="workspace_id" property="workspaceId"  />
         <result column="create_time" property="createTime"  />
         <result column="update_time" property="updateTime"  />
@@ -20,7 +20,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, name, method, path, description, body_type, raw_type, raw_text_field_id, workspace_id, create_time, update_time, remark
+        id, name, method, path, description, body_type, raw_type, raw_biz_field_type_id, workspace_id, create_time, update_time, remark
     </sql>
 
 </mapper>

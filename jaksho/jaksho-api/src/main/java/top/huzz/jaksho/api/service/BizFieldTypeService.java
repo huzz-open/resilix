@@ -28,7 +28,7 @@ public interface BizFieldTypeService {
 	@Getter
 	@Setter
 	@BizCheck.List({
-			@BizCheck(when = "basicFieldType == BasicFieldType.OBJECT", value = "#__VALID(objectBizFieldTypeRefDTOList)"),
+			@BizCheck(when = "basicFieldType == T(BasicFieldType).OBJECT", value = "#__VALID(objectBizFieldTypeRefDTOList)"),
 	})
 	class CreateBizFieldTypeRequest implements CascadedRequestProvider<ObjectBizFieldTypeRefDTO> {
 		@Length(min = 1, max = 100)

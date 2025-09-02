@@ -1,0 +1,30 @@
+POST {{endpoint}}/sr/api-definition
+
+{
+    "name": "createUser3",
+    "bodyType": "RAW",
+    "method": "POST",
+    "path": "/user3",
+    "description": "Test API definition"
+}
+
+###
+POST {{endpoint}}/sr/api-definition
+
+{
+    "name": "createUser3",
+    "method": "POST",
+    "path": "/user3",
+    "description": "Test API definition"
+}
+
+###
+POST {{endpoint}}/sr/api-definition
+
+{
+    "name": "createUser",
+    "path": "/user",
+    "description": "Test API definition",
+    "bodyType": "NONE",
+    "method": "POST"
+}

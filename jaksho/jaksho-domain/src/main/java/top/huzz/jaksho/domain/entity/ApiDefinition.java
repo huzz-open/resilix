@@ -79,10 +79,10 @@ public class ApiDefinition extends BasicProperties implements Serializable {
     private RawType rawType;
 
     /**
-     * 当body_type=RAW且raw_type=TEXT时，指定对应的标准字段ID
+     * 当body_type=RAW且raw_type=TEXT时，指定对应的业务字段类型id
      */
-    @TableField("raw_text_field_id")
-    private Integer rawTextFieldId;
+    @TableField("raw_biz_field_type_id")
+    private Integer rawBizFieldTypeId;
 
     /**
      * 工作空间ID
@@ -122,7 +122,7 @@ public class ApiDefinition extends BasicProperties implements Serializable {
 
     public static final String RAW_TYPE = "raw_type";
 
-    public static final String RAW_TEXT_FIELD_ID = "raw_text_field_id";
+    public static final String RAW_BIZ_FIELD_TYPE_ID = "raw_biz_field_type_id";
 
     public static final String WORKSPACE_ID = "workspace_id";
 
