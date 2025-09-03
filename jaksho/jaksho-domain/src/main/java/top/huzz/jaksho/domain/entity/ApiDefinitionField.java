@@ -9,6 +9,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.experimental.Accessors;
+import top.huzz.jaksho.common.constant.FieldType;
 import top.huzz.jaksho.common.entity.BasicProperties;
 
 import java.io.Serial;
@@ -49,7 +50,7 @@ public class ApiDefinitionField extends BasicProperties implements Serializable 
      * 字段类型
      */
     @TableField("field_type")
-    private String fieldType;
+    private FieldType fieldType;
 
     /**
      * 标准字段ID，引用sr_biz_field_domain.id
@@ -58,22 +59,16 @@ public class ApiDefinitionField extends BasicProperties implements Serializable 
     private Integer bizFieldDomainId;
 
     /**
-     * 字段名称
-     */
-    @TableField("field_name")
-    private String fieldName;
-
-    /**
      * 是否为文件字段：0-否，1-是（仅FORM_DATA时有意义）
      */
     @TableField("is_file_field")
-    private Byte isFileField;
+    private Boolean isFileField;
 
     /**
      * 是否必填：0-否，1-是
      */
     @TableField("is_required")
-    private Byte isRequired;
+    private Boolean isRequired;
 
     /**
      * 字段说明
@@ -112,8 +107,6 @@ public class ApiDefinitionField extends BasicProperties implements Serializable 
     public static final String FIELD_TYPE = "field_type";
 
     public static final String BIZ_FIELD_DOMAIN_ID = "biz_field_domain_id";
-
-    public static final String FIELD_NAME = "field_name";
 
     public static final String IS_FILE_FIELD = "is_file_field";
 

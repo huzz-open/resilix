@@ -99,12 +99,11 @@ CREATE TABLE IF NOT EXISTS sr_api_definition_field
     `api_id`              int(11)                        NOT NULL COMMENT '接口ID',
     `field_type`          varchar(20)                    NOT NULL COMMENT '字段类型',
     `biz_field_domain_id` int(11)                        NOT NULL COMMENT '标准字段ID，引用sr_biz_field_domain.id',
-    `field_name`          varchar(100)                   NOT NULL COMMENT '字段名称',
 
     -- 类型特有字段
-    `is_file_field`       tinyint      DEFAULT 0         NOT NULL COMMENT '是否为文件字段：0-否，1-是（仅FORM_DATA时有意义）',
+    `is_file_field`       boolean      DEFAULT 0         NOT NULL COMMENT '是否为文件字段：0-否，1-是（仅FORM_DATA时有意义）',
 
-    `is_required`         tinyint      DEFAULT 0         NOT NULL COMMENT '是否必填：0-否，1-是',
+    `is_required`         boolean      DEFAULT 0         NOT NULL COMMENT '是否必填：0-否，1-是',
     `description`         varchar(255) DEFAULT ''        NOT NULL COMMENT '字段说明',
     `sort_order`          int(11)      DEFAULT 0         NOT NULL COMMENT '在同一field_type内的排序序号，值越小越靠前，从0开始',
     `workspace_id`        int(11)                        NOT NULL COMMENT '工作空间ID',

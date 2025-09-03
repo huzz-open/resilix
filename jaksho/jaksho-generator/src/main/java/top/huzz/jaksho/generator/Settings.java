@@ -38,7 +38,7 @@ public class Settings {
         tableFiledTypeMap.put(TypeRegistryDelegate.calcKey("sr_api_definition", "body_type"), BodyType.class);
         tableFiledTypeMap.put(TypeRegistryDelegate.calcKey("sr_api_definition", "raw_type"), RawType.class);
 
-        tableFiledTypeMap.put(TypeRegistryDelegate.calcKey("sr_api_field", "field_type"), FieldType.class);
+        tableFiledTypeMap.put(TypeRegistryDelegate.calcKey("sr_api_definition_field", "field_type"), FieldType.class);
 
     }
 

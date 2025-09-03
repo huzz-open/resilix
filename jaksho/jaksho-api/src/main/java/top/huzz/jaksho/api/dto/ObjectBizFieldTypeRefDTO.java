@@ -12,7 +12,7 @@ import top.huzz.resilix.validation.annotation.BizCheck;
 @Getter
 @Setter
 public class ObjectBizFieldTypeRefDTO {
-    @BizCheck("#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizField', #this)")
+    @BizCheck("#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizFieldDomain', #this)")
     private Integer bizFieldDomainId;
     @NotNull
     private Integer sortOrder;

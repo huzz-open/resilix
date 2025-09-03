@@ -1,7 +1,7 @@
 POST {{endpoint}}/sr/biz-field
 
 {
-    "name": "username",
-    "bizFieldTypeId": 16,
-    "description": "a username field",
+    "name": "password",
+    "bizFieldTypeId": 1,
+    "description": "password of some username",
 }
