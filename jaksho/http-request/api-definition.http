@@ -1,16 +1,23 @@
 POST {{endpoint}}/sr/api-definition
 
 {
-    "name": "createUser2",
+    "name": "createUser4",
     "bodyType": "RAW",
     "rawType": "JSON",
     "method": "POST",
-    "path": "/user",
+    "path": "/user4",
     "apiDefinitionFieldDTOList": [
         {
             "fieldType": "JSON",
             "bizFieldDomainId": 1,
-            "sortOrder": 0
+            "sortOrder": 0,
+            "ulid": "1"
+        },
+        {
+            "fieldType": "JSON",
+            "bizFieldDomainId": 2,
+            "sortOrder": 1,
+            "ulid": "2"
         }
     ],
     "description": "Test API definition"

@@ -13,19 +13,24 @@ import top.huzz.resilix.validation.annotation.BizCheck;
  */
 @Getter
 @Setter
-public class ApiDefinitionFieldDTO {
+public class ApiDefinitionFieldDTO implements TreeDTO {
 	@NotNull
 	private FieldType fieldType;
 
 	@BizCheck("#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizFieldDomain', #this)")
 	private Integer bizFieldDomainId;
 
-	private Boolean isFileType;
-
 	private Boolean isRequired;
 
 	@Length(max = 255)
 	private String description;
+
+	@NotNull
+	@Length(min = 1, max = 26)
+	private String ulid;
+
+	@Length(min = 1, max = 26)
+	private String parentUlid;
 
 	@NotNull
 	private Integer sortOrder;

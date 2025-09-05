@@ -33,7 +33,7 @@ public interface ApiDefinitionService {
 			@BizCheck(when = "bodyType == T(BodyType).RAW", value = "rawType != null", message = "bodyType为RAW时，rawType不能为空"),
 			@BizCheck(when = "bodyType == T(BodyType).RAW && rawType == T(RawType).TEXT", value = "#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizFieldType', rawBizFieldTypeId)"),
 			@BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.ApiDefinition', path, method)"),
-			@BizCheck(when = "bodyType != T(BodyType).NONE", value = "#__VALID(apiDefinitionFieldDTOList)")
+			@BizCheck(when = "bodyType != T(BodyType).NONE", value = "#checkApiDefinitionField(apiDefinitionFieldDTOList)")
 	})
 	class CreateApiDefinitionRequest implements CascadedRequestProvider<ApiDefinitionFieldDTO> {
 		@Length(min = 1, max = 100)

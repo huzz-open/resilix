@@ -5,3 +5,12 @@ POST {{endpoint}}/sr/biz-field
     "bizFieldTypeId": 1,
     "description": "password of some username",
 }
+
+###
+POST {{endpoint}}/sr/biz-field
+
+{
+    "name": "password2",
+    "bizFieldTypeId": 1,
+    "description": "password of some username2",
+}

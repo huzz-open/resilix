@@ -42,14 +42,14 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
     /**
      * 对象唯一标识符
      */
-    @TableField("uuid")
-    private String uuid;
+    @TableField("ulid")
+    private String ulid;
 
     /**
      * 父对象唯一标识符，根对象该值为空字符串
      */
-    @TableField("parent_uuid")
-    private String parentUuid;
+    @TableField("parent_ulid")
+    private String parentUlid;
 
     /**
      * 在同一层级内的排序序号，值越小越靠前，从0开始
@@ -89,9 +89,9 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
 
     public static final String ID = "id";
 
-    public static final String UUID = "uuid";
+    public static final String ULID = "ulid";
 
-    public static final String PARENT_UUID = "parent_uuid";
+    public static final String PARENT_ULID = "parent_ulid";
 
     public static final String SORT_ORDER = "sort_order";
 
