@@ -40,6 +40,24 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
     private Integer id;
 
     /**
+     * 对象唯一标识符
+     */
+    @TableField("uuid")
+    private String uuid;
+
+    /**
+     * 父对象唯一标识符，根对象该值为空字符串
+     */
+    @TableField("parent_uuid")
+    private String parentUuid;
+
+    /**
+     * 在同一层级内的排序序号，值越小越靠前，从0开始
+     */
+    @TableField("sort_order")
+    private Integer sortOrder;
+
+    /**
      * 该ref所属的业务字段类型数据库主键id（sr_biz_field_type数据库主键id）
      */
     @TableField("biz_field_type_id")
@@ -50,12 +68,6 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
      */
     @TableField("biz_field_domain_id")
     private Integer bizFieldDomainId;
-
-    /**
-     * 在同一层级内的排序序号，值越小越靠前，从0开始
-     */
-    @TableField("sort_order")
-    private Integer sortOrder;
 
     /**
      * 创建时间
@@ -77,11 +89,15 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
 
     public static final String ID = "id";
 
+    public static final String UUID = "uuid";
+
+    public static final String PARENT_UUID = "parent_uuid";
+
+    public static final String SORT_ORDER = "sort_order";
+
     public static final String BIZ_FIELD_TYPE_ID = "biz_field_type_id";
 
     public static final String BIZ_FIELD_DOMAIN_ID = "biz_field_domain_id";
-
-    public static final String SORT_ORDER = "sort_order";
 
     public static final String CREATE_TIME = "create_time";
 

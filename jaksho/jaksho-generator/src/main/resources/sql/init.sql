@@ -64,13 +64,15 @@ CREATE TABLE IF NOT EXISTS `sr_biz_field_type`
 
 CREATE TABLE IF NOT EXISTS `sr_object_biz_field_type_ref`
 (
-    `id`                  int(11) AUTO_INCREMENT     NOT NULL COMMENT '数据库主键id',
-    `biz_field_type_id`   int(11)                    NOT NULL COMMENT '该ref所属的业务字段类型数据库主键id（sr_biz_field_type数据库主键id）',
-    `biz_field_domain_id` int(11)  DEFAULT 0         NOT NULL COMMENT '标准字段ID，引用sr_biz_field_domain.id',
-    `sort_order`          int(11)  DEFAULT 0         NOT NULL COMMENT '在同一层级内的排序序号，值越小越靠前，从0开始',
-    `create_time`         datetime DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
-    `update_time`         datetime DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
-    `workspace_id`        int(11)  DEFAULT 0         NOT NULL COMMENT '工作空间数据库主键id',
+    `id`                  int(11) AUTO_INCREMENT        NOT NULL COMMENT '数据库主键id',
+    `ulid`                varchar(32)                   NOT NULL COMMENT '对象唯一标识符',
+    `parent_ulid`         varchar(32) DEFAULT ''        NOT NULL COMMENT '父对象唯一标识符，根对象该值为空字符串',
+    `sort_order`          int(11)     DEFAULT 0         NOT NULL COMMENT '在同一层级内的排序序号，值越小越靠前，从0开始',
+    `biz_field_type_id`   int(11)                       NOT NULL COMMENT '该ref所属的业务字段类型数据库主键id（sr_biz_field_type数据库主键id）',
+    `biz_field_domain_id` int(11)     DEFAULT 0         NOT NULL COMMENT '标准字段ID，引用sr_biz_field_domain.id',
+    `create_time`         datetime    DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `update_time`         datetime    DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
+    `workspace_id`        int(11)     DEFAULT 0         NOT NULL COMMENT '工作空间数据库主键id',
     INDEX idx_field_type_id_field_domain_id (`workspace_id`, `biz_field_type_id`, `biz_field_domain_id`),
     PRIMARY KEY (`id`)
 ) COMMENT '对象业务字段类型引用表';
@@ -97,15 +99,13 @@ CREATE TABLE IF NOT EXISTS sr_api_definition_field
 (
     `id`                  int(11) AUTO_INCREMENT         NOT NULL COMMENT '数据库主键ID',
     `api_id`              int(11)                        NOT NULL COMMENT '接口ID',
+    `ulid`                varchar(32)                    NOT NULL COMMENT '字段唯一标识符',
+    `parent_ulid`         varchar(32)  DEFAULT ''        NOT NULL COMMENT '父字段唯一标识符，只有field_type为JSON的时候，父字段才起作用，用于表示字段的层级关系，根字段该值为空字符串',
+    `sort_order`          int(11)      DEFAULT 0         NOT NULL COMMENT '在同一field_type内的排序序号，值越小越靠前，从0开始',
     `field_type`          varchar(20)                    NOT NULL COMMENT '字段类型',
     `biz_field_domain_id` int(11)                        NOT NULL COMMENT '标准字段ID，引用sr_biz_field_domain.id',
-
-    -- 类型特有字段
-    `is_file_field`       boolean      DEFAULT 0         NOT NULL COMMENT '是否为文件字段：0-否，1-是（仅FORM_DATA时有意义）',
-
     `is_required`         boolean      DEFAULT 0         NOT NULL COMMENT '是否必填：0-否，1-是',
     `description`         varchar(255) DEFAULT ''        NOT NULL COMMENT '字段说明',
-    `sort_order`          int(11)      DEFAULT 0         NOT NULL COMMENT '在同一field_type内的排序序号，值越小越靠前，从0开始',
     `workspace_id`        int(11)                        NOT NULL COMMENT '工作空间ID',
     `create_time`         datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`         datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',

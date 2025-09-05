@@ -5,9 +5,11 @@
     <!-- 通用查询映射结果 -->
     <resultMap id="BaseResultMap" type="top.huzz.jaksho.domain.entity.ObjectBizFieldTypeRef">
         <id column="id" property="id" />
+        <result column="uuid" property="uuid"  />
+        <result column="parent_uuid" property="parentUuid"  />
+        <result column="sort_order" property="sortOrder"  />
         <result column="biz_field_type_id" property="bizFieldTypeId"  />
         <result column="biz_field_domain_id" property="bizFieldDomainId"  />
-        <result column="sort_order" property="sortOrder"  />
         <result column="create_time" property="createTime"  />
         <result column="update_time" property="updateTime"  />
         <result column="workspace_id" property="workspaceId"  />
@@ -15,7 +17,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, biz_field_type_id, biz_field_domain_id, sort_order, create_time, update_time, workspace_id
+        id, uuid, parent_uuid, sort_order, biz_field_type_id, biz_field_domain_id, create_time, update_time, workspace_id
     </sql>
 
 </mapper>

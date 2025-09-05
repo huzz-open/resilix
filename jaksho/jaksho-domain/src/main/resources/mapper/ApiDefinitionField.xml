@@ -6,12 +6,13 @@
     <resultMap id="BaseResultMap" type="top.huzz.jaksho.domain.entity.ApiDefinitionField">
         <id column="id" property="id" />
         <result column="api_id" property="apiId"  />
+        <result column="ulid" property="ulid"  />
+        <result column="parent_ulid" property="parentUlid"  />
+        <result column="sort_order" property="sortOrder"  />
         <result column="field_type" property="fieldType" typeHandler="top.huzz.jaksho.common.json.CustomFastjson2TypeHandler" />
         <result column="biz_field_domain_id" property="bizFieldDomainId"  />
-        <result column="is_file_field" property="isFileField"  />
         <result column="is_required" property="isRequired"  />
         <result column="description" property="description"  />
-        <result column="sort_order" property="sortOrder"  />
         <result column="workspace_id" property="workspaceId"  />
         <result column="create_time" property="createTime"  />
         <result column="update_time" property="updateTime"  />
@@ -19,7 +20,7 @@
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, api_id, field_type, biz_field_domain_id, is_file_field, is_required, description, sort_order, workspace_id, create_time, update_time
+        id, api_id, ulid, parent_ulid, sort_order, field_type, biz_field_domain_id, is_required, description, workspace_id, create_time, update_time
     </sql>
 
 </mapper>

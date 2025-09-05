@@ -47,6 +47,24 @@ public class ApiDefinitionField extends BasicProperties implements Serializable 
     private Integer apiId;
 
     /**
+     * 字段唯一标识符
+     */
+    @TableField("ulid")
+    private String ulid;
+
+    /**
+     * 父字段唯一标识符，只有field_type为JSON的时候，父字段才起作用，用于表示字段的层级关系，根字段该值为空字符串
+     */
+    @TableField("parent_ulid")
+    private String parentUlid;
+
+    /**
+     * 在同一field_type内的排序序号，值越小越靠前，从0开始
+     */
+    @TableField("sort_order")
+    private Integer sortOrder;
+
+    /**
      * 字段类型
      */
     @TableField("field_type")
@@ -59,12 +77,6 @@ public class ApiDefinitionField extends BasicProperties implements Serializable 
     private Integer bizFieldDomainId;
 
     /**
-     * 是否为文件字段：0-否，1-是（仅FORM_DATA时有意义）
-     */
-    @TableField("is_file_field")
-    private Boolean isFileField;
-
-    /**
      * 是否必填：0-否，1-是
      */
     @TableField("is_required")
@@ -75,12 +87,6 @@ public class ApiDefinitionField extends BasicProperties implements Serializable 
      */
     @TableField("description")
     private String description;
-
-    /**
-     * 在同一field_type内的排序序号，值越小越靠前，从0开始
-     */
-    @TableField("sort_order")
-    private Integer sortOrder;
 
     /**
      * 工作空间ID
@@ -104,17 +110,19 @@ public class ApiDefinitionField extends BasicProperties implements Serializable 
 
     public static final String API_ID = "api_id";
 
+    public static final String ULID = "ulid";
+
+    public static final String PARENT_ULID = "parent_ulid";
+
+    public static final String SORT_ORDER = "sort_order";
+
     public static final String FIELD_TYPE = "field_type";
 
     public static final String BIZ_FIELD_DOMAIN_ID = "biz_field_domain_id";
 
-    public static final String IS_FILE_FIELD = "is_file_field";
-
     public static final String IS_REQUIRED = "is_required";
 
     public static final String DESCRIPTION = "description";
-
-    public static final String SORT_ORDER = "sort_order";
 
     public static final String WORKSPACE_ID = "workspace_id";
 
