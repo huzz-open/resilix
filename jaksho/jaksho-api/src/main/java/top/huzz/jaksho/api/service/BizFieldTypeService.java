@@ -3,12 +3,16 @@ package top.huzz.jaksho.api.service;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.dubbo.remoting.http12.HttpMethods;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
 import org.hibernate.validator.constraints.Length;
+import org.springframework.web.bind.annotation.RequestBody;
 import top.huzz.jaksho.api.CascadedRequestProvider;
+import top.huzz.jaksho.api.dto.AbstractPageQuery;
 import top.huzz.jaksho.api.dto.ObjectBizFieldTypeRefDTO;
 import top.huzz.jaksho.common.constant.BasicFieldType;
 import top.huzz.jaksho.common.constant.CollectionType;
+import top.huzz.jaksho.domain.entity.BizFieldType;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
 import java.util.List;
@@ -22,7 +26,7 @@ import java.util.List;
 @Mapping("/sr/biz-field-type")
 public interface BizFieldTypeService {
 
-	@Mapping("")
+	@Mapping(path = "", method = HttpMethods.POST)
 	Integer create(CreateBizFieldTypeRequest request);
 
 	@Getter
@@ -54,5 +58,16 @@ public interface BizFieldTypeService {
 		public List<ObjectBizFieldTypeRefDTO> cascadedRequests() {
 			return objectBizFieldTypeRefDTOList;
 		}
+	}
+
+	@Mapping(path = "", method = HttpMethods.GET)
+	List<BizFieldType> pageQuery(@RequestBody PageQueryBizFieldTypeRequest request);
+
+	class PageQueryBizFieldTypeRequest extends AbstractPageQuery<BizFieldType> {
+
+	}
+
+	class PageQueryBizFieldTypeResponse extends BizFieldType {
+
 	}
 }

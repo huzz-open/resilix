@@ -1,3 +1,13 @@
+###
+GET {{endpoint}}/sr/biz-field-type
+
+{
+    "current": 1,
+    "pageSize": 10
+}
+
+
+###
 POST {{endpoint}}/sr/biz-field-type
 
 {

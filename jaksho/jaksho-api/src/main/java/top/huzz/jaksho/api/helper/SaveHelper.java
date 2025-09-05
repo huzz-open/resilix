@@ -24,54 +24,58 @@ import java.util.function.BiConsumer;
 @Configuration
 public class SaveHelper implements ApplicationContextAware {
 
-    private static SaverBuilder<Object, Integer> saverBuilder;
+	private static SaverBuilder<Object, Integer> saverBuilder;
 
-    /**
-     * 保存主对象及其级联对象
-     *
-     * @param mainObject      主对象
-     * @param cascadedObjects 级联对象列表
-     * @return 主对象的ID
-     */
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    public static int save(@Nonnull BasicProperties mainObject, List<?> cascadedObjects, BiConsumer<?, Integer> cascadedCreatedObjectIdSetter, BiConsumer createdObjectConsumer) {
-        Objects.requireNonNull(mainObject);
-        // 获取主对象的Saver
-        Saver<Object, Integer> mainSaver = getSaver(mainObject);
-        // 保存主对象
-        mainSaver.save(mainObject);
+	/**
+	 * 保存主对象及其级联对象
+	 *
+	 * @param mainObject      主对象
+	 * @param cascadedObjects 级联对象列表
+	 * @return 主对象的ID
+	 */
+	@SuppressWarnings({"unchecked", "rawtypes"})
+	public static int save(@Nonnull BasicProperties mainObject, List<?> cascadedObjects, BiConsumer<?, Integer> cascadedCreatedObjectIdSetter, BiConsumer createdObjectConsumer) {
+		Objects.requireNonNull(mainObject);
+		// 获取主对象的Saver
+		Saver<Object, Integer> mainSaver = getSaver(mainObject);
+		// 保存主对象
+		Integer saved = mainSaver.save(mainObject);
+		if (saved == null || saved <= 0) {
+			log.error("save failed");
+			throw new RuntimeException("Save main object failed");
+		}
 
-        Integer id = mainObject.getId();
+		Integer id = mainObject.getId();
 
-        // 如果有级联对象，则保存它们
-        if (CollectionUtils.isNotEmpty(cascadedObjects)) {
-            for (Object cascadedObject : cascadedObjects) {
-                ((BiConsumer) cascadedCreatedObjectIdSetter).accept(cascadedObject, id);
-                Saver<Object, Integer> saver = getSaver(cascadedObject);
-                saver.save(cascadedObject);
-            }
-        }
+		// 如果有级联对象，则保存它们
+		if (CollectionUtils.isNotEmpty(cascadedObjects)) {
+			for (Object cascadedObject : cascadedObjects) {
+				((BiConsumer) cascadedCreatedObjectIdSetter).accept(cascadedObject, id);
+				Saver<Object, Integer> saver = getSaver(cascadedObject);
+				saver.save(cascadedObject);
+			}
+		}
 
-        if (createdObjectConsumer != null) {
-            BucketAble bucketAble = new BucketAble(saverBuilder);
-            createdObjectConsumer.accept(bucketAble, mainObject);
-        }
-        return id;
-    }
+		if (createdObjectConsumer != null) {
+			BucketAble bucketAble = new BucketAble(saverBuilder);
+			createdObjectConsumer.accept(bucketAble, mainObject);
+		}
+		return id;
+	}
 
-    @Nonnull
-    protected static Saver<Object, Integer> getSaver(Object toBeSaved) {
-        Objects.requireNonNull(toBeSaved);
-        Saver<Object, Integer> saver = saverBuilder.getSaver(toBeSaved);
-        Objects.requireNonNull(saver, "Saver cannot be null for object: " + toBeSaved.getClass().getName());
-        log.info("Using saver: {} for object: {}", saver.getClass().getName(), toBeSaved.getClass().getName());
-        return saver;
-    }
+	@Nonnull
+	protected static Saver<Object, Integer> getSaver(Object toBeSaved) {
+		Objects.requireNonNull(toBeSaved);
+		Saver<Object, Integer> saver = saverBuilder.getSaver(toBeSaved);
+		Objects.requireNonNull(saver, "Saver cannot be null for object: " + toBeSaved.getClass().getName());
+		log.info("Using saver: {} for object: {}", saver.getClass().getName(), toBeSaved.getClass().getName());
+		return saver;
+	}
 
 
-    @Override
-    @SuppressWarnings("unchecked")
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        saverBuilder = applicationContext.getBean(SaverBuilder.class);
-    }
+	@Override
+	@SuppressWarnings("unchecked")
+	public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+		saverBuilder = applicationContext.getBean(SaverBuilder.class);
+	}
 }
