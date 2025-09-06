@@ -6,7 +6,6 @@ import lombok.Setter;
 import org.apache.dubbo.remoting.http12.HttpMethods;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
 import org.hibernate.validator.constraints.Length;
-import org.springframework.web.bind.annotation.RequestBody;
 import top.huzz.jaksho.api.CascadedRequestProvider;
 import top.huzz.jaksho.api.dto.AbstractPageQuery;
 import top.huzz.jaksho.api.dto.ObjectBizFieldTypeRefDTO;
@@ -60,8 +59,8 @@ public interface BizFieldTypeService {
 		}
 	}
 
-	@Mapping(path = "", method = HttpMethods.GET)
-	List<BizFieldType> pageQuery(@RequestBody PageQueryBizFieldTypeRequest request);
+	@Mapping(path = "/page", method = HttpMethods.POST)
+	List<BizFieldType> pageQuery(PageQueryBizFieldTypeRequest request);
 
 	class PageQueryBizFieldTypeRequest extends AbstractPageQuery<BizFieldType> {
 

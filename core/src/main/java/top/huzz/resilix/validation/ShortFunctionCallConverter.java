@@ -3,7 +3,7 @@ package top.huzz.resilix.validation;
 import jakarta.annotation.Nonnull;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
 import java.util.Map;
 
 /**
@@ -44,7 +44,7 @@ public final class ShortFunctionCallConverter implements ExpressionConverter {
         // Remove optional leading '#'
         String maybeFunctionName = trimmed.charAt(0) == '#' ? trimmed.substring(1) : trimmed;
 
-        Map<String, Method> functions = Validations.getFunctions();
+        Map<String, MethodHandle> functions = Validations.getFunctions();
         if (functions.containsKey(maybeFunctionName)) {
             return "#" + maybeFunctionName + "(#this)";
         }

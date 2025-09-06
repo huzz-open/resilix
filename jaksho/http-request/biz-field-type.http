@@ -1,5 +1,5 @@
 ###
-GET {{endpoint}}/sr/biz-field-type
+POST {{endpoint}}/sr/biz-field-type/page
 
 {
     "current": 1,

@@ -23,6 +23,14 @@
             <artifactId>spring-boot-starter-resilix</artifactId>
         </dependency>
         <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>mybatis-plus-jsqlparser</artifactId>
+        </dependency>
+        <dependency>
             <groupId>top.huzz</groupId>
             <artifactId>jaksho-common</artifactId>
             <version>${revision}</version>

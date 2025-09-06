@@ -16,7 +16,7 @@ import org.springframework.expression.spel.support.StandardTypeLocator;
 import top.huzz.resilix.util.ApplicationContextUtils;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
-import java.lang.reflect.Method;
+import java.lang.invoke.MethodHandle;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -137,7 +137,7 @@ public class BizCheckConstraint implements ConstraintValidator<BizCheck, Object>
     }
 
     private void registerFunctions(StandardEvaluationContext ctx) {
-        Map<String, Method> functions = Validations.getFunctions();
+        Map<String, MethodHandle> functions = Validations.getFunctions();
         functions.forEach(ctx::registerFunction);
     }
 

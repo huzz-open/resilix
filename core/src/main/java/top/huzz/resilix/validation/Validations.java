@@ -14,6 +14,8 @@ import top.huzz.resilix.validation.checker.Checker;
 import top.huzz.resilix.validation.checker.TypedDatasourceBasedChecker;
 import top.huzz.resilix.validation.checker.TypedDatasourceBasedCheckerProvider;
 
+import java.lang.invoke.MethodHandle;
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.*;
 import java.util.function.Consumer;
@@ -37,7 +39,7 @@ public class Validations implements ApplicationRunner {
         Validations.typedDatasourceBasedCheckerProvider = typedDatasourceBasedCheckerProvider;
     }
 
-    private static final Map<String, Method> METHODS = new LinkedHashMap<>();
+    private static final Map<String, MethodHandle> METHODS = new LinkedHashMap<>();
 
     /**
      * Gets the current validation context.
@@ -71,24 +73,24 @@ public class Validations implements ApplicationRunner {
      * </p>
      *
      * @param functionName the name of the function to register
-     * @param method       the method that implements the business check logic
+     * @param methodHandle the method handle representing the function implementation
      * @throws IllegalArgumentException if the function name is already registered
      */
-    public static void registerFunctions(@Nonnull String functionName, @Nonnull Method method) {
+    public static void registerFunctions(@Nonnull String functionName, @Nonnull MethodHandle methodHandle) {
         Objects.requireNonNull(functionName);
         if (METHODS.containsKey(functionName)) {
             throw new IllegalArgumentException("Function '" + functionName + "' is already registered.");
         }
-        METHODS.put(functionName, method);
+        METHODS.put(functionName, methodHandle);
     }
 
     /**
      * Returns an unmodifiable map of all registered business check functions.
      *
-     * @return an unmodifiable map where keys are function names and values are the corresponding methods
+     * @return an unmodifiable map of function names to method handles
      */
     @Nonnull
-    public static Map<String, Method> getFunctions() {
+    public static Map<String, MethodHandle> getFunctions() {
         return Collections.unmodifiableMap(METHODS);
     }
 
@@ -321,6 +323,14 @@ public class Validations implements ApplicationRunner {
     public void run(ApplicationArguments args) throws Exception {
         Map<String, Method> allReducibleMethod = findAllReducibleMethod();
         log.info("All reducible methods: {}", allReducibleMethod.keySet());
-        allReducibleMethod.forEach(Validations::registerFunctions);
+        MethodHandles.Lookup lookup = MethodHandles.lookup();
+        allReducibleMethod.forEach((name, method) -> {
+            try {
+                MethodHandle methodHandle = lookup.unreflect(method);
+                registerFunctions(name, methodHandle);
+            } catch (IllegalAccessException e) {
+                log.error("Failed to register function: {}", name, e);
+            }
+        });
     }
 }
