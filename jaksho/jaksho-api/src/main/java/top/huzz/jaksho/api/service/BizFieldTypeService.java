@@ -11,7 +11,7 @@ import top.huzz.jaksho.api.dto.AbstractPageQuery;
 import top.huzz.jaksho.api.dto.ObjectBizFieldTypeRefDTO;
 import top.huzz.jaksho.common.constant.BasicFieldType;
 import top.huzz.jaksho.common.constant.CollectionType;
-import top.huzz.jaksho.domain.entity.BizFieldType;
+import top.huzz.jaksho.common.entity.CombineResult;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
 import java.util.List;
@@ -25,48 +25,44 @@ import java.util.List;
 @Mapping("/sr/biz-field-type")
 public interface BizFieldTypeService {
 
-	@Mapping(path = "", method = HttpMethods.POST)
-	Integer create(CreateBizFieldTypeRequest request);
+    @Mapping(path = "", method = HttpMethods.POST)
+    Integer create(CreateBizFieldTypeRequest request);
 
-	@Getter
-	@Setter
-	@BizCheck.List({
-			@BizCheck(when = "basicFieldType == T(BasicFieldType).OBJECT", value = "#checkObjectBizFieldTypeRef(objectBizFieldTypeRefDTOList)"),
-	})
-	class CreateBizFieldTypeRequest implements CascadedRequestProvider<ObjectBizFieldTypeRefDTO> {
-		@Length(min = 1, max = 100)
-		@BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.BizFieldType', #this)")
-		private String name;
+    @Getter
+    @Setter
+    @BizCheck.List({
+            @BizCheck(when = "basicFieldType == T(BasicFieldType).OBJECT", value = "#checkObjectBizFieldTypeRef(objectBizFieldTypeRefDTOList)"),
+    })
+    class CreateBizFieldTypeRequest implements CascadedRequestProvider<ObjectBizFieldTypeRefDTO> {
+        @Length(min = 1, max = 100)
+        @BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.BizFieldType', #this)")
+        private String name;
 
-		@Length(max = 255)
-		private String description;
+        @Length(max = 255)
+        private String description;
 
-		@NotNull
-		private CollectionType collectionType;
+        @NotNull
+        private CollectionType collectionType;
 
-		@NotNull
-		private BasicFieldType basicFieldType;
+        @NotNull
+        private BasicFieldType basicFieldType;
 
-		private Integer minimum;
+        private Integer minimum;
 
-		private Integer maximum;
+        private Integer maximum;
 
-		private List<ObjectBizFieldTypeRefDTO> objectBizFieldTypeRefDTOList;
+        private List<ObjectBizFieldTypeRefDTO> objectBizFieldTypeRefDTOList;
 
-		@Override
-		public List<ObjectBizFieldTypeRefDTO> cascadedRequests() {
-			return objectBizFieldTypeRefDTOList;
-		}
-	}
+        @Override
+        public List<ObjectBizFieldTypeRefDTO> cascadedRequests() {
+            return objectBizFieldTypeRefDTOList;
+        }
+    }
 
-	@Mapping(path = "/page", method = HttpMethods.POST)
-	List<BizFieldType> pageQuery(PageQueryBizFieldTypeRequest request);
+    @Mapping(path = "/page", method = HttpMethods.POST)
+    List<CombineResult> pageQuery(PageQueryBizFieldTypeRequest request);
 
-	class PageQueryBizFieldTypeRequest extends AbstractPageQuery<BizFieldType> {
+    class PageQueryBizFieldTypeRequest extends AbstractPageQuery<CombineResult> {
 
-	}
-
-	class PageQueryBizFieldTypeResponse extends BizFieldType {
-
-	}
+    }
 }

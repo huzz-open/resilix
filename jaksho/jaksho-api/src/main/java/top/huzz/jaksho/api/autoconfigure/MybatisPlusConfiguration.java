@@ -1,10 +1,11 @@
-package top.huzz.jaksho.api.domain;
+package top.huzz.jaksho.api.autoconfigure;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
+import top.huzz.jaksho.api.domain.CustomMetaObjectHandler;
 
 /**
  * @author huzz
