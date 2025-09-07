@@ -12,7 +12,8 @@ import top.huzz.jaksho.api.config.AppConfig;
 @Import({
         AbleCacheRegistryConfiguration.class,
         MybatisPlusConfiguration.class,
-        CombineResultConfiguration.class
+        CombineResultConfiguration.class,
+        FastJson2Configuration.class
 })
 @EnableConfigurationProperties(AppConfig.class)
 public class BucketAutoconfigure {
