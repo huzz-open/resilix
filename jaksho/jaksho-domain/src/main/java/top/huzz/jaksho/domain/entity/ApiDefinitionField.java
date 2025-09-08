@@ -15,6 +15,8 @@ import top.huzz.jaksho.common.entity.BasicProperties;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -106,27 +108,22 @@ public class ApiDefinitionField extends BasicProperties implements Serializable 
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
-    public static final String ID = "id";
-
-    public static final String API_ID = "api_id";
-
-    public static final String ULID = "ulid";
-
-    public static final String PARENT_ULID = "parent_ulid";
-
-    public static final String SORT_ORDER = "sort_order";
-
-    public static final String FIELD_TYPE = "field_type";
-
-    public static final String BIZ_FIELD_DOMAIN_ID = "biz_field_domain_id";
-
-    public static final String IS_REQUIRED = "is_required";
-
-    public static final String DESCRIPTION = "description";
-
-    public static final String WORKSPACE_ID = "workspace_id";
-
-    public static final String CREATE_TIME = "create_time";
-
-    public static final String UPDATE_TIME = "update_time";
+    @Override
+    @SuppressWarnings("all")
+    public Map<String, Object> properties() {
+        Map<String, Object> props = new LinkedHashMap<>();
+        props.put("id", id);
+        props.put("apiId", apiId);
+        props.put("ulid", ulid);
+        props.put("parentUlid", parentUlid);
+        props.put("sortOrder", sortOrder);
+        props.put("fieldType", fieldType);
+        props.put("bizFieldDomainId", bizFieldDomainId);
+        props.put("isRequired", isRequired);
+        props.put("description", description);
+        props.put("workspaceId", workspaceId);
+        props.put("createTime", createTime);
+        props.put("updateTime", updateTime);
+        return props;
+    }
 }

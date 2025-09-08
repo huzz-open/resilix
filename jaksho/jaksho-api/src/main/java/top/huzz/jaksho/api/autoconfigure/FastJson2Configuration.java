@@ -7,7 +7,7 @@ import jakarta.annotation.Resource;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import top.huzz.jaksho.api.config.AppConfig;
 import top.huzz.jaksho.common.entity.CombineResult;
-import top.huzz.jaksho.common.json.CombineResultSerializer;
+import top.huzz.jaksho.api.json.CombineResultSerializer;
 
 
 /**
@@ -27,7 +27,7 @@ public class FastJson2Configuration {
     @PostConstruct
     public void configureFastJson2() {
         // 注册 CombineResult 的序列化器
-        ObjectWriter<CombineResult> serializer = new CombineResultSerializer();
+        ObjectWriter<CombineResult> serializer = new CombineResultSerializer(appConfig);
         JSON.register(CombineResult.class, serializer);
     }
 }

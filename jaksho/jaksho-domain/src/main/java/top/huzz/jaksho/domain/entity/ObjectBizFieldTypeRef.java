@@ -14,6 +14,8 @@ import top.huzz.jaksho.common.entity.BasicProperties;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -87,21 +89,19 @@ public class ObjectBizFieldTypeRef extends BasicProperties implements Serializab
     @TableField(value = "workspace_id", fill = FieldFill.INSERT)
     private Integer workspaceId;
 
-    public static final String ID = "id";
-
-    public static final String ULID = "ulid";
-
-    public static final String PARENT_ULID = "parent_ulid";
-
-    public static final String SORT_ORDER = "sort_order";
-
-    public static final String BIZ_FIELD_TYPE_ID = "biz_field_type_id";
-
-    public static final String BIZ_FIELD_DOMAIN_ID = "biz_field_domain_id";
-
-    public static final String CREATE_TIME = "create_time";
-
-    public static final String UPDATE_TIME = "update_time";
-
-    public static final String WORKSPACE_ID = "workspace_id";
+    @Override
+    @SuppressWarnings("all")
+    public Map<String, Object> properties() {
+        Map<String, Object> props = new LinkedHashMap<>();
+        props.put("id", id);
+        props.put("ulid", ulid);
+        props.put("parentUlid", parentUlid);
+        props.put("sortOrder", sortOrder);
+        props.put("bizFieldTypeId", bizFieldTypeId);
+        props.put("bizFieldDomainId", bizFieldDomainId);
+        props.put("createTime", createTime);
+        props.put("updateTime", updateTime);
+        props.put("workspaceId", workspaceId);
+        return props;
+    }
 }

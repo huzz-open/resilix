@@ -16,10 +16,11 @@ import java.util.Map;
 @Getter
 @Setter
 public class CombineResult {
+    public static final String FIELD_DOMAINS = "domains";
     /**
      * 存储多表查询结果
      * key: 表名
      * value: 对应的实体对象
      */
-    private final Map<String, Object> domains = new LinkedHashMap<>();
+    private final Map<String, BasicProperties> domains = new LinkedHashMap<>();
 }

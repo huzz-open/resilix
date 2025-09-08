@@ -7,6 +7,8 @@ import ${pkg};
 <#list importEntityJavaPackages as pkg>
 import ${pkg};
 </#list>
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -111,4 +113,14 @@ public class ${entity} {
             "}";
     }
 </#if>
+
+    @Override
+    @SuppressWarnings("all")
+    public Map<String, Object> properties() {
+        Map<String, Object> props = new LinkedHashMap<>();
+        <#list table.fields as field>
+        props.put("${field.propertyName}", ${field.propertyName});
+        </#list>
+        return props;
+    }
 }

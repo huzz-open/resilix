@@ -103,7 +103,7 @@ public class AppConfig {
          * }
          * </pre>
          */
-        private boolean fullExpand = true;
+        private boolean fullExpand = false;
 
         /**
          * 当开启 {@link #fullExpand} 时，是否智能地选择平铺策略，而不是简单地将 key 拼接后平铺。

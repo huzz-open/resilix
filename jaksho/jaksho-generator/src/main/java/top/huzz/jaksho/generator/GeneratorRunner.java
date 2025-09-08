@@ -84,7 +84,6 @@ public class GeneratorRunner extends Settings implements ApplicationRunner {
                             .enableChainModel() //开启链式模型
                             .enableFileOverride() //开启文件覆盖
                             .enableTableFieldAnnotation() // 开启生成实体时生成字段注解
-                            .enableColumnConstant()  //开启生成字段常量
                             .enableLombok() //开启 Lombok
                             .superClass(BasicProperties.class) // 指定Entity的父类.
                             .versionColumnName("version")   //乐观锁字段名(数据库)

@@ -15,6 +15,7 @@ import org.apache.ibatis.session.Configuration;
 import org.apache.ibatis.type.JdbcType;
 import org.apache.ibatis.type.TypeHandler;
 import org.apache.ibatis.type.TypeHandlerRegistry;
+import top.huzz.jaksho.common.entity.BasicProperties;
 import top.huzz.jaksho.common.entity.CombineResult;
 
 import java.sql.ResultSet;
@@ -95,8 +96,8 @@ public class CombineResultSetHandler implements Interceptor {
                 List<ColumnInfo> columns = entry.getValue();
 
                 // 获取对应的实体类
-                Class<?> entityClass = domainClassProvider.getDomainClass(tableName);
-                Object entity = createEntityFromResultSet(entityClass, columns, resultSet, defaultResultSetHandler);
+                Class<? extends BasicProperties> entityClass = domainClassProvider.getDomainClass(tableName);
+                BasicProperties entity = createEntityFromResultSet(entityClass, columns, resultSet, defaultResultSetHandler);
                 combineResult.getDomains().put(tableName, entity);
             }
 
@@ -126,8 +127,8 @@ public class CombineResultSetHandler implements Interceptor {
     /**
      * 从 ResultSet 创建实体对象
      */
-    private Object createEntityFromResultSet(Class<?> entityClass, List<ColumnInfo> columns, ResultSet resultSet, DefaultResultSetHandler defaultResultSetHandler) throws Throwable {
-        Object entity = entityClass.getDeclaredConstructor().newInstance();
+    private BasicProperties createEntityFromResultSet(Class<? extends BasicProperties> entityClass, List<ColumnInfo> columns, ResultSet resultSet, DefaultResultSetHandler defaultResultSetHandler) throws Throwable {
+        BasicProperties entity = entityClass.getDeclaredConstructor().newInstance();
         MetaObject metaObject = SystemMetaObject.forObject(entity);
 
         for (ColumnInfo columnInfo : columns) {
@@ -175,7 +176,7 @@ public class CombineResultSetHandler implements Interceptor {
     /**
      * 获取 TypeHandler
      */
-    private TypeHandler<?> getTypeHandler(Class<?> targetType, JdbcType jdbcType, DefaultResultSetHandler defaultResultSetHandler) throws Throwable {
+    private TypeHandler<?> getTypeHandler(Class<?> targetType, JdbcType jdbcType, DefaultResultSetHandler defaultResultSetHandler) {
         if (typeHandlerRegistry == null) {
             synchronized (CombineResultSetHandler.class) {
                 if (typeHandlerRegistry == null) {
@@ -190,7 +191,7 @@ public class CombineResultSetHandler implements Interceptor {
     /**
      * 获取 MyBatis Configuration
      */
-    private Configuration getConfiguration(DefaultResultSetHandler defaultResultSetHandler) throws Throwable {
+    private Configuration getConfiguration(DefaultResultSetHandler defaultResultSetHandler) {
         // 通过反射从 DefaultResultSetHandler 获取 Configuration
         MetaObject metaObject = SystemMetaObject.forObject(defaultResultSetHandler);
         return (Configuration) metaObject.getValue("configuration");
@@ -212,7 +213,7 @@ public class CombineResultSetHandler implements Interceptor {
     /**
      * 获取 MappedStatement
      */
-    private MappedStatement getMappedStatement(DefaultResultSetHandler defaultResultSetHandler) throws Throwable {
+    private MappedStatement getMappedStatement(DefaultResultSetHandler defaultResultSetHandler) {
         MetaObject metaObject = SystemMetaObject.forObject(defaultResultSetHandler);
         return (MappedStatement) metaObject.getValue("mappedStatement");
     }

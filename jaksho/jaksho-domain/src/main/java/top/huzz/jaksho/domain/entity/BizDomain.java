@@ -14,6 +14,8 @@ import top.huzz.jaksho.common.entity.BasicProperties;
 import java.io.Serial;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 /**
  * <p>
@@ -69,15 +71,16 @@ public class BizDomain extends BasicProperties implements Serializable {
     @TableField(value = "workspace_id", fill = FieldFill.INSERT)
     private Integer workspaceId;
 
-    public static final String ID = "id";
-
-    public static final String NAME = "name";
-
-    public static final String DESCRIPTION = "description";
-
-    public static final String CREATE_TIME = "create_time";
-
-    public static final String UPDATE_TIME = "update_time";
-
-    public static final String WORKSPACE_ID = "workspace_id";
+    @Override
+    @SuppressWarnings("all")
+    public Map<String, Object> properties() {
+        Map<String, Object> props = new LinkedHashMap<>();
+        props.put("id", id);
+        props.put("name", name);
+        props.put("description", description);
+        props.put("createTime", createTime);
+        props.put("updateTime", updateTime);
+        props.put("workspaceId", workspaceId);
+        return props;
+    }
 }
