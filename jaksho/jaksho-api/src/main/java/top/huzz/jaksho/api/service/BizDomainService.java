@@ -2,9 +2,14 @@ package top.huzz.jaksho.api.service;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.dubbo.remoting.http12.HttpMethods;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
 import org.hibernate.validator.constraints.Length;
+import top.huzz.jaksho.api.dto.AbstractPageQuery;
+import top.huzz.jaksho.domain.entity.BizDomain;
 import top.huzz.resilix.validation.annotation.BizCheck;
+
+import java.util.List;
 
 /**
  * 业务域名服务接口
@@ -27,5 +32,12 @@ public interface BizDomainService {
 
         @Length(max = 255)
         private String description;
+    }
+
+    @Mapping(path = "/page", method = HttpMethods.POST)
+    List<BizDomain> pageQuery(BizDomainService.PageQueryRequest request);
+
+    class PageQueryRequest extends AbstractPageQuery<BizDomain> {
+
     }
 }

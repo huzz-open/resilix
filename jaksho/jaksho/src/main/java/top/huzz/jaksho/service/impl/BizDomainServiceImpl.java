@@ -3,12 +3,17 @@ package top.huzz.jaksho.service.impl;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
+import top.huzz.jaksho.api.helper.QueryHelper;
 import top.huzz.jaksho.api.phase.CreatePhase;
 import top.huzz.jaksho.api.service.BizDomainService;
 import top.huzz.jaksho.common.entity.BasicProperties;
+import top.huzz.jaksho.common.session.Session;
 import top.huzz.jaksho.domain.entity.BizDomain;
+import top.huzz.jaksho.domain.mapper.BizDomainMapper;
 import top.huzz.resilix.core.RunHandlerManager;
 import top.huzz.resilix.core.RunHandlerManagerHelper;
+
+import java.util.List;
 
 /**
  * @author chenji
@@ -27,5 +32,13 @@ public class BizDomainServiceImpl implements BizDomainService {
             throw new RuntimeException(context.getException());
         }
         return context.getId();
+    }
+
+    @Override
+    public List<BizDomain> pageQuery(BizDomainService.PageQueryRequest request) {
+        int workspaceId = Session.currentWorkspaceId();
+        return QueryHelper.lambdaQuery(BizDomainMapper.class, request.toPage(), wp -> {
+            wp.eq(BizDomain::getWorkspaceId, workspaceId);
+        });
     }
 }

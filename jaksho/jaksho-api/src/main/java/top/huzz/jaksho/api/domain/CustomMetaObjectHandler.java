@@ -2,6 +2,7 @@ package top.huzz.jaksho.api.domain;
 
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import org.apache.ibatis.reflection.MetaObject;
+import top.huzz.jaksho.common.session.Session;
 
 import java.time.LocalDateTime;
 
@@ -16,8 +17,7 @@ public class CustomMetaObjectHandler implements MetaObjectHandler {
         LocalDateTime now = LocalDateTime.now();
         this.strictInsertFill(metaObject, "createTime", LocalDateTime.class, now);
         this.strictInsertFill(metaObject, "updateTime", LocalDateTime.class, now);
-        // TODO from session
-        this.strictInsertFill(metaObject, "workspaceId", Integer.class, 0);
+        this.strictInsertFill(metaObject, "workspaceId", Integer.class, Session.currentWorkspaceId());
     }
 
     @Override

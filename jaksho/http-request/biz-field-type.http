@@ -54,7 +54,7 @@ POST {{endpoint}}/sr/biz-field-type
 POST {{endpoint}}/sr/biz-field-type
 
 {
-    "name": "ObjectTest4",
+    "name": "ObjectTest55",
     "collectionType" : "NONE",
     "basicFieldType": "object",
     "objectBizFieldTypeRefDTOList": [{

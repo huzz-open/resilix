@@ -2,8 +2,13 @@ package top.huzz.jaksho.api.service;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.apache.dubbo.remoting.http12.HttpMethods;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
+import top.huzz.jaksho.api.dto.AbstractPageQuery;
+import top.huzz.jaksho.domain.entity.BizFieldDomain;
 import top.huzz.resilix.validation.annotation.BizCheck;
+
+import java.util.List;
 
 /**
  * 业务字段域名服务接口
@@ -27,5 +32,12 @@ public interface BizFieldDomainService {
         private Integer bizDomainId;
         @BizCheck("#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizFieldType', #this)")
         private Integer bizFieldTypeId;
+    }
+
+    @Mapping(path = "/page", method = HttpMethods.POST)
+    List<BizFieldDomain> pageQuery(BizFieldDomainService.PageQueryRequest request);
+
+    class PageQueryRequest extends AbstractPageQuery<BizFieldDomain> {
+
     }
 }

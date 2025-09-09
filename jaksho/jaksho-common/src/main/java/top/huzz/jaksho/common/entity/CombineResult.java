@@ -1,5 +1,6 @@
 package top.huzz.jaksho.common.entity;
 
+import jakarta.annotation.Nonnull;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -23,4 +24,24 @@ public class CombineResult {
      * value: 对应的实体对象
      */
     private final Map<String, BasicProperties> domains = new LinkedHashMap<>();
+
+    @Nonnull
+    public <T> BasicProperties get(Class<T> domainClass) {
+        return domains
+                .values()
+                .stream()
+                .filter(domain -> domainClass.isAssignableFrom(domain.getClass()))
+                .findFirst()
+                .orElseThrow(
+                        () -> new IllegalArgumentException("No domain found for class: " + domainClass.getName())
+                );
+    }
+
+    @SuppressWarnings("unchecked")
+    public <T> T get() {
+        if (domains.size() != 1) {
+            throw new IllegalStateException("Cannot determine single domain when multiple domains exist.");
+        }
+        return (T) domains.values().iterator().next();
+    }
 }

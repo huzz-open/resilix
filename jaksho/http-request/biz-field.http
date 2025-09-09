@@ -1,3 +1,12 @@
+###
+POST {{endpoint}}/sr/biz-field/page
+
+{
+    "current": 1,
+    "pageSize": 3
+}
+
+###
 POST {{endpoint}}/sr/biz-field
 
 {

@@ -3,6 +3,7 @@ package top.huzz.jaksho.api.validation;
 import jakarta.annotation.Nonnull;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
+import top.huzz.jaksho.common.session.Session;
 import top.huzz.resilix.validation.LeadingFieldValue;
 import top.huzz.resilix.validation.LeadingFieldValueProvider;
 import top.huzz.resilix.validation.checker.Checker;
@@ -20,8 +21,7 @@ public class SessionWorkspaceIdLeadingFieldValueProvider implements LeadingField
     @Override
     public LeadingFieldValue get() {
         // Here you should implement the logic to get the actual workspaceId from the session or context
-        int workspaceId = 0;
-        return new LeadingFieldValue("workspaceId", workspaceId);
+        return new LeadingFieldValue("workspaceId", Session.currentWorkspaceId());
     }
 
     @Override

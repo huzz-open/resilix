@@ -19,20 +19,7 @@ import java.util.Map;
  */
 @Mapper
 public interface QueryAnyMapper {
-
     @Select("${sql}")
     @ResultType(CombineResult.class)
-    List<CombineResult> query(@Param("sql") String sql, @Param("page") Page<CombineResult> page);
-
-    default List<CombineResult> query(@Param("sql") String sql) {
-        return query(sql, (Page<CombineResult>) null);
-    }
-
-    @Select("${sql}")
-    @ResultType(CombineResult.class)
-    List<CombineResult> query(@Param("sql") String sql, @Param("page") Page<CombineResult> page, @Param("params") Map<String, Object> params);
-
-    default List<CombineResult> query(@Param("sql") String sql, @Param("params") Map<String, Object> params) {
-        return query(sql, null, params);
-    }
+    List<CombineResult> query(@Param("sql") String sql, @Param("page") Page<CombineResult> page, @Param("p") Map<String, Object> p);
 }
