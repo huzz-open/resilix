@@ -35,7 +35,7 @@ public interface BizDomainService {
     }
 
     @Mapping(path = "/page", method = HttpMethods.POST)
-    List<BizDomain> pageQuery(BizDomainService.PageQueryRequest request);
+    Object pageQuery(BizDomainService.PageQueryRequest request);
 
     class PageQueryRequest extends AbstractPageQuery<BizDomain> {
 

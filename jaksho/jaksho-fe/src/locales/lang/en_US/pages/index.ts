@@ -1,3 +1,4 @@
+import bizDomain from './biz-domain';
 import dashboardBase from './dashboard-base';
 import dashboardDetail from './dashboard-detail';
 import detailBase from './detail-base';
@@ -15,6 +16,7 @@ import result from './result';
 import user from './user';
 
 export default {
+  bizDomain,
   dashboardBase,
   dashboardDetail,
   listBase,

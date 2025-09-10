@@ -1,5 +1,6 @@
 package top.huzz.jaksho.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
@@ -14,6 +15,7 @@ import top.huzz.resilix.core.RunHandlerManager;
 import top.huzz.resilix.core.RunHandlerManagerHelper;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenji
@@ -35,10 +37,13 @@ public class BizDomainServiceImpl implements BizDomainService {
     }
 
     @Override
-    public List<BizDomain> pageQuery(BizDomainService.PageQueryRequest request) {
+    public Object pageQuery(BizDomainService.PageQueryRequest request) {
         int workspaceId = Session.currentWorkspaceId();
-        return QueryHelper.lambdaQuery(BizDomainMapper.class, request.toPage(), wp -> {
+        Page<BizDomain> page = request.toPage();
+        List<BizDomain> bizDomains = QueryHelper.lambdaQuery(BizDomainMapper.class, page, wp -> {
             wp.eq(BizDomain::getWorkspaceId, workspaceId);
         });
+
+        return Map.of("total", page.getTotal(), "data", bizDomains, "code", 0);
     }
 }
