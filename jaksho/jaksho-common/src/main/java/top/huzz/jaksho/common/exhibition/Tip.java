@@ -19,7 +19,7 @@ public interface Tip {
 
     @Getter
     enum Builtin implements Tip {
-        OK(200, "ok"),
+        OK(0, "ok"),
         ;
         private final long code;
         private final String message;
