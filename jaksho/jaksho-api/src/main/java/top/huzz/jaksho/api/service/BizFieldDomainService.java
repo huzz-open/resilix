@@ -9,8 +9,6 @@ import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.domain.entity.BizFieldDomain;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
-import java.util.List;
-
 /**
  * 业务字段域名服务接口
  *

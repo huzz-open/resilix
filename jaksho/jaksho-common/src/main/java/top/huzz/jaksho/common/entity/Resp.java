@@ -22,6 +22,10 @@ public final class Resp<T> {
     private Resp() {
     }
 
+    public static <T> Resp<T> of(T data) {
+        return of(data, Tip.Builtin.OK);
+    }
+
     public static <T> Resp<T> of(Tip tip) {
         return of(null, tip.getCode(), tip.getMessage());
     }
