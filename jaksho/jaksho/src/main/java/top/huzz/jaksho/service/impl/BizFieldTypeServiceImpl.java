@@ -1,11 +1,13 @@
 package top.huzz.jaksho.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
 import top.huzz.jaksho.api.helper.QueryHelper;
 import top.huzz.jaksho.api.phase.CreatePhase;
 import top.huzz.jaksho.api.service.BizFieldTypeService;
+import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.common.session.Session;
 import top.huzz.jaksho.domain.entity.BizFieldType;
 import top.huzz.jaksho.domain.entity.ObjectBizFieldTypeRef;
@@ -36,10 +38,12 @@ public class BizFieldTypeServiceImpl implements BizFieldTypeService {
     }
 
     @Override
-    public List<BizFieldType> pageQuery(PageQueryRequest request) {
+    public PageResult<BizFieldType> pageQuery(PageQueryRequest request) {
         int workspaceId = Session.currentWorkspaceId();
-        return QueryHelper.lambdaQuery(BizFieldTypeMapper.class, request.toPage(), wp -> {
+        Page<BizFieldType> page = request.toPage();
+        List<BizFieldType> rows = QueryHelper.lambdaQuery(BizFieldTypeMapper.class, page, wp -> {
             wp.eq(BizFieldType::getWorkspaceId, workspaceId);
         });
+        return PageResult.of(rows, page);
     }
 }

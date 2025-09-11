@@ -6,6 +6,7 @@ import org.apache.dubbo.remoting.http12.HttpMethods;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
 import org.hibernate.validator.constraints.Length;
 import top.huzz.jaksho.api.dto.AbstractPageQuery;
+import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.domain.entity.BizDomain;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
@@ -35,7 +36,7 @@ public interface BizDomainService {
     }
 
     @Mapping(path = "/page", method = HttpMethods.POST)
-    Object pageQuery(BizDomainService.PageQueryRequest request);
+    PageResult<BizDomain> pageQuery(BizDomainService.PageQueryRequest request);
 
     class PageQueryRequest extends AbstractPageQuery<BizDomain> {
 

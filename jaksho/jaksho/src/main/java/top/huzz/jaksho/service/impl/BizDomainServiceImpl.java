@@ -8,6 +8,7 @@ import top.huzz.jaksho.api.helper.QueryHelper;
 import top.huzz.jaksho.api.phase.CreatePhase;
 import top.huzz.jaksho.api.service.BizDomainService;
 import top.huzz.jaksho.common.entity.BasicProperties;
+import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.common.session.Session;
 import top.huzz.jaksho.domain.entity.BizDomain;
 import top.huzz.jaksho.domain.mapper.BizDomainMapper;
@@ -15,7 +16,6 @@ import top.huzz.resilix.core.RunHandlerManager;
 import top.huzz.resilix.core.RunHandlerManagerHelper;
 
 import java.util.List;
-import java.util.Map;
 
 /**
  * @author chenji
@@ -37,13 +37,12 @@ public class BizDomainServiceImpl implements BizDomainService {
     }
 
     @Override
-    public Object pageQuery(BizDomainService.PageQueryRequest request) {
+    public PageResult<BizDomain> pageQuery(BizDomainService.PageQueryRequest request) {
         int workspaceId = Session.currentWorkspaceId();
         Page<BizDomain> page = request.toPage();
-        List<BizDomain> bizDomains = QueryHelper.lambdaQuery(BizDomainMapper.class, page, wp -> {
+        List<BizDomain> rows = QueryHelper.lambdaQuery(BizDomainMapper.class, page, wp -> {
             wp.eq(BizDomain::getWorkspaceId, workspaceId);
         });
-
-        return Map.of("total", page.getTotal(), "data", bizDomains, "code", 0);
+        return PageResult.of(rows, page);
     }
 }

@@ -11,6 +11,7 @@ import top.huzz.jaksho.api.dto.AbstractPageQuery;
 import top.huzz.jaksho.api.dto.ObjectBizFieldTypeRefDTO;
 import top.huzz.jaksho.common.constant.BasicFieldType;
 import top.huzz.jaksho.common.constant.CollectionType;
+import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.domain.entity.BizFieldType;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
@@ -60,7 +61,7 @@ public interface BizFieldTypeService {
     }
 
     @Mapping(path = "/page", method = HttpMethods.POST)
-    List<BizFieldType> pageQuery(PageQueryRequest request);
+    PageResult<BizFieldType> pageQuery(PageQueryRequest request);
 
     class PageQueryRequest extends AbstractPageQuery<BizFieldType> {
 

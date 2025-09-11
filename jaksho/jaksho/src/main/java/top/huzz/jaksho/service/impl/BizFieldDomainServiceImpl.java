@@ -1,5 +1,6 @@
 package top.huzz.jaksho.service.impl;
 
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
@@ -7,6 +8,7 @@ import top.huzz.jaksho.api.helper.QueryHelper;
 import top.huzz.jaksho.api.phase.CreatePhase;
 import top.huzz.jaksho.api.service.BizFieldDomainService;
 import top.huzz.jaksho.common.entity.BasicProperties;
+import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.common.session.Session;
 import top.huzz.jaksho.domain.entity.BizFieldDomain;
 import top.huzz.jaksho.domain.mapper.BizFieldDomainMapper;
@@ -35,10 +37,12 @@ public class BizFieldDomainServiceImpl implements BizFieldDomainService {
     }
 
     @Override
-    public List<BizFieldDomain> pageQuery(BizFieldDomainService.PageQueryRequest request) {
+    public PageResult<BizFieldDomain> pageQuery(BizFieldDomainService.PageQueryRequest request) {
         int workspaceId = Session.currentWorkspaceId();
-        return QueryHelper.lambdaQuery(BizFieldDomainMapper.class, request.toPage(), wp -> {
+        Page<BizFieldDomain> page = request.toPage();
+        List<BizFieldDomain> rows = QueryHelper.lambdaQuery(BizFieldDomainMapper.class, page, wp -> {
             wp.eq(BizFieldDomain::getWorkspaceId, workspaceId);
         });
+        return PageResult.of(rows, page);
     }
 }

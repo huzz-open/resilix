@@ -4,3 +4,11 @@ POST {{endpoint}}/sr/biz-domain
     "name": "user",
     "description": "User domain",
 }
+
+###
+POST {{endpoint}}/sr/biz-domain/page
+
+{
+    "current": 1,
+    "pageSize": 2
+}
