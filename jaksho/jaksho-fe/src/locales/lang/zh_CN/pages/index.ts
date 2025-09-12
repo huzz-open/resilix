@@ -34,4 +34,9 @@ export default {
   login,
   result,
   bizFieldType,
+  dev: {
+    jTreeDataDemo: {
+      title: 'j-tree-data 演示',
+    },
+  },
 };

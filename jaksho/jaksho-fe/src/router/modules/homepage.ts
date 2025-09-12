@@ -30,6 +30,17 @@ export default [
         },
       },
       {
+        path: 'j-tree-data-demo',
+        name: 'JTreeDataDemo',
+        component: () => import('@/pages/dev/j-tree-data-demo/index.vue'),
+        meta: {
+          title: {
+            zh_CN: 'j-tree-data 演示',
+            en_US: 'j-tree-data Demo',
+          },
+        },
+      },
+      {
         path: 'detail',
         name: 'DashboardDetail',
         component: () => import('@/pages/dashboard/detail/index.vue'),
