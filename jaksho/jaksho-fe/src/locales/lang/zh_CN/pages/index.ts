@@ -1,4 +1,5 @@
 import bizDomain from './biz-domain';
+import bizFieldType from './biz-field-type';
 import dashboardBase from './dashboard-base';
 import dashboardDetail from './dashboard-detail';
 import detailBase from './detail-base';
@@ -32,4 +33,5 @@ export default {
   user,
   login,
   result,
+  bizFieldType,
 };
