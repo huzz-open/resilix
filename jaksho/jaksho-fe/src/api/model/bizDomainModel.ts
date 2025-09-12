@@ -1,5 +1,5 @@
 export interface BizDomainListResult {
-  data: Array<BizDomainModel>;
+  rows: Array<BizDomainModel>;
   total: number;
 }
 

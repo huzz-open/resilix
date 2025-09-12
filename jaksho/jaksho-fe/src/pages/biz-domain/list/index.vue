@@ -184,12 +184,12 @@ const createFormRules: Record<string, FormRule[]> = {
 const fetchData = async () => {
   dataLoading.value = true;
   try {
-    const { data, total } = await getBizDomainList({
+    const { rows, total } = await getBizDomainList({
       current: pagination.value.current,
       pageSize: pagination.value.pageSize,
     });
     // 设置表格数据
-    listData.value = data;
+    listData.value = rows;
     // 设置分页总数
     pagination.value = {
       ...pagination.value,
