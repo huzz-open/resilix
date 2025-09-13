@@ -151,6 +151,7 @@ function normalizeComparable(val: unknown): string {
 }
 
 const extraWidth = ref<number>(0);
+const SELECTION_COL_WIDTH = 52;
 
 function computeMaxDepth(nodes: any[], currentDepth: number): number {
   let maxDepth = currentDepth;
@@ -163,8 +164,7 @@ function computeMaxDepth(nodes: any[], currentDepth: number): number {
   return maxDepth;
 }
 
-function recalcExtraWidth(entry?: string) {
-  console.info('recalcExtraWidth', entry);
+function recalcExtraWidth(_?: string) {
   const tree = treeRef.value;
   if (!tree || !tree.getTreeData) {
     extraWidth.value = 0;
@@ -248,7 +248,7 @@ const selectorColumns = computed(() => {
       if (c && (c.type === 'single' || c.type === 'multiple')) {
         const next: any = { ...c };
         next.checkProps = ensureCheckProps(c.checkProps);
-        if (typeof next.width === 'undefined') next.width = 52;
+        if (typeof next.width === 'undefined') next.width = SELECTION_COL_WIDTH;
         return next;
       }
       return c;
@@ -259,7 +259,7 @@ const selectorColumns = computed(() => {
   const selectionCol: any = {
     colKey: '__row_select__',
     type: props.selection === 'single' ? 'single' : 'multiple',
-    width: 52,
+    width: SELECTION_COL_WIDTH,
     checkProps: ensureCheckProps(undefined),
   };
   return [selectionCol, ...cols] as any[];
