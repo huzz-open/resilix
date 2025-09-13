@@ -36,11 +36,11 @@ const listPreview = ref('');
 
 const columns: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple' },
-  { title: '名称', colKey: 'name', width: '900px', ellipsis: true },
-  { title: '集合类型', colKey: 'collectionType', width: '900px', ellipsis: true },
-  { title: '描述', colKey: 'description', width: '900px', ellipsis: true },
-  { title: '最小值', colKey: 'minimum', width: '900px', ellipsis: true },
-  { title: '最大值', colKey: 'maximum', width: '900px', ellipsis: true },
+  { title: '名称', colKey: 'name', ellipsis: true },
+  { title: '集合类型', colKey: 'collectionType', ellipsis: true },
+  { title: '描述', colKey: 'description', ellipsis: true },
+  { title: '最小值', colKey: 'minimum', ellipsis: true },
+  { title: '最大值', colKey: 'maximum', ellipsis: true },
 ];
 
 // 演示分页数据接口：优先复用现有字段类型分页接口，如需更换可在这里替换

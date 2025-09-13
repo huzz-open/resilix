@@ -62,7 +62,7 @@
     <t-dialog
       v-model:visible="selector.visible"
       :header="selectorTitle"
-      width="960px"
+      :width="dialogWidth"
       :on-cancel="onSelectorCancel"
       @confirm="onSelectorConfirm"
     >
@@ -206,6 +206,26 @@ const listData = ref<any[]>([]);
 const selectedRowKeys = ref<Array<string | number>>([]);
 
 const columns = computed(() => props.columns);
+// 根据 columns 计算弹窗宽度：
+// 1) 优先使用列的 width/widthPx；2) 否则按默认列最小宽度估算；3) 加上动作列与内边距余量；4) 限制最小/最大宽度
+const dialogWidth = computed(() => {
+  const cols = columns.value || [];
+  const defaultColMin = 140; // 每列的保守最小宽度估算
+  const opsWidth = 160; // 选择框、分页、余量等
+  const padding = 80; // 弹窗内边距/表格滚动条富余
+  let total = 0;
+  cols.forEach((c: any) => {
+    const cw =
+      (typeof c.width === 'number' ? c.width : undefined) ||
+      (typeof c.width === 'string' && c.width.endsWith('px') ? Number.parseInt(c.width, 10) : undefined);
+    total += cw && !Number.isNaN(cw) ? cw : defaultColMin;
+  });
+  const width = total + opsWidth + padding;
+  const min = 720;
+  const max = 1440;
+  const bounded = Math.max(min, Math.min(width, max));
+  return `${bounded}px`;
+});
 const showColumnsResolved = computed<PrimaryTableCol[]>(() => {
   // 优先获取 showColumns，如果没有则使用 columns
   return props.showColumns && props.showColumns.length > 0 ? props.showColumns : props.columns;
