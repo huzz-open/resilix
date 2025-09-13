@@ -32,8 +32,12 @@
       >
         <template #op="slotProps">
           <t-space>
-            <t-link theme="primary" @click="handleClickDetail(slotProps)">{{ t('pages.bizFieldType.list.detail') }}</t-link>
-            <t-link theme="danger" @click="handleClickDelete(slotProps)">{{ t('pages.bizFieldType.list.delete') }}</t-link>
+            <t-link theme="primary" @click="handleClickDetail(slotProps)"
+              >{{ t('pages.bizFieldType.list.detail') }}
+            </t-link>
+            <t-link theme="danger" @click="handleClickDelete(slotProps)"
+              >{{ t('pages.bizFieldType.list.delete') }}
+            </t-link>
           </t-space>
         </template>
       </t-table>
@@ -47,12 +51,29 @@
       @confirm="onConfirmDelete"
     />
 
-    <t-dialog v-model:visible="createDialogVisible" :header="t('pages.bizFieldType.create.title')" width="760px" :footer="false">
-      <t-form ref="createFormRef" :data="createFormData" :rules="createFormRules" label-align="top" label-width="140" @submit="onCreateSubmit">
+    <t-dialog
+      v-model:visible="createDialogVisible"
+      :header="t('pages.bizFieldType.create.title')"
+      width="760px"
+      :footer="false"
+    >
+      <t-form
+        ref="createFormRef"
+        :data="createFormData"
+        :rules="createFormRules"
+        label-align="top"
+        label-width="140"
+        @submit="onCreateSubmit"
+      >
         <t-row :gutter="16">
           <t-col :span="6">
             <t-form-item :label="t('pages.bizFieldType.create.name')" name="name">
-              <t-input v-model="createFormData.name" :placeholder="t('pages.bizFieldType.create.namePlaceholder')" :maxlength="100" show-word-limit />
+              <t-input
+                v-model="createFormData.name"
+                :placeholder="t('pages.bizFieldType.create.namePlaceholder')"
+                :maxlength="100"
+                show-word-limit
+              />
             </t-form-item>
           </t-col>
           <t-col :span="6">
@@ -73,28 +94,47 @@
         <t-row :gutter="16">
           <t-col :span="6">
             <t-form-item :label="t('pages.bizFieldType.create.minimum')" name="minimum">
-              <t-input-number v-model="createFormData.minimum" :min="0" :theme="'column'" :placeholder="t('pages.bizFieldType.create.minimumPlaceholder')" style="width: 100%" />
+              <t-input-number
+                v-model="createFormData.minimum"
+                :min="0"
+                theme="column"
+                :placeholder="t('pages.bizFieldType.create.minimumPlaceholder')"
+                style="width: 100%"
+              />
             </t-form-item>
           </t-col>
           <t-col :span="6">
             <t-form-item :label="t('pages.bizFieldType.create.maximum')" name="maximum">
-              <t-input-number v-model="createFormData.maximum" :min="0" :theme="'column'" :placeholder="t('pages.bizFieldType.create.maximumPlaceholder')" style="width: 100%" />
+              <t-input-number
+                v-model="createFormData.maximum"
+                :min="0"
+                theme="column"
+                :placeholder="t('pages.bizFieldType.create.maximumPlaceholder')"
+                style="width: 100%"
+              />
             </t-form-item>
           </t-col>
         </t-row>
         <t-form-item :label="t('pages.bizFieldType.create.descriptionLabel')" name="description">
-          <t-textarea v-model="createFormData.description" :height="120" :placeholder="t('pages.bizFieldType.create.descriptionPlaceholder')" :maxlength="255" show-word-limit />
+          <t-textarea
+            v-model="createFormData.description"
+            :height="120"
+            :placeholder="t('pages.bizFieldType.create.descriptionPlaceholder')"
+            :maxlength="255"
+            show-word-limit
+          />
         </t-form-item>
         <div class="dialog-footer">
           <t-space>
             <t-button theme="default" @click="onCreateCancel">{{ t('pages.bizFieldType.create.cancel') }}</t-button>
-            <t-button theme="primary" type="submit" :loading="createSubmitLoading">{{ t('pages.bizFieldType.create.submit') }}</t-button>
+            <t-button theme="primary" type="submit" :loading="createSubmitLoading">
+              {{ t('pages.bizFieldType.create.submit') }}
+            </t-button>
           </t-space>
         </div>
       </t-form>
     </t-dialog>
   </div>
-
 </template>
 <script setup lang="ts">
 import { SearchIcon } from 'tdesign-icons-vue-next';
@@ -255,7 +295,14 @@ const handleClickDetail = (row: any) => {
 
 const handleCreate = () => {
   createDialogVisible.value = true;
-  createFormData.value = { name: '', description: '', minimum: undefined, maximum: undefined, collectionType: 'NONE', basicFieldType: 'STRING' };
+  createFormData.value = {
+    name: '',
+    description: '',
+    minimum: undefined,
+    maximum: undefined,
+    collectionType: 'NONE',
+    basicFieldType: 'STRING',
+  };
 };
 
 const handleClickDelete = (row: { rowIndex: any }) => {
@@ -285,29 +332,57 @@ const onCreateSubmit = async () => {
 
 const onCreateCancel = () => {
   createDialogVisible.value = false;
-  createFormData.value = { name: '', description: '', minimum: undefined, maximum: undefined, collectionType: 'NONE', basicFieldType: 'STRING' };
+  createFormData.value = {
+    name: '',
+    description: '',
+    minimum: undefined,
+    maximum: undefined,
+    collectionType: 'NONE',
+    basicFieldType: 'STRING',
+  };
 };
 
-const headerAffixedTop = computed(() => ({ offsetTop: store.isUseTabsRouter ? 48 : 0, container: `.${prefix}-layout` } as any));
+const headerAffixedTop = computed(
+  () =>
+    ({
+      offsetTop: store.isUseTabsRouter ? 48 : 0,
+      container: `.${prefix}-layout`,
+    }) as any,
+);
 </script>
 <style lang="less" scoped>
 .list-card-container {
   padding: var(--td-comp-paddingTB-xxl) var(--td-comp-paddingLR-xxl);
-  :deep(.t-card__body) { padding: 0; }
+
+  :deep(.t-card__body) {
+    padding: 0;
+  }
 }
+
 .create-dialog-body :deep(.t-dialog__body),
 :deep(.t-dialog__body) {
   /* 防止表单栅格负外边距导致的横向滚动条 */
   overflow-x: hidden;
 }
+
 .left-operation-container {
   display: flex;
   align-items: center;
   margin-bottom: var(--td-comp-margin-xxl);
-  .selected-count { display: inline-block; margin-left: var(--td-comp-margin-l); color: var(--td-text-color-secondary); }
+
+  .selected-count {
+    display: inline-block;
+    margin-left: var(--td-comp-margin-l);
+    color: var(--td-text-color-secondary);
+  }
 }
-.search-input { width: 360px; }
-.dialog-footer { margin-top: var(--td-comp-margin-l); text-align: right; }
+
+.search-input {
+  width: 360px;
+}
+
+.dialog-footer {
+  margin-top: var(--td-comp-margin-l);
+  text-align: right;
+}
 </style>
-
-
