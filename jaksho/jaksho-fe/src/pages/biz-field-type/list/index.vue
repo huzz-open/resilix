@@ -175,14 +175,17 @@ const createFormRules: Record<string, FormRule[]> = {
   ],
   collectionType: [{ required: true, message: t('pages.bizFieldType.create.collectionTypeRequired'), type: 'error' }],
   basicFieldType: [{ required: true, message: t('pages.bizFieldType.create.basicFieldTypeRequired'), type: 'error' }],
-  minimum: [{ type: 'number', message: t('pages.bizFieldType.create.minimumInvalid') }],
-  maximum: [{ type: 'number', message: t('pages.bizFieldType.create.maximumInvalid') }],
+  minimum: [{ type: 'error', message: t('pages.bizFieldType.create.minimumInvalid') }],
+  maximum: [{ type: 'error', message: t('pages.bizFieldType.create.maximumInvalid') }],
 };
 
 const fetchData = async () => {
   dataLoading.value = true;
   try {
-    const { rows, total } = await getBizFieldTypeList({ current: pagination.value.current, pageSize: pagination.value.pageSize });
+    const { rows, total } = await getBizFieldTypeList({
+      current: pagination.value.current,
+      pageSize: pagination.value.pageSize,
+    });
     listData.value = rows;
     pagination.value = { ...pagination.value, total };
   } catch (e) {
@@ -237,6 +240,7 @@ const rehandleSelectChange = (val: (string | number)[]) => {
 
 const rehandlePageChange = (pageInfo: PageInfo, newDataSource: any) => {
   pagination.value.current = pageInfo.current;
+  pagination.value.pageSize = pageInfo.pageSize;
   console.log('分页变化', newDataSource);
   fetchData();
 };

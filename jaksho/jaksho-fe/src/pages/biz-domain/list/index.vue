@@ -248,6 +248,7 @@ const rehandleSelectChange = (val: (string | number)[]) => {
 
 const rehandlePageChange = (pageInfo: PageInfo, newDataSource: any) => {
   pagination.value.current = pageInfo.current;
+  pagination.value.pageSize = pageInfo.pageSize;
   console.log('分页变化', newDataSource);
   fetchData();
 };
