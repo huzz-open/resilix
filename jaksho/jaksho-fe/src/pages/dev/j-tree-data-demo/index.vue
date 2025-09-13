@@ -1,7 +1,6 @@
 <template>
   <t-card :bordered="false">
     <t-space direction="vertical" style="width: 100%">
-      <t-alert theme="info" message="选择任意分页数据插入树中，最终以List返回" />
       <j-tree-data
         ref="jTreeRef"
         :fetch-page="fetchPage"
@@ -14,13 +13,8 @@
         :page-size-options="[1, 20, 520]"
         @change="onListChange"
       />
-      <t-space>
-        <t-button theme="primary" @click="showList">输出List</t-button>
-      </t-space>
-      <t-textarea v-model="listPreview" autosize placeholder="这里会展示 build 出来的 List" />
     </t-space>
   </t-card>
-
 </template>
 <script lang="ts" setup>
 import type { PrimaryTableCol } from 'tdesign-vue-next';
@@ -53,12 +47,6 @@ async function fetchPage(params: { current: number; pageSize: number; keyword?: 
 }
 
 function onListChange(list: any[]) {
-  listPreview.value = JSON.stringify(list, null, 2);
-}
-
-function showList() {
-  if (!jTreeRef.value) return;
-  const list = jTreeRef.value.getList();
   listPreview.value = JSON.stringify(list, null, 2);
 }
 </script>
