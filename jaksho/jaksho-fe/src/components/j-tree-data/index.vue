@@ -16,6 +16,7 @@
       expand-all
       activable
       :filter="filterByText"
+      :allow-drop="handleAllowDrop"
       line
       :scroll="{
         rowHeight: 34,
@@ -77,7 +78,7 @@
             v-model:selected-row-keys="selectedRowKeys"
             :row-key="rowKeyInternal"
             :data="listData"
-            :columns="columns"
+            :columns="selectorColumns"
             :pagination="pagination"
             :loading="loading"
             :hover="true"
@@ -91,6 +92,7 @@
 <script lang="ts" setup>
 import { AddIcon, ArrowDownIcon, ArrowUpIcon, DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
+import { MessagePlugin } from 'tdesign-vue-next';
 import { ulid } from 'ulid';
 import { computed, onMounted, reactive, ref } from 'vue';
 
@@ -133,6 +135,20 @@ const emits = defineEmits<{
 const treeLineIndentation =
   Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--td-comp-margin-xxl')) || 24;
 const rowKeyInternal = computed(() => props.rowKey ?? 'id');
+
+// 用于同层级去重的值标准化：将比较值统一转为字符串，降低类型不一致造成的不匹配
+function normalizeComparable(val: unknown): string {
+  try {
+    // 优先保持字符串/数字等原始值的直观表示
+    if (val == null) return '';
+    if (typeof val === 'string') return val;
+    if (typeof val === 'number' || typeof val === 'boolean') return String(val);
+    // 避免对象引用不一致导致的比较错误
+    return JSON.stringify(val);
+  } catch {
+    return String(val as any);
+  }
+}
 
 const extraWidth = ref<number>(0);
 
@@ -204,8 +220,50 @@ const pagination = reactive({
 const loading = ref(false);
 const listData = ref<any[]>([]);
 const selectedRowKeys = ref<Array<string | number>>([]);
+// 移除 rowSelection，改为按文档通过列 disabled 控制禁用
 
 const columns = computed(() => props.columns);
+// 选择器表格列：按官方 API，添加或复用选择列（single/multiple），通过 checkProps 禁用行
+const selectorColumns = computed(() => {
+  // 强制依赖以便在集合变化时重算列定义（避免对象引用复用）
+  const _ver = existingLevelValuesVersion?.value ?? existingLevelValues.value.size;
+  void _ver;
+
+  const cols = (props.columns || []).map((c: any) => ({ ...c }));
+  const hasSelection = cols.some((c: any) => c && (c.type === 'single' || c.type === 'multiple'));
+  const ensureCheckProps = (orig: any) => (options: any) => {
+    const row = options?.row ?? options;
+    const comparable = normalizeComparable(props.getCustomValue(row));
+    const disabledByLevel = existingLevelValues.value.has(comparable);
+    if (typeof orig === 'function') {
+      const rs = orig(options) || {};
+      return { ...rs, disabled: Boolean(rs.disabled) || disabledByLevel } as Record<string, any>;
+    }
+    return { disabled: disabledByLevel } as Record<string, any>;
+  };
+
+  if (hasSelection) {
+    // 复用已有的选择列，并合并/覆盖其 checkProps 以实现禁用
+    return cols.map((c: any) => {
+      if (c && (c.type === 'single' || c.type === 'multiple')) {
+        const next: any = { ...c };
+        next.checkProps = ensureCheckProps(c.checkProps);
+        if (typeof next.width === 'undefined') next.width = 52;
+        return next;
+      }
+      return c;
+    });
+  }
+
+  // 注入一个选择列
+  const selectionCol: any = {
+    colKey: '__row_select__',
+    type: props.selection === 'single' ? 'single' : 'multiple',
+    width: 52,
+    checkProps: ensureCheckProps(undefined),
+  };
+  return [selectionCol, ...cols] as any[];
+});
 // 根据 columns 计算弹窗宽度：
 // 1) 优先使用列的 width/widthPx；2) 否则按默认列最小宽度估算；3) 加上动作列与内边距余量；4) 限制最小/最大宽度
 const dialogWidth = computed(() => {
@@ -258,6 +316,8 @@ function openSelector(action: 'appendRoot' | 'appendChild' | 'insertBefore' | 'i
   selector.visible = true;
   selectedRowKeys.value = [];
   pagination.current = 1;
+  // 预计算：当前插入目标层级中已有的数据值集合
+  computeExistingLevelValues();
   void fetchPage();
 }
 
@@ -286,6 +346,8 @@ async function fetchPage() {
     });
     listData.value = rs.rows || [];
     pagination.total = rs.total || 0;
+    // 基于当前页数据，更新禁用并预勾选的 keys（同层级已存在）
+    updateDisabledSelectionsForCurrentPage();
   } finally {
     loading.value = false;
   }
@@ -332,7 +394,13 @@ function insertNodesByAction(rows: any[]) {
 
 function onSelectorConfirm() {
   const key = rowKeyInternal.value;
-  const selectedRows = listData.value.filter((x) => selectedRowKeys.value.includes(x[key]));
+  // 仅插入“新勾选”的字段：过滤掉同层级已存在（被禁用并预勾选）的项
+  const selectedRows = listData.value.filter((x) => {
+    const k = x[key];
+    if (!selectedRowKeys.value.includes(k)) return false;
+    const v = normalizeComparable(props.getCustomValue(x));
+    return !existingLevelValues.value.has(v);
+  });
   insertNodesByAction(selectedRows);
   selector.visible = false;
   emitList();
@@ -378,6 +446,118 @@ defineExpose({ getList: buildList });
 
 function onTreeDragEnd() {
   recalcExtraWidth('dragend');
+}
+
+// ============== 限制：同层级去重（插入 + 拖拽） ==============
+const existingLevelValues = ref<Set<any>>(new Set());
+const existingLevelValuesVersion = ref(0);
+
+function computeExistingLevelValues() {
+  const tree = treeRef.value;
+  if (!tree || !tree.getTreeData) {
+    existingLevelValues.value = new Set();
+    return;
+  }
+  const roots: any[] = tree.getTreeData();
+  const levelNodes = getTargetLevelNodesForAction(roots, selector.action, selector.targetValue);
+  const vals = new Set<any>();
+  levelNodes.forEach((n: any) => {
+    const v = n?.data?.[props.customField];
+    if (v !== undefined) vals.add(normalizeComparable(v));
+  });
+  existingLevelValues.value = vals;
+  existingLevelValuesVersion.value++;
+}
+
+function getTargetLevelNodesForAction(roots: any[], action: string, targetValue: string) {
+  if (action === 'appendRoot') return roots || [];
+  const { node, parent } = findNodeWithParent(roots, targetValue);
+  if (action === 'appendChild') return (node?.children as any[]) || [];
+  // insertBefore/insertAfter：同父节点的 children（根节点则为 roots）
+  if (action === 'insertBefore' || action === 'insertAfter') {
+    if (parent) return (parent.children as any[]) || [];
+    return roots || [];
+  }
+  return [] as any[];
+}
+
+function findNodeWithParent(nodes: any[], target: string, parent?: any): { node: any | null; parent: any | null } {
+  for (const n of nodes || []) {
+    if (String(n?.value) === String(target)) return { node: n, parent: parent ?? null };
+    if (Array.isArray(n?.children) && n.children.length > 0) {
+      const rs = findNodeWithParent(n.children, target, n);
+      if (rs.node) return rs;
+    }
+  }
+  return { node: null, parent: null };
+}
+
+function updateDisabledSelectionsForCurrentPage() {
+  const key = rowKeyInternal.value;
+  // 当前页中已存在于层级的数据项：禁用并预勾选
+  const toDisableKeys = new Set<any>();
+  (listData.value || []).forEach((row: any) => {
+    const v = normalizeComparable(props.getCustomValue(row));
+    if (existingLevelValues.value.has(v)) {
+      toDisableKeys.add(row[key]);
+    }
+  });
+  // 预勾选：把禁用项加到 selectedRowKeys（保持用户已勾选项不丢失）
+  const next = new Set<any>(selectedRowKeys.value as any[]);
+  toDisableKeys.forEach((k) => next.add(k));
+  selectedRowKeys.value = Array.from(next);
+}
+
+function handleAllowDrop(context: any) {
+  try {
+    const tree = treeRef.value;
+    if (!tree || !tree.getTreeData) return true;
+    const roots: any[] = tree.getTreeData();
+    const dragValueId = context?.dragNode?.value;
+    const dropValueId = context?.dropNode?.value;
+    const dropPosition = context?.dropPosition; // -1: before, 0: inner, 1: after
+
+    const dragNode = dragValueId ? findNodeWithParent(roots, dragValueId).node : null;
+    const dropNode = dropValueId ? findNodeWithParent(roots, dropValueId).node : null;
+    if (!dragNode || !dropNode) return true;
+
+    // 目标层级节点集合：根据 dropPosition 决定同级集合
+    let levelNodes;
+    if (dropPosition === 0) {
+      // 放入 dropNode 的 children
+      levelNodes = (dropNode.children as any[]) || [];
+    } else {
+      // 放在 dropNode 前/后 → 与 dropNode 同父的 children（根则为 roots）
+      const rel = findNodeWithParent(roots, dropNode.value);
+      levelNodes = rel.parent ? (rel.parent.children as any[]) || [] : roots;
+    }
+
+    const dragValue = dragNode?.data?.[props.customField];
+    // 排除拖动节点自身后，检查是否存在相同数据
+    const conflict = (levelNodes || [])
+      .filter((n: any) => String(n?.value) !== String(dragNode.value))
+      .some((n: any) => normalizeComparable(n?.data?.[props.customField]) === normalizeComparable(dragValue));
+    if (conflict) {
+      tipDenyOnce(`${dragNode.value}->${dropNode.value}:${dropPosition}`, '该层级已存在相同数据，无法放置');
+      return false;
+    }
+    return true;
+  } catch {
+    return true;
+  }
+}
+
+// 拖拽禁止提示：节流避免频繁弹出
+const denyTipState = reactive({ lastKey: '', lastAt: 0 });
+function tipDenyOnce(key: string, message: string) {
+  const now = Date.now();
+  const hitDifferentTarget = denyTipState.lastKey !== key;
+  const hitTimeout = now - denyTipState.lastAt > 800;
+  if (hitDifferentTarget || hitTimeout) {
+    denyTipState.lastKey = key;
+    denyTipState.lastAt = now;
+    MessagePlugin.warning(message);
+  }
 }
 
 onMounted(() => {
