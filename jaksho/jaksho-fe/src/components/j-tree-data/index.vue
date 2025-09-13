@@ -1,8 +1,10 @@
 <template>
   <t-space direction="vertical" style="width: 100%">
     <t-space align="center">
-      <t-button theme="primary" variant="outline" @click="openSelector('appendRoot')">插入一个根节点</t-button>
-      <t-input-adornment prepend="filter:">
+      <t-button theme="primary" variant="outline" @click="openSelector(ACTIONS.AppendRoot)">{{
+        i18n.insertRoot
+      }}</t-button>
+      <t-input-adornment :prepend="i18n.filterLabel">
         <t-input v-model="filterText" @change="onFilterChange" />
       </t-input-adornment>
     </t-space>
@@ -44,16 +46,16 @@
       </template>
       <template #operations="{ node }">
         <t-space :size="10">
-          <t-tooltip content="添加子节点" placement="top">
-            <add-icon class="op-icon" size="16px" @click="openSelector('appendChild', node)" />
+          <t-tooltip :content="i18n.addChild" placement="top">
+            <add-icon class="op-icon" size="16px" @click="openSelector(ACTIONS.AppendChild, node)" />
           </t-tooltip>
-          <t-tooltip content="前插节点" placement="top">
-            <arrow-up-icon class="op-icon" size="16px" @click="openSelector('insertBefore', node)" />
+          <t-tooltip :content="i18n.insertBefore" placement="top">
+            <arrow-up-icon class="op-icon" size="16px" @click="openSelector(ACTIONS.InsertBefore, node)" />
           </t-tooltip>
-          <t-tooltip content="后插节点" placement="top">
-            <arrow-down-icon class="op-icon" size="16px" @click="openSelector('insertAfter', node)" />
+          <t-tooltip :content="i18n.insertAfter" placement="top">
+            <arrow-down-icon class="op-icon" size="16px" @click="openSelector(ACTIONS.InsertAfter, node)" />
           </t-tooltip>
-          <t-tooltip content="删除" placement="top">
+          <t-tooltip :content="i18n.remove" placement="top">
             <delete-icon class="op-icon danger" size="16px" @click="remove(node)" />
           </t-tooltip>
         </t-space>
@@ -64,18 +66,26 @@
       v-model:visible="selector.visible"
       :header="selectorTitle"
       :width="dialogWidth"
+      :cancel-btn="i18n.cancel"
+      :confirm-btn="i18n.confirm"
       :on-cancel="onSelectorCancel"
       @confirm="onSelectorConfirm"
     >
       <template #body>
         <t-space direction="vertical" style="width: 100%">
-          <t-input v-model="selector.keyword" placeholder="搜索..." style="width: 260px" @change="onKeywordChange">
+          <t-input
+            v-model="selector.keyword"
+            :placeholder="i18n.searchPlaceholder"
+            style="width: 260px"
+            @change="onKeywordChange"
+          >
             <template #suffix-icon>
               <search-icon size="16px" />
             </template>
           </t-input>
           <t-table
             v-model:selected-row-keys="selectedRowKeys"
+            select-on-row-click
             :row-key="rowKeyInternal"
             :data="listData"
             :columns="selectorColumns"
@@ -109,6 +119,8 @@ interface TreeNodeData {
   data?: Record<string, any>;
 }
 
+import { t } from '@/locales';
+
 const props = defineProps<{
   fetchPage: FetchPageFn;
   // 表格列，用于选择器展示
@@ -127,14 +139,39 @@ const props = defineProps<{
   pageSizeOptions?: number[];
   treeDepthThreshold?: number;
 }>();
-
 const emits = defineEmits<{
   (e: 'change', list: Array<Record<string, any>>): void;
   (e: 'update:list', list: Array<Record<string, any>>): void;
 }>();
+// 统一插入/放置动作常量与类型，避免字符串散落
+const ACTIONS = {
+  AppendRoot: 'appendRoot',
+  AppendChild: 'appendChild',
+  InsertBefore: 'insertBefore',
+  InsertAfter: 'insertAfter',
+} as const;
+type Action = (typeof ACTIONS)[keyof typeof ACTIONS];
+
 const treeLineIndentation =
   Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--td-comp-margin-xxl')) || 24;
 const rowKeyInternal = computed(() => props.rowKey ?? 'id');
+// ========= i18n（统一到全局 locales） =========
+const i18n = computed(() => ({
+  insertRoot: t('components.jTreeData.insertRoot'),
+  filterLabel: t('components.jTreeData.filterLabel'),
+  addChild: t('components.jTreeData.addChild'),
+  insertBefore: t('components.jTreeData.insertBefore'),
+  insertAfter: t('components.jTreeData.insertAfter'),
+  remove: t('components.jTreeData.remove'),
+  searchPlaceholder: t('components.jTreeData.searchPlaceholder'),
+  dialogTitleRoot: t('components.jTreeData.dialogTitleRoot'),
+  dialogTitleChild: t('components.jTreeData.dialogTitleChild'),
+  dialogTitleBefore: t('components.jTreeData.dialogTitleBefore'),
+  dialogTitleAfter: t('components.jTreeData.dialogTitleAfter'),
+  cancel: t('components.jTreeData.cancel'),
+  confirm: t('components.jTreeData.confirm'),
+  dropDenied: t('components.jTreeData.dropDenied'),
+}));
 
 // 用于同层级去重的值标准化：将比较值统一转为字符串，降低类型不一致造成的不匹配
 function normalizeComparable(val: unknown): string {
@@ -206,7 +243,7 @@ const onFilterChange = () => {
 // 选择器状态
 const selector = reactive({
   visible: false,
-  action: 'appendRoot' as 'appendRoot' | 'appendChild' | 'insertBefore' | 'insertAfter',
+  action: ACTIONS.AppendRoot as Action,
   targetValue: '' as string | '',
   keyword: '',
 });
@@ -299,18 +336,18 @@ function getCellValue(rowData: any, col: PrimaryTableCol) {
 
 const selectorTitle = computed(() => {
   switch (selector.action) {
-    case 'appendChild':
-      return '选择要作为子节点的数据';
-    case 'insertBefore':
-      return '选择要前插的数据';
-    case 'insertAfter':
-      return '选择要后插的数据';
+    case ACTIONS.AppendChild:
+      return i18n.value.dialogTitleChild;
+    case ACTIONS.InsertBefore:
+      return i18n.value.dialogTitleBefore;
+    case ACTIONS.InsertAfter:
+      return i18n.value.dialogTitleAfter;
     default:
-      return '选择要插入的根节点数据';
+      return i18n.value.dialogTitleRoot;
   }
 });
 
-function openSelector(action: 'appendRoot' | 'appendChild' | 'insertBefore' | 'insertAfter', node?: any) {
+function openSelector(action: Action, node?: any) {
   selector.action = action;
   selector.targetValue = node?.value ?? '';
   selector.visible = true;
@@ -372,17 +409,17 @@ function insertNodesByAction(rows: any[]) {
   const tree = treeRef.value;
   if (!tree) return;
 
-  if (selector.action === 'appendRoot') {
+  if (selector.action === ACTIONS.AppendRoot) {
     nodes.forEach((n) => tree.appendTo('', n));
   }
-  if (selector.action === 'appendChild') {
+  if (selector.action === ACTIONS.AppendChild) {
     nodes.forEach((n) => tree.appendTo(selector.targetValue, n));
   }
-  if (selector.action === 'insertBefore') {
+  if (selector.action === ACTIONS.InsertBefore) {
     // 多选保持顺序：按选择顺序逐个前插，后插会改变目标位置索引，使用当前顺序即可
     nodes.forEach((n) => tree.insertBefore(selector.targetValue, n));
   }
-  if (selector.action === 'insertAfter') {
+  if (selector.action === ACTIONS.InsertAfter) {
     // after 时按逆序插入确保最终顺序与选择顺序一致
     nodes
       .slice()
@@ -469,12 +506,12 @@ function computeExistingLevelValues() {
   existingLevelValuesVersion.value++;
 }
 
-function getTargetLevelNodesForAction(roots: any[], action: string, targetValue: string) {
-  if (action === 'appendRoot') return roots || [];
+function getTargetLevelNodesForAction(roots: any[], action: Action, targetValue: string) {
+  if (action === ACTIONS.AppendRoot) return roots || [];
   const { node, parent } = findNodeWithParent(roots, targetValue);
-  if (action === 'appendChild') return (node?.children as any[]) || [];
+  if (action === ACTIONS.AppendChild) return (node?.children as any[]) || [];
   // insertBefore/insertAfter：同父节点的 children（根节点则为 roots）
-  if (action === 'insertBefore' || action === 'insertAfter') {
+  if (action === ACTIONS.InsertBefore || action === ACTIONS.InsertAfter) {
     if (parent) return (parent.children as any[]) || [];
     return roots || [];
   }
@@ -538,7 +575,7 @@ function handleAllowDrop(context: any) {
       .filter((n: any) => String(n?.value) !== String(dragNode.value))
       .some((n: any) => normalizeComparable(n?.data?.[props.customField]) === normalizeComparable(dragValue));
     if (conflict) {
-      tipDenyOnce(`${dragNode.value}->${dropNode.value}:${dropPosition}`, '该层级已存在相同数据，无法放置');
+      tipDenyOnce(`${dragNode.value}->${dropNode.value}:${dropPosition}`, i18n.value.dropDenied);
       return false;
     }
     return true;
