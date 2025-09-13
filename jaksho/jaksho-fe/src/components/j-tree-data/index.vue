@@ -43,10 +43,18 @@
       </template>
       <template #operations="{ node }">
         <t-space :size="10">
-          <t-button size="small" variant="base" @click="openSelector('appendChild', node)">添加子节点</t-button>
-          <t-button size="small" variant="outline" @click="openSelector('insertBefore', node)">前插节点</t-button>
-          <t-button size="small" variant="outline" @click="openSelector('insertAfter', node)">后插节点</t-button>
-          <t-button size="small" variant="base" theme="danger" @click="remove(node)">删除</t-button>
+          <t-tooltip content="添加子节点" placement="top">
+            <add-icon class="op-icon" size="16px" @click="openSelector('appendChild', node)" />
+          </t-tooltip>
+          <t-tooltip content="前插节点" placement="top">
+            <arrow-up-icon class="op-icon" size="16px" @click="openSelector('insertBefore', node)" />
+          </t-tooltip>
+          <t-tooltip content="后插节点" placement="top">
+            <arrow-down-icon class="op-icon" size="16px" @click="openSelector('insertAfter', node)" />
+          </t-tooltip>
+          <t-tooltip content="删除" placement="top">
+            <delete-icon class="op-icon danger" size="16px" @click="remove(node)" />
+          </t-tooltip>
         </t-space>
       </template>
     </t-tree>
@@ -81,7 +89,7 @@
   </t-space>
 </template>
 <script lang="ts" setup>
-import { SearchIcon } from 'tdesign-icons-vue-next';
+import { AddIcon, ArrowDownIcon, ArrowUpIcon, DeleteIcon, SearchIcon } from 'tdesign-icons-vue-next';
 import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { ulid } from 'ulid';
 import { computed, onMounted, reactive, ref } from 'vue';
@@ -361,5 +369,15 @@ onMounted(() => {
   min-height: 180px;
   background-color: var(--td-bg-color-container);
   padding: 8px 12px;
+}
+.op-icon {
+  cursor: pointer;
+  color: var(--td-text-color-secondary);
+}
+.op-icon:hover {
+  color: var(--td-brand-color);
+}
+.op-icon.danger:hover {
+  color: var(--td-error-color);
 }
 </style>
