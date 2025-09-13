@@ -9,9 +9,9 @@
         row-key="id"
         selection="multiple"
         custom-field="bizFieldDomainId"
-        :get-custom-value="(row)=>row.id"
+        :get-custom-value="(row) => row.id"
         :default-page-size="10"
-        :page-size-options="[1,20,520]"
+        :page-size-options="[1, 20, 520]"
         @change="onListChange"
       />
       <t-space>
@@ -22,11 +22,11 @@
   </t-card>
 
 </template>
-
 <script lang="ts" setup>
-import { ref } from 'vue';
-import JTreeData from '@/components/j-tree-data/index.vue';
 import type { PrimaryTableCol } from 'tdesign-vue-next';
+import { ref } from 'vue';
+
+import JTreeData from '@/components/j-tree-data/index.vue';
 import { request } from '@/utils/request';
 
 defineOptions({ name: 'JTreeDataDemo' });
@@ -35,10 +35,12 @@ const jTreeRef = ref<InstanceType<typeof JTreeData> | null>(null);
 const listPreview = ref('');
 
 const columns: PrimaryTableCol[] = [
-  { colKey: 'row-select', type: 'multiple', width: 64, fixed: 'left' },
-  { title: 'ID', colKey: 'id', width: 120 },
-  { title: '名称', colKey: 'name', width: 240 },
-  { title: '描述', colKey: 'description', ellipsis: true },
+  { colKey: 'row-select', type: 'multiple' },
+  { title: '名称', colKey: 'name', width: '900px', ellipsis: true },
+  { title: '集合类型', colKey: 'collectionType', width: '900px', ellipsis: true },
+  { title: '描述', colKey: 'description', width: '900px', ellipsis: true },
+  { title: '最小值', colKey: 'minimum', width: '900px', ellipsis: true },
+  { title: '最大值', colKey: 'maximum', width: '900px', ellipsis: true },
 ];
 
 // 演示分页数据接口：优先复用现有字段类型分页接口，如需更换可在这里替换
@@ -60,8 +62,4 @@ function showList() {
   listPreview.value = JSON.stringify(list, null, 2);
 }
 </script>
-
-<style scoped>
-</style>
-
-
+<style scoped></style>

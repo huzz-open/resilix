@@ -15,7 +15,6 @@
       :checkable="isCheckable"
       expand-all
       activable
-      :label="getLabel"
       :filter="filterByText"
       line
       :scroll="{
@@ -24,12 +23,26 @@
         threshold: 10,
         type: 'virtual',
       }"
+      @drag-end="onTreeDragEnd"
     >
+      <template #label="{ node }">
+        <div>
+          <t-space :size="12">
+            <template v-for="(col, idx) in showColumnsResolved" :key="String(col.colKey)">
+              <t-input
+                v-if="!col.type"
+                size="small"
+                readonly
+                :value="String(getCellValue(node.data, col))"
+                :style="idx === 1 ? firstColStyle : {}"
+                placeholder=""
+              ></t-input>
+            </template>
+          </t-space>
+        </div>
+      </template>
       <template #operations="{ node }">
         <t-space :size="10">
-          <slot name="ops-prefix" :row="node.data">
-            <t-input :value="node.data.data.name" size="small" readonly />
-          </slot>
           <t-button size="small" variant="base" @click="openSelector('appendChild', node)">添加子节点</t-button>
           <t-button size="small" variant="outline" @click="openSelector('insertBefore', node)">前插节点</t-button>
           <t-button size="small" variant="outline" @click="openSelector('insertAfter', node)">后插节点</t-button>
@@ -38,21 +51,27 @@
       </template>
     </t-tree>
 
-    <t-dialog v-model:visible="selector.visible" :header="selectorTitle" width="960px" :on-cancel="onSelectorCancel" @confirm="onSelectorConfirm">
+    <t-dialog
+      v-model:visible="selector.visible"
+      :header="selectorTitle"
+      width="960px"
+      :on-cancel="onSelectorCancel"
+      @confirm="onSelectorConfirm"
+    >
       <template #body>
         <t-space direction="vertical" style="width: 100%">
           <t-input v-model="selector.keyword" placeholder="搜索..." style="width: 260px" @change="onKeywordChange">
             <template #suffix-icon>
-              <SearchIcon size="16px" />
+              <search-icon size="16px" />
             </template>
           </t-input>
           <t-table
+            v-model:selected-row-keys="selectedRowKeys"
             :row-key="rowKeyInternal"
             :data="listData"
             :columns="columns"
             :pagination="pagination"
             :loading="loading"
-            v-model:selected-row-keys="selectedRowKeys"
             :hover="true"
             @page-change="onPageChange"
           />
@@ -61,14 +80,17 @@
     </t-dialog>
   </t-space>
 </template>
-
 <script lang="ts" setup>
-import {computed, nextTick, reactive, ref} from 'vue';
-import {SearchIcon} from 'tdesign-icons-vue-next';
-import {ulid} from 'ulid';
-import type {PageInfo, PrimaryTableCol} from 'tdesign-vue-next';
+import { SearchIcon } from 'tdesign-icons-vue-next';
+import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
+import { ulid } from 'ulid';
+import { computed, onMounted, reactive, ref } from 'vue';
 
-type FetchPageFn = (params: { current: number; pageSize: number; keyword?: string }) => Promise<{ rows: any[]; total: number }>;
+type FetchPageFn = (params: {
+  current: number;
+  pageSize: number;
+  keyword?: string;
+}) => Promise<{ rows: any[]; total: number }>;
 
 interface TreeNodeData {
   value: string; // ulid
@@ -81,8 +103,10 @@ const props = defineProps<{
   fetchPage: FetchPageFn;
   // 表格列，用于选择器展示
   columns: PrimaryTableCol[];
+  // 树节点行内展示的列（默认与 columns 一致，可外部传入覆盖）
+  showColumns?: PrimaryTableCol[];
   // 选择器行主键
-  rowKey?: 'id';
+  rowKey?: string;
   // 选择模式
   selection?: 'single' | 'multiple';
   // 自定义属性字段名与映射函数
@@ -91,14 +115,51 @@ const props = defineProps<{
   // 分页
   defaultPageSize?: number;
   pageSizeOptions?: number[];
+  treeDepthThreshold?: number;
 }>();
 
 const emits = defineEmits<{
   (e: 'change', list: Array<Record<string, any>>): void;
   (e: 'update:list', list: Array<Record<string, any>>): void;
 }>();
-
+const treeLineIndentation =
+  Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--td-comp-margin-xxl')) || 24;
 const rowKeyInternal = computed(() => props.rowKey ?? 'id');
+
+const extraWidth = ref<number>(0);
+
+function computeMaxDepth(nodes: any[], currentDepth: number): number {
+  let maxDepth = currentDepth;
+  nodes.forEach((n: any) => {
+    if (Array.isArray(n.children) && n.children.length > 0) {
+      const childMax = computeMaxDepth(n.children, currentDepth + 1);
+      if (childMax > maxDepth) maxDepth = childMax;
+    }
+  });
+  return maxDepth;
+}
+
+function recalcExtraWidth(entry?: string) {
+  console.info('recalcExtraWidth', entry);
+  const tree = treeRef.value;
+  if (!tree || !tree.getTreeData) {
+    extraWidth.value = 0;
+    return;
+  }
+  const treeDepthThreshold = props.treeDepthThreshold ?? 3;
+  const roots = tree.getTreeData();
+  const maxDepth = computeMaxDepth(roots, 1);
+  extraWidth.value = maxDepth < treeDepthThreshold ? 0 : (maxDepth - treeDepthThreshold) * treeLineIndentation;
+}
+
+const firstColStyle = computed(() => {
+  const extra = `${extraWidth.value}px`;
+  return {
+    marginRight: `calc(var(--td-comp-margin-xxl) * var(--level) * -1)`,
+    paddingRight: extra,
+    width: `calc(100% + ${extra})`,
+  } as Record<string, string>;
+});
 
 const treeRef = ref();
 const treeData = ref<TreeNodeData[]>([]);
@@ -137,7 +198,18 @@ const listData = ref<any[]>([]);
 const selectedRowKeys = ref<Array<string | number>>([]);
 
 const columns = computed(() => props.columns);
-const displayColumns = computed<PrimaryTableCol[]>(() => (props.columns || []).filter((c: any) => c && c.colKey && c.colKey !== 'row-select' && c.colKey !== 'op'));
+const showColumnsResolved = computed<PrimaryTableCol[]>(() => {
+  // 优先获取 showColumns，如果没有则使用 columns
+  return props.showColumns && props.showColumns.length > 0 ? props.showColumns : props.columns;
+});
+
+function getCellValue(rowData: any, col: PrimaryTableCol) {
+  const key = (col?.colKey as string) || '';
+  if (!key) return '';
+  const source = rowData ?? {};
+  // 支持 a.b.c 的安全取值
+  return key.split('.').reduce((acc: any, k: string) => (acc == null ? acc : acc[k]), source?.data) ?? '';
+}
 
 const selectorTitle = computed(() => {
   switch (selector.action) {
@@ -151,33 +223,6 @@ const selectorTitle = computed(() => {
       return '选择要插入的根节点数据';
   }
 });
-
-function getLabel(_h: any, node: any) {
-  // 用于过滤与激活，取首列或 customField 作为可读文本
-  const first = displayColumns.value[0]?.colKey as string | undefined;
-  const label = (first && node?.data?.[first]) ?? node?.data?.[props.customField] ?? '';
-  node.data.label = String(label ?? '');
-  return node.data.label;
-}
-
-function getCellText(node: any, col: PrimaryTableCol) {
-  const key = String(col.colKey ?? '');
-  if (!key) return '';
-  const val = node?.data?.[key];
-  return val === undefined || val === null ? '' : String(val);
-}
-
-function getCellStyle(col: PrimaryTableCol) {
-  const style: Record<string, string> = {};
-  const w = (col as any).width;
-  if (w !== undefined) {
-    style.width = typeof w === 'number' ? `${w}px` : String(w);
-    style.flex = '0 0 auto';
-  } else {
-    style.flex = '1 1 0';
-  }
-  return style;
-}
 
 function openSelector(action: 'appendRoot' | 'appendChild' | 'insertBefore' | 'insertAfter', node?: any) {
   selector.action = action;
@@ -206,7 +251,11 @@ function onPageChange(pageInfo: PageInfo) {
 async function fetchPage() {
   loading.value = true;
   try {
-    const rs = await props.fetchPage({ current: pagination.current, pageSize: pagination.pageSize, keyword: selector.keyword });
+    const rs = await props.fetchPage({
+      current: pagination.current,
+      pageSize: pagination.pageSize,
+      keyword: selector.keyword,
+    });
     listData.value = rs.rows || [];
     pagination.total = rs.total || 0;
   } finally {
@@ -250,19 +299,7 @@ function insertNodesByAction(rows: any[]) {
       .reverse()
       .forEach((n) => tree.insertAfter(selector.targetValue, n));
   }
-
-  // 更新 label
-  nextTick(() => {
-    nodes.forEach((n) => setLabel(n.value));
-  });
-}
-
-function setLabel(value: string) {
-  const node = treeRef.value.getItem(value);
-  const pathNodes = node.getPath();
-  const labelIndex = pathNodes.map((n: any) => n.getIndex() + 1).join('.');
-  const labelRight = node?.data?.[props.customField];
-  node.data.label = `${labelIndex} | ${props.customField}: ${labelRight}`;
+  recalcExtraWidth('insert');
 }
 
 function onSelectorConfirm() {
@@ -276,6 +313,7 @@ function onSelectorConfirm() {
 function remove(node: any) {
   treeRef.value.remove(node.value);
   emitList();
+  recalcExtraWidth('remove');
 }
 
 function emitList() {
@@ -294,7 +332,7 @@ function buildList() {
     nodes.forEach((n: any, idx: number) => {
       const item = {
         ulid: n.value,
-        parentUlid: parentUlid,
+        parentUlid,
         sortOrder: idx,
         [props.customField]: n.data?.[props.customField],
       } as Record<string, any>;
@@ -309,8 +347,15 @@ function buildList() {
 }
 
 defineExpose({ getList: buildList });
-</script>
 
+function onTreeDragEnd() {
+  recalcExtraWidth('dragend');
+}
+
+onMounted(() => {
+  recalcExtraWidth('mounted');
+});
+</script>
 <style scoped>
 .t-tree {
   min-height: 180px;
@@ -318,5 +363,3 @@ defineExpose({ getList: buildList });
   padding: 8px 12px;
 }
 </style>
-
-
