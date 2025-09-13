@@ -232,8 +232,7 @@ const filterByText = ref<((node: any) => boolean) | null>(null);
 const onFilterChange = () => {
   if (filterText.value) {
     filterByText.value = (node: any) => {
-      const label = node?.data?.label || '';
-      return String(label).includes(filterText.value);
+      return String(JSON.stringify(node?.data)).includes(filterText.value);
     };
   } else {
     filterByText.value = null;
