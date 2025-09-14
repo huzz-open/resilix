@@ -11,7 +11,7 @@
 
     <!-- 简易表头：展示列标题，便于对齐理解 -->
     <div class="j-tree-data-header" :style="{ paddingLeft: `${headerLeftPadding}px` }">
-      <t-space :size="14" align="center">
+      <t-space :size="12" align="center">
         <template v-for="(col, idx) in headerColumns" :key="String(col.colKey)">
           <span class="header-cell" :style="getHeaderColWidthStyle(idx)">{{ getColTitle(col) }}</span>
         </template>
@@ -655,7 +655,7 @@ function tipDenyOnce(key: string, message: string) {
 }
 
 onMounted(() => {
-  recalcExtraWidth('mounted');
+  recalcExtraWidth('');
   measureHeaderOffset();
   measureHeaderColWidths();
   window.addEventListener('resize', () => {
