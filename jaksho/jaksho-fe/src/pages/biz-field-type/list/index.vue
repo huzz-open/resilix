@@ -83,33 +83,33 @@
               </t-select>
             </t-form-item>
           </t-col>
+        </t-row>
+        <t-row :gutter="16">
           <t-col :span="6">
-            <t-form-item :label="t('pages.bizFieldType.create.collectionType')" name="collectionType">
+            <t-form-item :label="t('pages.bizFieldType.create.collectionType')" name="collectionType" required>
               <t-select v-model="createFormData.collectionType">
                 <t-option v-for="op in collectionTypeOptions" :key="op.value" :value="op.value" :label="op.label" />
               </t-select>
             </t-form-item>
           </t-col>
-        </t-row>
-        <t-row v-if="shouldShowMinMax" :gutter="16">
-          <t-col :span="6">
+          <t-col v-if="shouldShowMinMax" :span="3">
             <t-form-item :label="minLabelText" name="minimum">
               <t-input-number
                 v-model="createFormData.minimum"
                 :min="0"
                 theme="column"
-                :placeholder="t('pages.bizFieldType.create.minimumPlaceholder')"
+                :disabled="minimumAndMaximumDisabled"
                 style="width: 100%"
               />
             </t-form-item>
           </t-col>
-          <t-col :span="6">
+          <t-col v-if="shouldShowMinMax" :span="3">
             <t-form-item :label="maxLabelText" name="maximum">
               <t-input-number
                 v-model="createFormData.maximum"
                 :min="0"
                 theme="column"
-                :placeholder="t('pages.bizFieldType.create.maximumPlaceholder')"
+                :disabled="minimumAndMaximumDisabled"
                 style="width: 100%"
               />
             </t-form-item>
@@ -170,7 +170,7 @@ const jTreeRef = ref<InstanceType<typeof JTreeData> | null>(null);
 
 const COLUMNS: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple', width: 64, fixed: 'left' },
-  { title: 'ID', align: 'left', width: 80, colKey: 'id', fixed: 'left' },
+  { title: t('pages.bizFieldType.list.id'), align: 'left', width: 80, colKey: 'id', fixed: 'left' },
   { title: t('pages.bizFieldType.list.name'), align: 'left', width: 200, colKey: 'name' },
   { title: t('pages.bizFieldType.list.collectionType'), width: 140, colKey: 'collectionType' },
   { title: t('pages.bizFieldType.list.basicFieldType'), width: 140, colKey: 'basicFieldType' },
@@ -203,10 +203,10 @@ const createFormData = ref<CreateBizFieldTypeRequest>({
 });
 
 const collectionTypeOptions = [
-  { label: 'NONE', value: 'NONE' },
-  { label: 'LIST', value: 'LIST' },
-  { label: 'SET', value: 'SET' },
-  { label: 'ARRAY', value: 'ARRAY' },
+  { label: t('pages.bizFieldType.create.collectionTypeOptions.NONE'), value: 'NONE' },
+  { label: t('pages.bizFieldType.create.collectionTypeOptions.LIST'), value: 'LIST' },
+  { label: t('pages.bizFieldType.create.collectionTypeOptions.SET'), value: 'SET' },
+  { label: t('pages.bizFieldType.create.collectionTypeOptions.ARRAY'), value: 'ARRAY' },
 ];
 
 const basicFieldTypeOptions = [
@@ -220,7 +220,7 @@ const basicFieldTypeOptions = [
   'STRING',
   'OBJECT',
   'FILE',
-].map((x) => ({ label: x, value: x }));
+].map((x) => ({ label: t(`pages.bizFieldType.create.basicFieldTypeOptions.${x}`), value: x }));
 
 // 创建表单验证规则
 const createFormRules: Record<string, FormRule[]> = {
@@ -234,28 +234,32 @@ const createFormRules: Record<string, FormRule[]> = {
   maximum: [{ type: 'error', message: t('pages.bizFieldType.create.maximumInvalid') }],
 };
 
-// ========== 动态标签：最小/最大值 ==========
+// ========== 动态标签/占位符：最小/最大值 ==========
 const numericTypes = new Set(['INT8', 'INT16', 'INT32', 'INT64', 'FLOAT', 'DOUBLE']);
 const isCollection = computed(() => createFormData.value.collectionType !== 'NONE');
+const minimumAndMaximumDisabled = computed(() => {
+  return !(isCollection.value || createFormData.value.basicFieldType !== 'OBJECT');
+});
 const isNumeric = computed(() => numericTypes.has(createFormData.value.basicFieldType as string));
 const isStringType = computed(() => createFormData.value.basicFieldType === 'STRING');
 const isFileType = computed(() => createFormData.value.basicFieldType === 'FILE');
 const supportsMinMax = computed(() => isCollection.value || isNumeric.value || isStringType.value || isFileType.value);
 const minLabelText = computed(() => {
   if (isCollection.value) return t('pages.bizFieldType.create.minElements');
-  if (isNumeric.value) return t('pages.bizFieldType.create.minimum');
+  if (isNumeric.value) return t('pages.bizFieldType.create.minValue');
   if (isStringType.value) return t('pages.bizFieldType.create.minLength');
-  if (isFileType.value) return t('pages.bizFieldType.create.minSize');
+  if (isFileType.value) return t('pages.bizFieldType.create.minFileSize');
   return t('pages.bizFieldType.create.minimum');
 });
 const maxLabelText = computed(() => {
   if (isCollection.value) return t('pages.bizFieldType.create.maxElements');
-  if (isNumeric.value) return t('pages.bizFieldType.create.maximum');
+  if (isNumeric.value) return t('pages.bizFieldType.create.maxValue');
   if (isStringType.value) return t('pages.bizFieldType.create.maxLength');
-  if (isFileType.value) return t('pages.bizFieldType.create.maxSize');
+  if (isFileType.value) return t('pages.bizFieldType.create.maxFileSize');
   return t('pages.bizFieldType.create.maximum');
 });
 const shouldShowMinMax = computed(() => supportsMinMax.value);
+// 移除占位符，改由 label 完整表达语义
 
 // ========== OBJECT 类型：引用字段树 ==========
 const objectRefColumns: PrimaryTableCol[] = [
