@@ -11,7 +11,7 @@
 
     <!-- 简易表头：展示列标题，便于对齐理解 -->
     <div class="j-tree-data-header" :style="{ paddingLeft: `${headerLeftPadding}px` }">
-      <t-space :size="12" align="center">
+      <t-space :size="colSpace" align="center">
         <template v-for="(col, idx) in headerColumns" :key="String(col.colKey)">
           <span class="header-cell" :style="getHeaderColWidthStyle(idx)">{{ getColTitle(col) }}</span>
         </template>
@@ -39,7 +39,7 @@
     >
       <template #label="{ node }">
         <div>
-          <t-space :size="12">
+          <t-space :size="colSpace">
             <template v-for="(col, idx) in displayColumns" :key="String(col.colKey)">
               <t-input
                 v-if="!col.type && col.colKey !== 'row-select'"
@@ -156,7 +156,7 @@ const ACTIONS = {
   InsertAfter: 'insertAfter',
 } as const;
 type Action = (typeof ACTIONS)[keyof typeof ACTIONS];
-
+const colSpace = 12;
 const treeLineIndentation =
   Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--td-comp-margin-xxl')) || 24;
 const rowKeyInternal = computed(() => props.rowKey ?? 'id');
@@ -685,8 +685,7 @@ function measureHeaderOffset() {
     const unit = marginXXL || marginXL || marginL || marginM || 16;
     // 当可勾选时，预留一个复选框（含左右间距）的宽度；再预留展开图标区域
     const checkWidth = isCheckable.value ? unit : 0;
-    const expandIconWidth = unit;
-    const fromVars = Math.floor(paddingLeft + checkWidth + expandIconWidth);
+    const fromVars = Math.floor(paddingLeft + checkWidth + unit);
 
     // 方案B：DOM 实测（兜底）：第一行 label 左边界与树容器左边界之差
     const firstLabelEl = treeEl.querySelector('.t-tree__label') as HTMLElement;
