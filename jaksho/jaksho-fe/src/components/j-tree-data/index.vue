@@ -1,13 +1,22 @@
 <template>
   <t-space direction="vertical" style="width: 100%">
     <t-space align="center">
-      <t-button theme="primary" variant="outline" @click="openSelector(ACTIONS.AppendRoot)"
-        >{{ i18n.insertRoot }}
+      <t-button theme="primary" variant="outline" @click="openSelector(ACTIONS.AppendRoot)">
+        {{ i18n.insertRoot }}
       </t-button>
       <t-input-adornment :prepend="i18n.filterLabel">
         <t-input v-model="filterText" @change="onFilterChange" />
       </t-input-adornment>
     </t-space>
+
+    <!-- 简易表头：展示列标题，便于对齐理解 -->
+    <div class="j-tree-data-header" :style="{ paddingLeft: `${headerLeftPadding}px` }">
+      <t-space :size="14" align="center">
+        <template v-for="(col, idx) in headerColumns" :key="String(col.colKey)">
+          <span class="header-cell" :style="getHeaderColWidthStyle(idx)">{{ getColTitle(col) }}</span>
+        </template>
+      </t-space>
+    </div>
 
     <t-tree
       ref="treeRef"
@@ -31,13 +40,13 @@
       <template #label="{ node }">
         <div>
           <t-space :size="12">
-            <template v-for="(col, idx) in showColumnsResolved" :key="String(col.colKey)">
+            <template v-for="(col, idx) in displayColumns" :key="String(col.colKey)">
               <t-input
-                v-if="!col.type"
+                v-if="!col.type && col.colKey !== 'row-select'"
                 size="small"
                 readonly
                 :value="String(getCellValue(node.data, col))"
-                :style="idx === 1 ? firstColStyle : {}"
+                :style="idx === 0 ? firstColStyle : {}"
                 placeholder=""
               ></t-input>
             </template>
@@ -104,7 +113,7 @@ import { AddIcon, ArrowDownIcon, ArrowUpIcon, DeleteIcon, SearchIcon } from 'tde
 import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ulid } from 'ulid';
-import { computed, onMounted, reactive, ref } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref } from 'vue';
 
 import { t } from '@/locales';
 
@@ -210,12 +219,20 @@ function recalcExtraWidth(_?: string) {
   const tree = treeRef.value;
   if (!tree || !tree.getTreeData) {
     extraWidth.value = 0;
+    void nextTick().then(() => {
+      measureHeaderOffset();
+      measureHeaderColWidths();
+    });
     return;
   }
   const treeDepthThreshold = props.treeDepthThreshold ?? 3;
   const roots = tree.getTreeData();
   const maxDepth = computeMaxDepth(roots, 1);
   extraWidth.value = maxDepth < treeDepthThreshold ? 0 : (maxDepth - treeDepthThreshold) * treeLineIndentation;
+  void nextTick().then(() => {
+    measureHeaderOffset();
+    measureHeaderColWidths();
+  });
 }
 
 const firstColStyle = computed(() => {
@@ -228,6 +245,8 @@ const firstColStyle = computed(() => {
 });
 
 const treeRef = ref();
+const headerLeftPadding = ref(0);
+const headerColWidths = ref<number[]>([]);
 const treeData = ref<TreeNodeData[]>([]);
 const isCheckable = ref(true);
 
@@ -330,12 +349,53 @@ const showColumnsResolved = computed<PrimaryTableCol[]>(() => {
   return props.showColumns && props.showColumns.length > 0 ? props.showColumns : props.columns;
 });
 
+// 用于渲染的一致列数组（去掉 row-select），保证 header 与行渲染顺序/数量一致
+const displayColumns = computed<PrimaryTableCol[]>(() => {
+  const cols = showColumnsResolved.value || [];
+  return cols.filter((c: any) => c && c.colKey !== 'row-select');
+});
+
+// 头部列：过滤掉选择列（type 为 single/multiple 或 colKey === 'row-select'）
+const headerColumns = computed<PrimaryTableCol[]>(() => {
+  const cols = displayColumns.value || [];
+  return cols.filter((c: any) => {
+    if (!c) return false;
+    if (c.colKey === 'row-select') return false;
+    if ((c as any).type === 'single' || (c as any).type === 'multiple') return false;
+    return true;
+  });
+});
+
 function getCellValue(rowData: any, col: PrimaryTableCol) {
   const key = (col?.colKey as string) || '';
   if (!key) return '';
   const source = rowData ?? {};
   // 支持 a.b.c 的安全取值
   return key.split('.').reduce((acc: any, k: string) => (acc == null ? acc : acc[k]), source?.data) ?? '';
+}
+
+function getColTitle(col: PrimaryTableCol): string {
+  const tVal = (col as any)?.title;
+  if (typeof tVal === 'string') return tVal;
+  // 回退到 colKey 显示
+  return String((col?.colKey as string) || '');
+}
+
+// 与 header 对齐：按列索引返回与行渲染一致的宽度
+function getHeaderColWidthStyle(index: number): Record<string, string> {
+  // 优先使用首行实际渲染宽度，确保像素级对齐
+  const measured = headerColWidths.value?.[index];
+  if (measured && measured > 0) {
+    return { width: `${measured}px` };
+  }
+  // 若列对象提供 width，优先使用，否则使用默认最小宽度
+  const col = (displayColumns.value || [])[index] as any;
+  const defaultMin = 140;
+  const colWidth =
+    (typeof col?.width === 'number' ? col.width : undefined) ||
+    (typeof col?.width === 'string' && col.width.endsWith('px') ? Number.parseInt(col.width, 10) : undefined) ||
+    defaultMin;
+  return { minWidth: `${colWidth}px` };
 }
 
 const selectorTitle = computed(() => {
@@ -596,7 +656,71 @@ function tipDenyOnce(key: string, message: string) {
 
 onMounted(() => {
   recalcExtraWidth('mounted');
+  measureHeaderOffset();
+  measureHeaderColWidths();
+  window.addEventListener('resize', () => {
+    measureHeaderOffset();
+    measureHeaderColWidths();
+  });
 });
+
+function measureHeaderOffset() {
+  try {
+    const treeEl = (treeRef.value as any)?.$el as HTMLElement;
+    if (!treeEl) {
+      headerLeftPadding.value = 0;
+      return;
+    }
+    // 方案A：优先用官方设计变量估算（更可控，可避免首行未渲染/虚拟滚动测量失败）
+    const readCssNumber = (name: string) => {
+      const v = getComputedStyle(document.documentElement).getPropertyValue(name);
+      const n = Number.parseFloat(v);
+      return Number.isFinite(n) ? n : 0;
+    };
+    const paddingLeft = Number.parseFloat(getComputedStyle(treeEl).paddingLeft || '0') || 0;
+    // 估算图标/复选框区域：基于间距变量兜底（不同主题/密度存在差异）
+    const marginXXL = readCssNumber('--td-comp-margin-xxl');
+    const marginXL = readCssNumber('--td-comp-margin-xl');
+    const marginL = readCssNumber('--td-comp-margin-l');
+    const marginM = readCssNumber('--td-comp-margin-m');
+    // 取一个合理的代表宽度：优先使用 xxl/xl，否则退化到 l/m
+    const unit = marginXXL || marginXL || marginL || marginM || 16;
+    // 当可勾选时，预留一个复选框（含左右间距）的宽度；再预留展开图标区域
+    const checkWidth = isCheckable.value ? unit : 0;
+    const expandIconWidth = unit;
+    const fromVars = Math.floor(paddingLeft + checkWidth + expandIconWidth);
+
+    // 方案B：DOM 实测（兜底）：第一行 label 左边界与树容器左边界之差
+    const firstLabelEl = treeEl.querySelector('.t-tree__label') as HTMLElement;
+    const treeRect = treeEl.getBoundingClientRect();
+    const labelRect = firstLabelEl?.getBoundingClientRect();
+    const fromDom = labelRect ? Math.max(0, Math.floor(labelRect.left - treeRect.left)) : 0;
+
+    // 取两者的较大值，避免由于变量估算偏小导致错位
+    headerLeftPadding.value = Math.max(fromVars, fromDom);
+  } catch {
+    headerLeftPadding.value = 0;
+  }
+}
+
+function measureHeaderColWidths() {
+  try {
+    const treeEl = (treeRef.value as any)?.$el as HTMLElement;
+    if (!treeEl) {
+      headerColWidths.value = [];
+      return;
+    }
+    const firstLabelEl = treeEl.querySelector('.t-tree__label') as HTMLElement;
+    if (!firstLabelEl) {
+      headerColWidths.value = [];
+      return;
+    }
+    const nodes = Array.from(firstLabelEl.querySelectorAll('.t-input, .t-input-number')) as HTMLElement[];
+    headerColWidths.value = nodes.map((el) => Math.max(0, Math.floor(el.getBoundingClientRect().width)));
+  } catch {
+    headerColWidths.value = [];
+  }
+}
 </script>
 <style scoped>
 .t-tree {
@@ -616,5 +740,19 @@ onMounted(() => {
 
 .op-icon.danger:hover {
   color: var(--td-error-color);
+}
+
+.j-tree-data-header {
+  padding: 6px 12px 0 12px;
+  color: var(--td-text-color-secondary);
+}
+
+.header-cell {
+  display: inline-block;
+  min-width: 120px;
+}
+
+.header-sep {
+  color: var(--td-text-color-placeholder);
 }
 </style>

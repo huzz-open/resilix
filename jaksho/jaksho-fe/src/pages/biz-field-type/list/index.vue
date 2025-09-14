@@ -265,6 +265,7 @@ const shouldShowMinMax = computed(() => supportsMinMax.value);
 const objectRefColumns: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple' },
   { title: t('pages.bizFieldType.create.objectRef.name'), colKey: 'bizFieldType.name', ellipsis: true },
+  { title: t('pages.bizFieldType.create.objectRef.description'), colKey: 'bizFieldType.description', ellipsis: true },
   {
     title: t('pages.bizFieldType.create.objectRef.basicFieldType'),
     colKey: 'bizFieldType.basicFieldType',
@@ -277,7 +278,6 @@ const objectRefColumns: PrimaryTableCol[] = [
   },
   { title: t('pages.bizFieldType.create.objectRef.minimum'), colKey: 'bizFieldType.minimum', ellipsis: true },
   { title: t('pages.bizFieldType.create.objectRef.maximum'), colKey: 'bizFieldType.maximum', ellipsis: true },
-  { title: t('pages.bizFieldType.create.objectRef.description'), colKey: 'bizFieldType.description', ellipsis: true },
 ];
 
 async function fetchBizFieldDomainPage(params: { current: number; pageSize: number; keyword?: string }) {
