@@ -23,3 +23,22 @@ POST {{endpoint}}/sr/biz-field
     "bizFieldTypeId": 1,
     "description": "password of some username2",
 }
+
+
+###
+POST {{endpoint}}/sr/biz-field
+
+{
+    "name": "password",
+    "bizFieldTypeId": 2,
+    "description": "明文密码",
+}
+
+###
+POST {{endpoint}}/sr/biz-field
+
+{
+    "name": "username",
+    "bizFieldTypeId": 1,
+    "description": "用户名",
+}

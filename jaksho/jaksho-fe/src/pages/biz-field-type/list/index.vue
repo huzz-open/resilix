@@ -127,12 +127,12 @@
         <t-form-item v-if="createFormData.basicFieldType === 'OBJECT'" name="objectBizFieldTypeRefDTOList">
           <j-tree-data
             ref="jTreeRef"
-            :fetch-page="fetchBizFieldTypePage"
+            :fetch-page="fetchBizFieldDomainPage"
             :columns="objectRefColumns"
             row-key="id"
             selection="multiple"
             custom-field="bizFieldDomainId"
-            :get-custom-value="(row: any) => row.id"
+            :get-custom-value="(row: any) => row.bizFieldDomain.id"
           />
         </t-form-item>
         <div class="dialog-footer">
@@ -260,14 +260,17 @@ const shouldShowMinMax = computed(() => supportsMinMax.value);
 // ========== OBJECT 类型：引用字段树 ==========
 const objectRefColumns: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple' },
-  { title: '名称', colKey: 'name', ellipsis: true },
-  { title: '集合类型', colKey: 'collectionType', ellipsis: true },
-  { title: '描述', colKey: 'description', ellipsis: true },
+  { title: '名称', colKey: 'bizFieldType.name', ellipsis: true },
+  { title: '基础类型', colKey: 'bizFieldType.basicFieldType', ellipsis: true },
+  { title: '集合类型', colKey: 'bizFieldType.collectionType', ellipsis: true },
+  { title: '最小值', colKey: 'bizFieldType.minimum', ellipsis: true },
+  { title: '最大值', colKey: 'bizFieldType.maximum', ellipsis: true },
+  { title: '描述', colKey: 'bizFieldType.description', ellipsis: true },
 ];
 
-async function fetchBizFieldTypePage(params: { current: number; pageSize: number; keyword?: string }) {
+async function fetchBizFieldDomainPage(params: { current: number; pageSize: number; keyword?: string }) {
   return request.post<{ rows: any[]; total: number }>({
-    url: '/sr/biz-field-type/page',
+    url: '/sr/biz-field-domain/page',
     data: { current: params.current, pageSize: params.pageSize, keyword: params.keyword },
   });
 }

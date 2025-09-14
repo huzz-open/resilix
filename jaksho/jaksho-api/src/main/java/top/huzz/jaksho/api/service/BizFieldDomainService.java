@@ -5,6 +5,7 @@ import lombok.Setter;
 import org.apache.dubbo.remoting.http12.HttpMethods;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
 import top.huzz.jaksho.api.dto.AbstractPageQuery;
+import top.huzz.jaksho.common.entity.CombineResult;
 import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.domain.entity.BizFieldDomain;
 import top.huzz.resilix.validation.annotation.BizCheck;
@@ -34,9 +35,9 @@ public interface BizFieldDomainService {
     }
 
     @Mapping(path = "/page", method = HttpMethods.POST)
-    PageResult<BizFieldDomain> pageQuery(BizFieldDomainService.PageQueryRequest request);
+    PageResult<CombineResult> pageQuery(BizFieldDomainService.PageQueryRequest request);
 
-    class PageQueryRequest extends AbstractPageQuery<BizFieldDomain> {
+    class PageQueryRequest extends AbstractPageQuery<CombineResult> {
 
     }
 }
