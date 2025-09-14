@@ -242,17 +242,17 @@ const isStringType = computed(() => createFormData.value.basicFieldType === 'STR
 const isFileType = computed(() => createFormData.value.basicFieldType === 'FILE');
 const supportsMinMax = computed(() => isCollection.value || isNumeric.value || isStringType.value || isFileType.value);
 const minLabelText = computed(() => {
-  if (isCollection.value) return '最少元素个数';
-  if (isNumeric.value) return '最小值';
-  if (isStringType.value) return '最小长度';
-  if (isFileType.value) return '最小大小';
+  if (isCollection.value) return t('pages.bizFieldType.create.minElements');
+  if (isNumeric.value) return t('pages.bizFieldType.create.minimum');
+  if (isStringType.value) return t('pages.bizFieldType.create.minLength');
+  if (isFileType.value) return t('pages.bizFieldType.create.minSize');
   return t('pages.bizFieldType.create.minimum');
 });
 const maxLabelText = computed(() => {
-  if (isCollection.value) return '最多元素个数';
-  if (isNumeric.value) return '最大值';
-  if (isStringType.value) return '最大长度';
-  if (isFileType.value) return '最大大小';
+  if (isCollection.value) return t('pages.bizFieldType.create.maxElements');
+  if (isNumeric.value) return t('pages.bizFieldType.create.maximum');
+  if (isStringType.value) return t('pages.bizFieldType.create.maxLength');
+  if (isFileType.value) return t('pages.bizFieldType.create.maxSize');
   return t('pages.bizFieldType.create.maximum');
 });
 const shouldShowMinMax = computed(() => supportsMinMax.value);
@@ -260,12 +260,20 @@ const shouldShowMinMax = computed(() => supportsMinMax.value);
 // ========== OBJECT 类型：引用字段树 ==========
 const objectRefColumns: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple' },
-  { title: '名称', colKey: 'bizFieldType.name', ellipsis: true },
-  { title: '基础类型', colKey: 'bizFieldType.basicFieldType', ellipsis: true },
-  { title: '集合类型', colKey: 'bizFieldType.collectionType', ellipsis: true },
-  { title: '最小值', colKey: 'bizFieldType.minimum', ellipsis: true },
-  { title: '最大值', colKey: 'bizFieldType.maximum', ellipsis: true },
-  { title: '描述', colKey: 'bizFieldType.description', ellipsis: true },
+  { title: t('pages.bizFieldType.create.objectRef.name'), colKey: 'bizFieldType.name', ellipsis: true },
+  {
+    title: t('pages.bizFieldType.create.objectRef.basicFieldType'),
+    colKey: 'bizFieldType.basicFieldType',
+    ellipsis: true,
+  },
+  {
+    title: t('pages.bizFieldType.create.objectRef.collectionType'),
+    colKey: 'bizFieldType.collectionType',
+    ellipsis: true,
+  },
+  { title: t('pages.bizFieldType.create.objectRef.minimum'), colKey: 'bizFieldType.minimum', ellipsis: true },
+  { title: t('pages.bizFieldType.create.objectRef.maximum'), colKey: 'bizFieldType.maximum', ellipsis: true },
+  { title: t('pages.bizFieldType.create.objectRef.description'), colKey: 'bizFieldType.description', ellipsis: true },
 ];
 
 async function fetchBizFieldDomainPage(params: { current: number; pageSize: number; keyword?: string }) {
@@ -296,7 +304,7 @@ const deleteIdx = ref(-1);
 const confirmBody = computed(() => {
   if (deleteIdx.value > -1) {
     const { name } = listData.value[deleteIdx.value];
-    return `删除后，${name}的所有信息将被清空，且无法恢复`;
+    return t('pages.bizFieldType.list.confirmDeleteBody', { name });
   }
   return '';
 });
