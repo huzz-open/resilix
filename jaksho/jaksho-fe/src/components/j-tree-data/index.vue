@@ -1,9 +1,9 @@
 <template>
   <t-space direction="vertical" style="width: 100%">
     <t-space align="center">
-      <t-button theme="primary" variant="outline" @click="openSelector(ACTIONS.AppendRoot)">{{
-        i18n.insertRoot
-      }}</t-button>
+      <t-button theme="primary" variant="outline" @click="openSelector(ACTIONS.AppendRoot)"
+        >{{ i18n.insertRoot }}
+      </t-button>
       <t-input-adornment :prepend="i18n.filterLabel">
         <t-input v-model="filterText" @change="onFilterChange" />
       </t-input-adornment>
@@ -106,6 +106,8 @@ import { MessagePlugin } from 'tdesign-vue-next';
 import { ulid } from 'ulid';
 import { computed, onMounted, reactive, ref } from 'vue';
 
+import { t } from '@/locales';
+
 type FetchPageFn = (params: {
   current: number;
   pageSize: number;
@@ -118,8 +120,6 @@ interface TreeNodeData {
   children?: TreeNodeData[];
   data?: Record<string, any>;
 }
-
-import { t } from '@/locales';
 
 const props = defineProps<{
   fetchPage: FetchPageFn;
@@ -138,10 +138,6 @@ const props = defineProps<{
   defaultPageSize?: number;
   pageSizeOptions?: number[];
   treeDepthThreshold?: number;
-}>();
-const emits = defineEmits<{
-  (e: 'change', list: Array<Record<string, any>>): void;
-  (e: 'update:list', list: Array<Record<string, any>>): void;
 }>();
 // 统一插入/放置动作常量与类型，避免字符串散落
 const ACTIONS = {
@@ -439,28 +435,20 @@ function onSelectorConfirm() {
   });
   insertNodesByAction(selectedRows);
   selector.visible = false;
-  emitList();
 }
 
 function remove(node: any) {
   treeRef.value.remove(node.value);
-  emitList();
   recalcExtraWidth('remove');
 }
 
-function emitList() {
-  const list = buildList();
-  emits('update:list', list);
-  emits('change', list);
-}
-
-function buildList() {
+function buildTreeDTOList() {
   const list: Array<Record<string, any>> = [];
   const tree = treeRef.value;
   if (!tree) return list;
   const roots: any[] = tree.getTreeData();
 
-  const dfs = (nodes: any[], parentUlid: string | '') => {
+  const dfs = (nodes: any[], parentUlid: string) => {
     nodes.forEach((n: any, idx: number) => {
       const item = {
         ulid: n.value,
@@ -474,11 +462,11 @@ function buildList() {
       }
     });
   };
-  dfs(roots, '');
+  dfs(roots, null);
   return list;
 }
 
-defineExpose({ getList: buildList });
+defineExpose({ getTreeDTOList: buildTreeDTOList });
 
 function onTreeDragEnd() {
   recalcExtraWidth('dragend');
@@ -585,6 +573,7 @@ function handleAllowDrop(context: any) {
 
 // 拖拽禁止提示：节流避免频繁弹出
 const denyTipState = reactive({ lastKey: '', lastAt: 0 });
+
 function tipDenyOnce(key: string, message: string) {
   const now = Date.now();
   const hitDifferentTarget = denyTipState.lastKey !== key;
@@ -606,13 +595,16 @@ onMounted(() => {
   background-color: var(--td-bg-color-container);
   padding: 8px 12px;
 }
+
 .op-icon {
   cursor: pointer;
   color: var(--td-text-color-secondary);
 }
+
 .op-icon:hover {
   color: var(--td-brand-color);
 }
+
 .op-icon.danger:hover {
   color: var(--td-error-color);
 }

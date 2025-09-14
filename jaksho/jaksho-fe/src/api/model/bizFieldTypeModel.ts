@@ -1,3 +1,5 @@
+import type { TreeDTO } from '@/api/model/basic/treeDTO';
+
 export type CollectionType = 'NONE' | 'LIST' | 'SET' | 'ARRAY';
 
 export type BasicFieldType =
@@ -37,6 +39,9 @@ export interface CreateBizFieldTypeRequest {
   maximum?: number;
   collectionType: CollectionType;
   basicFieldType: BasicFieldType;
+  objectBizFieldTypeRefDTOList?: ObjectBizFieldTypeRefDTO[];
 }
 
-
+export interface ObjectBizFieldTypeRefDTO extends TreeDTO {
+  bizFieldDomainId: number | string;
+}

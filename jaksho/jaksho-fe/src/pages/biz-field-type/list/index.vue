@@ -77,23 +77,23 @@
             </t-form-item>
           </t-col>
           <t-col :span="6">
-            <t-form-item :label="t('pages.bizFieldType.create.collectionType')" name="collectionType">
-              <t-select v-model="createFormData.collectionType">
-                <t-option v-for="op in collectionTypeOptions" :key="op.value" :value="op.value" :label="op.label" />
-              </t-select>
-            </t-form-item>
-          </t-col>
-          <t-col :span="6">
             <t-form-item :label="t('pages.bizFieldType.create.basicFieldType')" name="basicFieldType">
               <t-select v-model="createFormData.basicFieldType">
                 <t-option v-for="op in basicFieldTypeOptions" :key="op.value" :value="op.value" :label="op.label" />
               </t-select>
             </t-form-item>
           </t-col>
-        </t-row>
-        <t-row :gutter="16">
           <t-col :span="6">
-            <t-form-item :label="t('pages.bizFieldType.create.minimum')" name="minimum">
+            <t-form-item :label="t('pages.bizFieldType.create.collectionType')" name="collectionType">
+              <t-select v-model="createFormData.collectionType">
+                <t-option v-for="op in collectionTypeOptions" :key="op.value" :value="op.value" :label="op.label" />
+              </t-select>
+            </t-form-item>
+          </t-col>
+        </t-row>
+        <t-row v-if="shouldShowMinMax" :gutter="16">
+          <t-col :span="6">
+            <t-form-item :label="minLabelText" name="minimum">
               <t-input-number
                 v-model="createFormData.minimum"
                 :min="0"
@@ -104,7 +104,7 @@
             </t-form-item>
           </t-col>
           <t-col :span="6">
-            <t-form-item :label="t('pages.bizFieldType.create.maximum')" name="maximum">
+            <t-form-item :label="maxLabelText" name="maximum">
               <t-input-number
                 v-model="createFormData.maximum"
                 :min="0"
@@ -122,6 +122,17 @@
             :placeholder="t('pages.bizFieldType.create.descriptionPlaceholder')"
             :maxlength="255"
             show-word-limit
+          />
+        </t-form-item>
+        <t-form-item v-if="createFormData.basicFieldType === 'OBJECT'" name="objectBizFieldTypeRefDTOList">
+          <j-tree-data
+            ref="jTreeRef"
+            :fetch-page="fetchBizFieldTypePage"
+            :columns="objectRefColumns"
+            row-key="id"
+            selection="multiple"
+            custom-field="bizFieldDomainId"
+            :get-custom-value="(row: any) => row.id"
           />
         </t-form-item>
         <div class="dialog-footer">
@@ -144,15 +155,18 @@ import { computed, onMounted, ref } from 'vue';
 
 import { createBizFieldType, getBizFieldTypeList } from '@/api/bizFieldType';
 import type { CreateBizFieldTypeRequest } from '@/api/model/bizFieldTypeModel';
+import JTreeData from '@/components/j-tree-data/index.vue';
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
+import { request } from '@/utils/request';
 
 defineOptions({
   name: 'BizFieldTypeList',
 });
 
 const store = useSettingStore();
+const jTreeRef = ref<InstanceType<typeof JTreeData> | null>(null);
 
 const COLUMNS: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple', width: 64, fixed: 'left' },
@@ -185,6 +199,7 @@ const createFormData = ref<CreateBizFieldTypeRequest>({
   maximum: undefined,
   collectionType: 'NONE',
   basicFieldType: 'STRING',
+  objectBizFieldTypeRefDTOList: [],
 });
 
 const collectionTypeOptions = [
@@ -218,6 +233,44 @@ const createFormRules: Record<string, FormRule[]> = {
   minimum: [{ type: 'error', message: t('pages.bizFieldType.create.minimumInvalid') }],
   maximum: [{ type: 'error', message: t('pages.bizFieldType.create.maximumInvalid') }],
 };
+
+// ========== 动态标签：最小/最大值 ==========
+const numericTypes = new Set(['INT8', 'INT16', 'INT32', 'INT64', 'FLOAT', 'DOUBLE']);
+const isCollection = computed(() => createFormData.value.collectionType !== 'NONE');
+const isNumeric = computed(() => numericTypes.has(createFormData.value.basicFieldType as string));
+const isStringType = computed(() => createFormData.value.basicFieldType === 'STRING');
+const isFileType = computed(() => createFormData.value.basicFieldType === 'FILE');
+const supportsMinMax = computed(() => isCollection.value || isNumeric.value || isStringType.value || isFileType.value);
+const minLabelText = computed(() => {
+  if (isCollection.value) return '最少元素个数';
+  if (isNumeric.value) return '最小值';
+  if (isStringType.value) return '最小长度';
+  if (isFileType.value) return '最小大小';
+  return t('pages.bizFieldType.create.minimum');
+});
+const maxLabelText = computed(() => {
+  if (isCollection.value) return '最多元素个数';
+  if (isNumeric.value) return '最大值';
+  if (isStringType.value) return '最大长度';
+  if (isFileType.value) return '最大大小';
+  return t('pages.bizFieldType.create.maximum');
+});
+const shouldShowMinMax = computed(() => supportsMinMax.value);
+
+// ========== OBJECT 类型：引用字段树 ==========
+const objectRefColumns: PrimaryTableCol[] = [
+  { colKey: 'row-select', type: 'multiple' },
+  { title: '名称', colKey: 'name', ellipsis: true },
+  { title: '集合类型', colKey: 'collectionType', ellipsis: true },
+  { title: '描述', colKey: 'description', ellipsis: true },
+];
+
+async function fetchBizFieldTypePage(params: { current: number; pageSize: number; keyword?: string }) {
+  return request.post<{ rows: any[]; total: number }>({
+    url: '/sr/biz-field-type/page',
+    data: { current: params.current, pageSize: params.pageSize, keyword: params.keyword },
+  });
+}
 
 const fetchData = async () => {
   dataLoading.value = true;
@@ -302,6 +355,7 @@ const handleCreate = () => {
     maximum: undefined,
     collectionType: 'NONE',
     basicFieldType: 'STRING',
+    objectBizFieldTypeRefDTOList: [],
   };
 };
 
@@ -317,7 +371,22 @@ const onCreateSubmit = async () => {
   if (validateResult === true) {
     createSubmitLoading.value = true;
     try {
-      await createBizFieldType(createFormData.value);
+      const payload: CreateBizFieldTypeRequest = {
+        ...createFormData.value,
+      };
+      // 若为 OBJECT，则从 j-tree-data 读取真实列表
+      if (createFormData.value.basicFieldType === 'OBJECT') {
+        const list = (jTreeRef.value?.getTreeDTOList?.() || []) as any[];
+        (payload as any).objectBizFieldTypeRefDTOList = list.map((x: any) => ({
+          bizFieldDomainId: x.bizFieldDomainId,
+          sortOrder: x.sortOrder,
+          ulid: x.ulid,
+          parentUlid: x.parentUlid,
+        }));
+      } else {
+        delete (payload as any).objectBizFieldTypeRefDTOList;
+      }
+      await createBizFieldType(payload);
       await MessagePlugin.success(t('pages.bizFieldType.create.createSuccess'));
       createDialogVisible.value = false;
       await fetchData();
@@ -339,6 +408,7 @@ const onCreateCancel = () => {
     maximum: undefined,
     collectionType: 'NONE',
     basicFieldType: 'STRING',
+    objectBizFieldTypeRefDTOList: [],
   };
 };
 
