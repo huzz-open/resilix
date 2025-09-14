@@ -54,7 +54,7 @@
     <t-dialog
       v-model:visible="createDialogVisible"
       :header="t('pages.bizFieldType.create.title')"
-      width="760px"
+      width="60%"
       :footer="false"
     >
       <t-form
