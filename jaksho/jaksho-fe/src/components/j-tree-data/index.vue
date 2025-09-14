@@ -160,6 +160,7 @@ type Action = (typeof ACTIONS)[keyof typeof ACTIONS];
 const treeLineIndentation =
   Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--td-comp-margin-xxl')) || 24;
 const rowKeyInternal = computed(() => props.rowKey ?? 'id');
+
 // 支持 a.b.c 点路径的安全取值
 function getByPath(source: any, path: string): any {
   if (!path) return undefined;
@@ -169,6 +170,7 @@ function getByPath(source: any, path: string): any {
   }
   return (source as any)[path];
 }
+
 // ========= i18n（统一到全局 locales） =========
 const i18n = computed(() => ({
   insertRoot: t('components.jTreeData.insertRoot'),
@@ -219,16 +221,17 @@ function recalcExtraWidth(_?: string) {
   const tree = treeRef.value;
   if (!tree || !tree.getTreeData) {
     extraWidth.value = 0;
-    void nextTick().then(() => {
-      measureHeaderOffset();
-      measureHeaderColWidths();
-    });
+    measureHeaderOnce();
     return;
   }
   const treeDepthThreshold = props.treeDepthThreshold ?? 3;
   const roots = tree.getTreeData();
   const maxDepth = computeMaxDepth(roots, 1);
   extraWidth.value = maxDepth < treeDepthThreshold ? 0 : (maxDepth - treeDepthThreshold) * treeLineIndentation;
+  measureHeaderOnce();
+}
+
+function measureHeaderOnce() {
   void nextTick().then(() => {
     measureHeaderOffset();
     measureHeaderColWidths();
@@ -361,8 +364,7 @@ const headerColumns = computed<PrimaryTableCol[]>(() => {
   return cols.filter((c: any) => {
     if (!c) return false;
     if (c.colKey === 'row-select') return false;
-    if ((c as any).type === 'single' || (c as any).type === 'multiple') return false;
-    return true;
+    return !((c as any).type === 'single' || (c as any).type === 'multiple');
   });
 });
 
@@ -656,12 +658,8 @@ function tipDenyOnce(key: string, message: string) {
 
 onMounted(() => {
   recalcExtraWidth('');
-  measureHeaderOffset();
-  measureHeaderColWidths();
-  window.addEventListener('resize', () => {
-    measureHeaderOffset();
-    measureHeaderColWidths();
-  });
+  measureHeaderOnce();
+  window.addEventListener('resize', measureHeaderOnce);
 });
 
 function measureHeaderOffset() {
