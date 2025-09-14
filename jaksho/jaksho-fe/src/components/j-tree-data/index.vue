@@ -151,6 +151,15 @@ type Action = (typeof ACTIONS)[keyof typeof ACTIONS];
 const treeLineIndentation =
   Number.parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--td-comp-margin-xxl')) || 24;
 const rowKeyInternal = computed(() => props.rowKey ?? 'id');
+// 支持 a.b.c 点路径的安全取值
+function getByPath(source: any, path: string): any {
+  if (!path) return undefined;
+  if (source == null) return undefined;
+  if (path.includes('.')) {
+    return path.split('.').reduce((acc: any, k: string) => (acc == null ? acc : acc[k]), source);
+  }
+  return (source as any)[path];
+}
 // ========= i18n（统一到全局 locales） =========
 const i18n = computed(() => ({
   insertRoot: t('components.jTreeData.insertRoot'),
@@ -428,7 +437,7 @@ function onSelectorConfirm() {
   const key = rowKeyInternal.value;
   // 仅插入“新勾选”的字段：过滤掉同层级已存在（被禁用并预勾选）的项
   const selectedRows = listData.value.filter((x) => {
-    const k = x[key];
+    const k = getByPath(x, key as string);
     if (!selectedRowKeys.value.includes(k)) return false;
     const v = normalizeComparable(props.getCustomValue(x));
     return !existingLevelValues.value.has(v);
@@ -523,7 +532,7 @@ function updateDisabledSelectionsForCurrentPage() {
   (listData.value || []).forEach((row: any) => {
     const v = normalizeComparable(props.getCustomValue(row));
     if (existingLevelValues.value.has(v)) {
-      toDisableKeys.add(row[key]);
+      toDisableKeys.add(getByPath(row, key as string));
     }
   });
   // 预勾选：把禁用项加到 selectedRowKeys（保持用户已勾选项不丢失）

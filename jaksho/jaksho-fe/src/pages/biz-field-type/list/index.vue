@@ -129,7 +129,7 @@
             ref="jTreeRef"
             :fetch-page="fetchBizFieldDomainPage"
             :columns="objectRefColumns"
-            row-key="id"
+            row-key="bizFieldDomain.id"
             selection="multiple"
             custom-field="bizFieldDomainId"
             :get-custom-value="(row: any) => row.bizFieldDomain.id"
