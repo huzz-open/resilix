@@ -1,4 +1,5 @@
 import bizDomain from './biz-domain';
+import bizField from './biz-field';
 import bizFieldType from './biz-field-type';
 import dashboardBase from './dashboard-base';
 import dashboardDetail from './dashboard-detail';
@@ -34,6 +35,7 @@ export default {
   login,
   result,
   bizFieldType,
+  bizField,
   dev: {
     jTreeDataDemo: {
       title: 'j-tree-data 演示',

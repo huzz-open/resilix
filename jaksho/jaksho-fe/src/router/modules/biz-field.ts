@@ -5,27 +5,27 @@ import Layout from '@/layouts/index.vue';
 
 export default [
   {
-    path: '/biz-field-type',
+    path: '/biz-field',
     component: Layout,
-    redirect: '/biz-field-type/list',
-    name: 'biz-field-type',
+    redirect: '/biz-field/list',
+    name: 'biz-field',
     meta: {
       title: {
-        zh_CN: '字段类型管理',
-        en_US: 'Field Type Management',
+        zh_CN: '字段管理',
+        en_US: 'Field Management',
       },
       icon: shallowRef(DashboardIcon),
-      orderNo: 2,
+      orderNo: 3,
     },
     children: [
       {
         path: 'list',
-        name: 'BizFieldTypeList',
-        component: () => import('@/pages/biz-field-type/list/index.vue'),
+        name: 'BizFieldList',
+        component: () => import('@/pages/biz-field/list/index.vue'),
         meta: {
           title: {
-            zh_CN: '字段类型列表',
-            en_US: 'Field Type List',
+            zh_CN: '字段列表',
+            en_US: 'Field List',
           },
         },
       },

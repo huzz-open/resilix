@@ -19,5 +19,3 @@ export function createBizFieldType(data: CreateBizFieldTypeRequest) {
     data,
   });
 }
-
-
