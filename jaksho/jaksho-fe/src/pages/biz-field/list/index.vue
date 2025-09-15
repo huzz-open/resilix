@@ -19,7 +19,7 @@
       <t-table
         :data="listData"
         :columns="COLUMNS"
-        :row-key="rowKey"
+        row-key="bizField.id"
         vertical-align="top"
         :hover="true"
         :pagination="pagination"
@@ -50,7 +50,7 @@
     <t-dialog
       v-model:visible="createDialogVisible"
       :header="t('pages.bizField.create.title')"
-      width="600px"
+      width="50%"
       :footer="false"
     >
       <t-form
@@ -79,12 +79,19 @@
           />
         </t-form-item>
         <t-form-item :label="t('pages.bizField.create.bizFieldTypeId')" name="bizFieldTypeId">
-          <t-select
-            v-model="createFormData.bizFieldTypeId"
-            :placeholder="t('pages.bizField.create.bizFieldTypePlaceholder')"
-          >
-            <t-option v-for="op in bizFieldTypeOptions" :key="op.value" :value="op.value" :label="op.label" />
-          </t-select>
+          <t-table
+            :data="typeListData"
+            :columns="TYPE_COLUMNS"
+            select-on-row-click
+            row-key="id"
+            :hover="true"
+            :pagination="typePagination"
+            :selected-row-keys="selectedTypeKeys"
+            :loading="typeLoading"
+            @page-change="onTypePageChange"
+            @change="onTypeChange"
+            @select-change="onTypeSelectChange"
+          />
         </t-form-item>
         <div class="dialog-footer">
           <t-space>
@@ -131,11 +138,7 @@ const COLUMNS: PrimaryTableCol[] = [
       const name = row?.bizFieldType?.name;
       const desc = row?.bizFieldType?.description;
       if (!name) return name;
-      return h(
-        Tooltip,
-        { content: desc || '' },
-        { default: () => name },
-      );
+      return h(Tooltip, { content: desc || '' }, { default: () => name });
     },
   },
   { title: t('pages.bizField.list.collectionType'), width: 140, colKey: 'bizFieldType.collectionType' },
@@ -162,12 +165,46 @@ const createFormData = ref<CreateBizFieldRequest>({
   bizFieldTypeId: undefined as unknown as number,
 });
 
-// 字段类型下拉
-const bizFieldTypeOptions = ref<{ label: string; value: number }[]>([]);
-async function fetchBizFieldTypeOptions() {
-  const { rows } = await getBizFieldTypeList({ current: 1, pageSize: 9999 });
-  bizFieldTypeOptions.value = (rows as BizFieldTypeModel[]).map((r) => ({ label: r.name, value: r.id }));
-}
+// 字段类型选择（表格单选）
+const TYPE_COLUMNS: PrimaryTableCol[] = [
+  { colKey: 'row-select', type: 'single', width: 64, fixed: 'left' },
+  { title: t('pages.bizField.list.bizFieldTypeName'), width: 200, colKey: 'name', ellipsis: true },
+  { title: t('pages.bizField.list.collectionType'), width: 140, colKey: 'collectionType' },
+  { title: t('pages.bizField.list.minimum'), width: 140, colKey: 'minimum' },
+  { title: t('pages.bizField.list.maximum'), width: 140, colKey: 'maximum' },
+  { title: t('pages.bizField.list.description'), width: 300, colKey: 'description', ellipsis: true },
+];
+const typeListData = ref<BizFieldTypeModel[]>([]);
+const typePagination = ref({ pageSize: 10, total: 0, current: 1 });
+const typeLoading = ref(false);
+const selectedTypeKeys = ref<(string | number)[]>([]);
+
+const fetchTypeData = async () => {
+  typeLoading.value = true;
+  try {
+    const { rows, total } = await getBizFieldTypeList({
+      current: typePagination.value.current,
+      pageSize: typePagination.value.pageSize,
+    });
+    typeListData.value = rows as BizFieldTypeModel[];
+    typePagination.value = { ...typePagination.value, total };
+  } finally {
+    typeLoading.value = false;
+  }
+};
+
+const onTypePageChange = (pageInfo: PageInfo) => {
+  typePagination.value.current = pageInfo.current;
+  typePagination.value.pageSize = pageInfo.pageSize;
+  fetchTypeData();
+};
+const onTypeChange = () => {
+  // no-op for now
+};
+const onTypeSelectChange = (keys: (string | number)[]) => {
+  selectedTypeKeys.value = keys;
+  createFormData.value.bizFieldTypeId = keys[0] as number as number;
+};
 
 // 创建表单验证规则
 const createFormRules: Record<string, FormRule[]> = {
@@ -207,7 +244,6 @@ const confirmBody = computed(() => {
 
 onMounted(() => {
   fetchData();
-  fetchBizFieldTypeOptions();
 });
 
 const confirmVisible = ref(false);
@@ -232,9 +268,6 @@ const onConfirmDelete = () => {
 const onCancel = () => {
   resetIdx();
 };
-
-const rowKey = (row: any) => row?.bizField?.id;
-
 const rehandleSelectChange = (val: (string | number)[]) => {
   selectedRowKeys.value = val;
 };
@@ -257,6 +290,9 @@ const handleClickDetail = (row: any) => {
 const handleCreate = () => {
   createDialogVisible.value = true;
   createFormData.value = { name: '', description: '', bizFieldTypeId: undefined as unknown as number };
+  selectedTypeKeys.value = [];
+  typePagination.value = { pageSize: 10, total: 0, current: 1 } as any;
+  fetchTypeData();
 };
 
 const handleClickDelete = (row: { rowIndex: any }) => {

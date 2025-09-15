@@ -740,7 +740,7 @@ function measureHeaderColWidths() {
 }
 
 .j-tree-data-header {
-  padding: 6px 12px 0 12px;
+  padding: 6px 12px 0;
   color: var(--td-text-color-secondary);
 }
 
