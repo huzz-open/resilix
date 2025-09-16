@@ -14,6 +14,7 @@ export default {
     updateTime: '更新时间',
     operation: '操作',
     detail: '详情',
+    addDomainField: '添加领域字段',
     delete: '删除',
     confirmDelete: '确认删除当前所选字段？',
     confirmDeleteBody: '删除后，{name}的所有信息将被清空，且无法恢复',
@@ -40,5 +41,14 @@ export default {
     cancel: '取消',
     createSuccess: '创建成功',
     createFailed: '创建失败，请重试',
+  },
+  addDomain: {
+    title: '为字段添加领域',
+    bizDomainId: '选择领域',
+    bizDomainRequired: '请选择领域',
+    submit: '确定',
+    cancel: '取消',
+    createSuccess: '添加成功',
+    createFailed: '添加失败，请重试',
   },
 };
