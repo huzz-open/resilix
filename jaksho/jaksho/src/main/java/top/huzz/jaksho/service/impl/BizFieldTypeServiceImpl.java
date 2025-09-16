@@ -2,6 +2,7 @@ package top.huzz.jaksho.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import org.apache.dubbo.config.annotation.DubboService;
+import jakarta.annotation.Resource;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
 import top.huzz.jaksho.api.helper.QueryHelper;
@@ -24,6 +25,9 @@ import java.util.List;
 @DubboService
 public class BizFieldTypeServiceImpl implements BizFieldTypeService {
 
+    @Resource
+    private BizFieldTypeMapper bizFieldTypeMapper;
+
     @Override
     @Transactional
     public Integer create(CreateBizFieldTypeRequest request) {
@@ -45,5 +49,10 @@ public class BizFieldTypeServiceImpl implements BizFieldTypeService {
             wp.eq(BizFieldType::getWorkspaceId, workspaceId);
         });
         return PageResult.of(rows, page);
+    }
+
+    @Override
+    public int delete(Integer id) {
+        return bizFieldTypeMapper.deleteById(id);
     }
 }

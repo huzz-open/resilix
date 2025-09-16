@@ -101,7 +101,7 @@ import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
 
-import { createBizDomain, getBizDomainList } from '@/api/bizDomain';
+import { createBizDomain, getBizDomainList, deleteBizDomain } from '@/api/bizDomain';
 import type { CreateBizDomainRequest } from '@/api/model/bizDomainModel';
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
@@ -223,17 +223,18 @@ const resetIdx = () => {
   deleteIdx.value = -1;
 };
 
-const onConfirmDelete = () => {
-  // 真实业务请发起请求
-  listData.value.splice(deleteIdx.value, 1);
-  pagination.value.total = listData.value.length;
-  const selectedIdx = selectedRowKeys.value.indexOf(deleteIdx.value);
-  if (selectedIdx > -1) {
-    selectedRowKeys.value.splice(selectedIdx, 1);
+const onConfirmDelete = async () => {
+  try {
+    const id = (listData.value[deleteIdx.value] as any)?.id;
+    if (id == null) return;
+    await deleteBizDomain(id);
+    await MessagePlugin.success(t('pages.bizDomain.list.deleteSuccess'));
+    confirmVisible.value = false;
+    resetIdx();
+    await fetchData();
+  } catch (e) {
+    console.error(e);
   }
-  confirmVisible.value = false;
-  MessagePlugin.success(t('pages.bizDomain.list.deleteSuccess'));
-  resetIdx();
 };
 
 const onCancel = () => {

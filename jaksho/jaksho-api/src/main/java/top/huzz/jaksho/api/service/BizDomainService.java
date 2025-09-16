@@ -4,6 +4,8 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.dubbo.remoting.http12.HttpMethods;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
+import org.apache.dubbo.remoting.http12.rest.Param;
+import org.apache.dubbo.remoting.http12.rest.ParamType;
 import org.hibernate.validator.constraints.Length;
 import top.huzz.jaksho.api.dto.AbstractPageQuery;
 import top.huzz.jaksho.common.entity.PageResult;
@@ -39,4 +41,7 @@ public interface BizDomainService {
     class PageQueryRequest extends AbstractPageQuery<BizDomain> {
 
     }
+
+    @Mapping(path = "/{id}", method = HttpMethods.DELETE)
+    int delete(@Param(value = "id", type = ParamType.PathVariable) Integer id);
 }

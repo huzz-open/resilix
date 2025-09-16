@@ -1,6 +1,7 @@
 package top.huzz.jaksho.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import jakarta.annotation.Resource;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
@@ -15,6 +16,7 @@ import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.common.session.Session;
 import top.huzz.jaksho.domain.entity.BizField;
 import top.huzz.jaksho.domain.entity.BizFieldDomain;
+import top.huzz.jaksho.domain.mapper.BizFieldMapper;
 import top.huzz.resilix.core.RunHandlerManager;
 import top.huzz.resilix.core.RunHandlerManagerHelper;
 
@@ -27,6 +29,9 @@ import java.util.Map;
  */
 @DubboService
 public class BizFieldServiceImpl implements BizFieldService {
+
+    @Resource
+    private BizFieldMapper bizFieldMapper;
 
     @Override
     @Transactional
@@ -59,5 +64,11 @@ public class BizFieldServiceImpl implements BizFieldService {
         Page<CombineResult> page = request.toPage();
         List<CombineResult> rows = QueryHelper.query(sql, page, Map.of("workspaceId", workspaceId));
         return PageResult.of(rows, page);
+    }
+
+
+    @Override
+    public int delete(Integer id) {
+        return bizFieldMapper.deleteById(id);
     }
 }

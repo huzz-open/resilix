@@ -4,10 +4,11 @@ import lombok.Getter;
 import lombok.Setter;
 import org.apache.dubbo.remoting.http12.HttpMethods;
 import org.apache.dubbo.remoting.http12.rest.Mapping;
+import org.apache.dubbo.remoting.http12.rest.Param;
+import org.apache.dubbo.remoting.http12.rest.ParamType;
 import top.huzz.jaksho.api.dto.AbstractPageQuery;
 import top.huzz.jaksho.common.entity.CombineResult;
 import top.huzz.jaksho.common.entity.PageResult;
-import top.huzz.jaksho.domain.entity.BizFieldDomain;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
 /**
@@ -40,4 +41,7 @@ public interface BizFieldDomainService {
     class PageQueryRequest extends AbstractPageQuery<CombineResult> {
 
     }
+
+    @Mapping(path = "/{id}", method = HttpMethods.DELETE)
+    int delete(@Param(value = "id", type = ParamType.PathVariable) Integer id);
 }

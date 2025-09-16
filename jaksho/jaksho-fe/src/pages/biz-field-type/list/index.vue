@@ -153,7 +153,7 @@ import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
 
-import { createBizFieldType, getBizFieldTypeList } from '@/api/bizFieldType';
+import { createBizFieldType, getBizFieldTypeList, deleteBizFieldType } from '@/api/bizFieldType';
 import type { CreateBizFieldTypeRequest } from '@/api/model/bizFieldTypeModel';
 import JTreeData from '@/components/j-tree-data/index.vue';
 import { prefix } from '@/config/global';
@@ -324,16 +324,18 @@ const resetIdx = () => {
   deleteIdx.value = -1;
 };
 
-const onConfirmDelete = () => {
-  listData.value.splice(deleteIdx.value, 1);
-  pagination.value.total = listData.value.length;
-  const selectedIdx = selectedRowKeys.value.indexOf(deleteIdx.value);
-  if (selectedIdx > -1) {
-    selectedRowKeys.value.splice(selectedIdx, 1);
+const onConfirmDelete = async () => {
+  try {
+    const id = listData.value[deleteIdx.value]?.id;
+    if (id == null) return;
+    await deleteBizFieldType(id);
+    await MessagePlugin.success(t('pages.bizFieldType.list.deleteSuccess'));
+    confirmVisible.value = false;
+    resetIdx();
+    await fetchData();
+  } catch (e) {
+    console.error(e);
   }
-  confirmVisible.value = false;
-  MessagePlugin.success(t('pages.bizFieldType.list.deleteSuccess'));
-  resetIdx();
 };
 
 const onCancel = () => {
