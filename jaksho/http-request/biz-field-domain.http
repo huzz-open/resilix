@@ -5,3 +5,10 @@ POST {{endpoint}}/sr/biz-field-domain
     "bizDomainId": 1,
     "bizFieldTypeId": 2
 }
+
+###
+POST {{endpoint}}/sr/biz-field-domain/page
+
+{
+
+}

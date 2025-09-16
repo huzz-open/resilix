@@ -14,11 +14,11 @@ public abstract class AbstractPageQuery<T> implements PageQuery<T> {
 	/**
 	 * 当前页码，从1开始
 	 */
-	private long current;
+	private long current = 1;
 	/**
 	 * 每页大小
 	 */
-	private long pageSize;
+	private long pageSize = 10;
 
 	@Override
 	public Page<T> toPage() {
