@@ -262,22 +262,17 @@ const shouldShowMinMax = computed(() => supportsMinMax.value);
 // 移除占位符，改由 label 完整表达语义
 
 // ========== OBJECT 类型：引用字段树 ==========
+// 插入根节点弹窗表格列：bizField.name、bizFieldType.basicFieldType、bizFieldType.collectionType、
+// bizFieldType.minimum、bizFieldType.maximum、bizField.createTime、bizField.updateTime
 const objectRefColumns: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple' },
-  { title: t('pages.bizFieldType.create.objectRef.name'), colKey: 'bizFieldType.name', ellipsis: true },
-  { title: t('pages.bizFieldType.create.objectRef.description'), colKey: 'bizFieldType.description', ellipsis: true },
-  {
-    title: t('pages.bizFieldType.create.objectRef.basicFieldType'),
-    colKey: 'bizFieldType.basicFieldType',
-    ellipsis: true,
-  },
-  {
-    title: t('pages.bizFieldType.create.objectRef.collectionType'),
-    colKey: 'bizFieldType.collectionType',
-    ellipsis: true,
-  },
+  { title: t('pages.bizFieldType.create.objectRef.name'), colKey: 'bizField.name', ellipsis: true },
+  { title: t('pages.bizFieldType.create.objectRef.basicFieldType'), colKey: 'bizFieldType.basicFieldType', ellipsis: true },
+  { title: t('pages.bizFieldType.create.objectRef.collectionType'), colKey: 'bizFieldType.collectionType', ellipsis: true },
   { title: t('pages.bizFieldType.create.objectRef.minimum'), colKey: 'bizFieldType.minimum', ellipsis: true },
   { title: t('pages.bizFieldType.create.objectRef.maximum'), colKey: 'bizFieldType.maximum', ellipsis: true },
+  { title: t('pages.bizFieldType.list.createTime'), colKey: 'bizField.createTime', ellipsis: true },
+  { title: t('pages.bizFieldType.list.updateTime'), colKey: 'bizField.updateTime', ellipsis: true },
 ];
 
 async function fetchBizFieldDomainPage(params: { current: number; pageSize: number; keyword?: string }) {

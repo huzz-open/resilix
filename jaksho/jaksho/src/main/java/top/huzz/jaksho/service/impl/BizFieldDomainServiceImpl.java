@@ -46,7 +46,9 @@ public class BizFieldDomainServiceImpl implements BizFieldDomainService {
     public PageResult<CombineResult> pageQuery(BizFieldDomainService.PageQueryRequest request) {
         int workspaceId = Session.currentWorkspaceId();
         String sql = """
-                select * from sr_biz_field_domain bfd inner join sr_biz_field_type bft on bfd.biz_field_type_id = bft.id and bfd.workspace_id = bft.workspace_id
+                select * from sr_biz_field_domain bfd
+                    inner join sr_biz_field_type bft on bfd.biz_field_type_id = bft.id and bfd.workspace_id = bft.workspace_id
+                    inner join sr_biz_field bf on bfd.biz_field_id = bf.id and bfd.workspace_id = bf.workspace_id
                 where bfd.workspace_id = #{p.workspaceId}
                 """;
         Page<CombineResult> page = request.toPage();
