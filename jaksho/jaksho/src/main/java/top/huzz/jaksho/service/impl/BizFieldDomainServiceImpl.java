@@ -1,11 +1,10 @@
 package top.huzz.jaksho.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import org.apache.dubbo.config.annotation.DubboService;
 import jakarta.annotation.Resource;
+import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
-import top.huzz.jaksho.api.helper.QueryHelper;
 import top.huzz.jaksho.api.phase.CreatePhase;
 import top.huzz.jaksho.api.service.BizFieldDomainService;
 import top.huzz.jaksho.common.entity.BasicProperties;
@@ -17,6 +16,7 @@ import top.huzz.jaksho.domain.mapper.BizFieldDomainMapper;
 import top.huzz.resilix.core.RunHandlerManager;
 import top.huzz.resilix.core.RunHandlerManagerHelper;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -45,14 +45,11 @@ public class BizFieldDomainServiceImpl implements BizFieldDomainService {
     @Override
     public PageResult<CombineResult> pageQuery(BizFieldDomainService.PageQueryRequest request) {
         int workspaceId = Session.currentWorkspaceId();
-        String sql = """
-                select * from sr_biz_field_domain bfd
-                    inner join sr_biz_field_type bft on bfd.biz_field_type_id = bft.id and bfd.workspace_id = bft.workspace_id
-                    inner join sr_biz_field bf on bfd.biz_field_id = bf.id and bfd.workspace_id = bf.workspace_id
-                where bfd.workspace_id = #{p.workspaceId}
-                """;
         Page<CombineResult> page = request.toPage();
-        List<CombineResult> rows = QueryHelper.query(sql, page, Map.of("workspaceId", workspaceId));
+        Map<String, Object> p = new HashMap<>();
+        p.put("bizFieldId", request.getBizFieldId());
+        p.put("workspaceId", workspaceId);
+        List<CombineResult> rows = bizFieldDomainMapper.query(page, p);
         return PageResult.of(rows, page);
     }
 

@@ -38,8 +38,10 @@ public interface BizFieldDomainService {
     @Mapping(path = "/page", method = HttpMethods.POST)
     PageResult<CombineResult> pageQuery(BizFieldDomainService.PageQueryRequest request);
 
+    @Getter
+    @Setter
     class PageQueryRequest extends AbstractPageQuery<CombineResult> {
-
+        private Integer bizFieldId;
     }
 
     @Mapping(path = "/{id}", method = HttpMethods.DELETE)

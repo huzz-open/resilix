@@ -18,4 +18,15 @@
         id, biz_field_id, biz_domain_id, biz_field_type_id, create_time, update_time, workspace_id
     </sql>
 
+    <select id="query" resultType="top.huzz.jaksho.common.entity.CombineResult">
+        select *
+        from sr_biz_field_domain bfd
+            inner join sr_biz_field_type bft on bfd.biz_field_type_id = bft.id and bfd.workspace_id = bft.workspace_id
+            inner join sr_biz_field bf on bfd.biz_field_id = bf.id and bfd.workspace_id = bf.workspace_id
+        where
+            bfd.workspace_id = #{p.workspaceId}
+        <if test="p.bizFieldId != null">
+            and bfd.biz_field_id = #{p.bizFieldId}
+        </if>
+    </select>
 </mapper>
