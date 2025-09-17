@@ -111,7 +111,7 @@
     <t-dialog
       v-model:visible="addDomainDialogVisible"
       :header="t('pages.bizField.addDomain.title')"
-      width="40%"
+      width="45%"
       :footer="false"
     >
       <t-form
@@ -135,6 +135,21 @@
             @page-change="onDomainPageChange"
             @change="onDomainChange"
             @select-change="onDomainSelectChange"
+          />
+        </t-form-item>
+        <t-form-item :label="t('pages.bizField.create.bizFieldTypeId')" name="bizFieldTypeId">
+          <t-table
+            :data="addTypeListData"
+            :columns="TYPE_COLUMNS"
+            select-on-row-click
+            row-key="id"
+            :hover="true"
+            :pagination="addTypePagination"
+            :selected-row-keys="selectedAddTypeKeys"
+            :loading="addTypeLoading"
+            @page-change="onAddTypePageChange"
+            @change="onAddTypeChange"
+            @select-change="onAddTypeSelectChange"
           />
         </t-form-item>
         <div class="dialog-footer">
@@ -217,9 +232,10 @@ const createFormData = ref<CreateBizFieldRequest>({
 const TYPE_COLUMNS: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'single', width: 64, fixed: 'left' },
   { title: t('pages.bizField.list.bizFieldTypeName'), width: 200, colKey: 'name', ellipsis: true },
-  { title: t('pages.bizField.list.collectionType'), width: 140, colKey: 'collectionType' },
-  { title: t('pages.bizField.list.minimum'), width: 140, colKey: 'minimum' },
-  { title: t('pages.bizField.list.maximum'), width: 140, colKey: 'maximum' },
+  { title: t('pages.bizField.list.basicFieldType'), width: 80, colKey: 'basicFieldType', ellipsis: true },
+  { title: t('pages.bizField.list.collectionType'), width: 80, colKey: 'collectionType' },
+  { title: t('pages.bizField.list.minimum'), width: 80, colKey: 'minimum' },
+  { title: t('pages.bizField.list.maximum'), width: 80, colKey: 'maximum' },
   { title: t('pages.bizField.list.description'), width: 300, colKey: 'description', ellipsis: true },
 ];
 const typeListData = ref<BizFieldTypeModel[]>([]);
@@ -301,8 +317,40 @@ const onDomainSelectChange = (keys: (string | number)[]) => {
   addDomainFormData.value.bizDomainId = keys[0] as number;
 };
 
+// 添加领域字段-字段类型选择（表格单选）
+const addTypeListData = ref<BizFieldTypeModel[]>([]);
+const addTypePagination = ref({ pageSize: 10, total: 0, current: 1 });
+const addTypeLoading = ref(false);
+const selectedAddTypeKeys = ref<(string | number)[]>([]);
+
+const fetchAddTypeData = async () => {
+  addTypeLoading.value = true;
+  try {
+    const { rows, total } = await getBizFieldTypeList({
+      current: addTypePagination.value.current,
+      pageSize: addTypePagination.value.pageSize,
+    });
+    addTypeListData.value = rows as BizFieldTypeModel[];
+    addTypePagination.value = { ...addTypePagination.value, total } as any;
+  } finally {
+    addTypeLoading.value = false;
+  }
+};
+
+const onAddTypePageChange = (pageInfo: PageInfo) => {
+  addTypePagination.value.current = pageInfo.current;
+  addTypePagination.value.pageSize = pageInfo.pageSize;
+  fetchAddTypeData();
+};
+const onAddTypeChange = () => {};
+const onAddTypeSelectChange = (keys: (string | number)[]) => {
+  selectedAddTypeKeys.value = keys;
+  addDomainFormData.value.bizFieldTypeId = keys[0] as number;
+};
+
 const addDomainFormRules: Record<string, FormRule[]> = {
   bizDomainId: [{ required: true, message: t('pages.bizField.addDomain.bizDomainRequired'), type: 'error' }],
+  bizFieldTypeId: [{ required: true, message: t('pages.bizField.create.bizFieldTypeRequired'), type: 'error' }],
 };
 
 function handleClickAddDomainField(ctx: any) {
@@ -316,6 +364,10 @@ function handleClickAddDomainField(ctx: any) {
   domainPagination.value = { pageSize: 10, total: 0, current: 1 } as any;
   addDomainDialogVisible.value = true;
   fetchDomainData();
+  // 预选字段类型并拉取字段类型列表
+  selectedAddTypeKeys.value = [bizFieldTypeId];
+  addTypePagination.value = { pageSize: 10, total: 0, current: 1 } as any;
+  fetchAddTypeData();
 }
 
 const onAddDomainSubmit = async () => {

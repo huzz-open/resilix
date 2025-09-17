@@ -7,6 +7,7 @@ export default {
     name: 'Name',
     description: 'Description',
     bizFieldTypeName: 'Field Type',
+    basicFieldType: 'Basic Type',
     collectionType: 'Collection Type',
     minimum: 'Minimum',
     maximum: 'Maximum',

@@ -10,5 +10,5 @@ POST {{endpoint}}/sr/biz-field-domain
 POST {{endpoint}}/sr/biz-field-domain/page
 
 {
-    "bizFieldId": 2
+    "bizFieldId": null
 }

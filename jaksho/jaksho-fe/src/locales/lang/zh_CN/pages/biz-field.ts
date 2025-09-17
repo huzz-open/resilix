@@ -7,6 +7,7 @@ export default {
     name: '名称',
     description: '描述',
     bizFieldTypeName: '字段类型',
+    basicFieldType: '基础类型',
     collectionType: '集合类型',
     minimum: '最小值',
     maximum: '最大值',
