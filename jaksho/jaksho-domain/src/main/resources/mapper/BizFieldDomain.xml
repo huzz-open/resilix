@@ -25,6 +25,7 @@
             inner join sr_biz_field bf on bfd.biz_field_id = bf.id and bfd.workspace_id = bf.workspace_id
         where
             bfd.workspace_id = #{p.workspaceId}
+            and bfd.biz_domain_id != -1
         <if test="p.bizFieldId != null">
             and bfd.biz_field_id = #{p.bizFieldId}
         </if>
