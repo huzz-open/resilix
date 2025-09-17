@@ -11,5 +11,3 @@ export function createBizFieldDomain(data: CreateBizFieldDomainRequest) {
     data,
   });
 }
-
-

@@ -101,7 +101,7 @@ import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
 
-import { createBizDomain, getBizDomainList, deleteBizDomain } from '@/api/bizDomain';
+import { createBizDomain, deleteBizDomain, getBizDomainList } from '@/api/bizDomain';
 import type { CreateBizDomainRequest } from '@/api/model/bizDomainModel';
 import { prefix } from '@/config/global';
 import { t } from '@/locales';

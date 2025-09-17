@@ -5,13 +5,13 @@
         <div class="left-operation-container">
           <t-button @click="handleCreate">{{ t('pages.bizField.list.create') }}</t-button>
           <p v-if="!!selectedRowKeys.length" class="selected-count">
-            {{ t('pages.bizField.list.selectedCount', {count: selectedRowKeys.length}) }}
+            {{ t('pages.bizField.list.selectedCount', { count: selectedRowKeys.length }) }}
           </p>
         </div>
         <div class="search-input">
           <t-input v-model="searchValue" :placeholder="t('pages.bizField.list.searchPlaceholder')" clearable>
             <template #suffix-icon>
-              <search-icon size="16px"/>
+              <search-icon size="16px" />
             </template>
           </t-input>
         </div>
@@ -99,9 +99,8 @@
         <div class="dialog-footer">
           <t-space>
             <t-button theme="default" @click="onCreateCancel">{{ t('pages.bizField.create.cancel') }}</t-button>
-            <t-button theme="primary" type="submit" :loading="createSubmitLoading">{{
-                t('pages.bizField.create.submit')
-              }}
+            <t-button theme="primary" type="submit" :loading="createSubmitLoading"
+              >{{ t('pages.bizField.create.submit') }}
             </t-button>
           </t-space>
         </div>
@@ -151,22 +150,22 @@
   </div>
 </template>
 <script setup lang="ts">
-import {SearchIcon} from 'tdesign-icons-vue-next';
-import type {FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol} from 'tdesign-vue-next';
-import {MessagePlugin, Tooltip} from 'tdesign-vue-next';
-import {computed, onMounted, ref} from 'vue';
+import { SearchIcon } from 'tdesign-icons-vue-next';
+import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
+import { MessagePlugin, Tooltip } from 'tdesign-vue-next';
+import { computed, onMounted, ref } from 'vue';
 
-import {createBizField, deleteBizField, getBizFieldList} from '@/api/bizField';
-import {getBizDomainList} from '@/api/bizDomain';
-import {createBizFieldDomain} from '@/api/bizFieldDomain';
-import {getBizFieldTypeList} from '@/api/bizFieldType';
-import type {CreateBizFieldRequest} from '@/api/model/bizFieldModel';
-import type {CreateBizFieldDomainRequest} from '@/api/model/bizFieldDomainModel';
-import type {BizDomainModel} from '@/api/model/bizDomainModel';
-import type {BizFieldTypeModel} from '@/api/model/bizFieldTypeModel';
-import {prefix} from '@/config/global';
-import {t} from '@/locales';
-import {useSettingStore} from '@/store';
+import { getBizDomainList } from '@/api/bizDomain';
+import { createBizField, deleteBizField, getBizFieldList } from '@/api/bizField';
+import { createBizFieldDomain } from '@/api/bizFieldDomain';
+import { getBizFieldTypeList } from '@/api/bizFieldType';
+import type { BizDomainModel } from '@/api/model/bizDomainModel';
+import type { CreateBizFieldDomainRequest } from '@/api/model/bizFieldDomainModel';
+import type { CreateBizFieldRequest } from '@/api/model/bizFieldModel';
+import type { BizFieldTypeModel } from '@/api/model/bizFieldTypeModel';
+import { prefix } from '@/config/global';
+import { t } from '@/locales';
+import { useSettingStore } from '@/store';
 
 defineOptions({
   name: 'BizFieldList',
@@ -175,31 +174,31 @@ defineOptions({
 const store = useSettingStore();
 
 const COLUMNS: PrimaryTableCol[] = [
-  {colKey: 'row-select', type: 'multiple', width: 64, fixed: 'left'},
-  {title: t('pages.bizField.list.name'), align: 'left', width: 200, colKey: 'bizField.name'},
-  {title: t('pages.bizField.list.description'), width: 300, ellipsis: true, colKey: 'bizField.description'},
+  { colKey: 'row-select', type: 'multiple', width: 64, fixed: 'left' },
+  { title: t('pages.bizField.list.name'), align: 'left', width: 200, colKey: 'bizField.name' },
+  { title: t('pages.bizField.list.description'), width: 300, ellipsis: true, colKey: 'bizField.description' },
   {
     title: t('pages.bizField.list.bizFieldTypeName'),
     width: 200,
     colKey: 'bizFieldType.name',
     ellipsis: true,
-    cell(h, {row}) {
+    cell(h, { row }) {
       const name = row?.bizFieldType?.name;
       const desc = row?.bizFieldType?.description;
       if (!name) return name;
-      return h(Tooltip, {content: desc || ''}, {default: () => name});
+      return h(Tooltip, { content: desc || '' }, { default: () => name });
     },
   },
-  {title: t('pages.bizField.list.collectionType'), width: 140, colKey: 'bizFieldType.collectionType'},
-  {title: t('pages.bizField.list.minimum'), width: 140, colKey: 'bizFieldType.minimum'},
-  {title: t('pages.bizField.list.maximum'), width: 140, colKey: 'bizFieldType.maximum'},
-  {title: t('pages.bizField.list.createTime'), width: 180, colKey: 'bizField.createTime'},
-  {title: t('pages.bizField.list.updateTime'), width: 180, colKey: 'bizField.updateTime'},
-  {title: t('pages.bizField.list.operation'), align: 'left', fixed: 'right', width: 260, colKey: 'op'},
+  { title: t('pages.bizField.list.collectionType'), width: 140, colKey: 'bizFieldType.collectionType' },
+  { title: t('pages.bizField.list.minimum'), width: 140, colKey: 'bizFieldType.minimum' },
+  { title: t('pages.bizField.list.maximum'), width: 140, colKey: 'bizFieldType.maximum' },
+  { title: t('pages.bizField.list.createTime'), width: 180, colKey: 'bizField.createTime' },
+  { title: t('pages.bizField.list.updateTime'), width: 180, colKey: 'bizField.updateTime' },
+  { title: t('pages.bizField.list.operation'), align: 'left', fixed: 'right', width: 260, colKey: 'op' },
 ];
 
 const listData = ref<any[]>([]);
-const pagination = ref({pageSize: 20, total: 0, current: 1});
+const pagination = ref({ pageSize: 20, total: 0, current: 1 });
 
 const searchValue = ref('');
 const dataLoading = ref(false);
@@ -216,27 +215,27 @@ const createFormData = ref<CreateBizFieldRequest>({
 
 // 字段类型选择（表格单选）
 const TYPE_COLUMNS: PrimaryTableCol[] = [
-  {colKey: 'row-select', type: 'single', width: 64, fixed: 'left'},
-  {title: t('pages.bizField.list.bizFieldTypeName'), width: 200, colKey: 'name', ellipsis: true},
-  {title: t('pages.bizField.list.collectionType'), width: 140, colKey: 'collectionType'},
-  {title: t('pages.bizField.list.minimum'), width: 140, colKey: 'minimum'},
-  {title: t('pages.bizField.list.maximum'), width: 140, colKey: 'maximum'},
-  {title: t('pages.bizField.list.description'), width: 300, colKey: 'description', ellipsis: true},
+  { colKey: 'row-select', type: 'single', width: 64, fixed: 'left' },
+  { title: t('pages.bizField.list.bizFieldTypeName'), width: 200, colKey: 'name', ellipsis: true },
+  { title: t('pages.bizField.list.collectionType'), width: 140, colKey: 'collectionType' },
+  { title: t('pages.bizField.list.minimum'), width: 140, colKey: 'minimum' },
+  { title: t('pages.bizField.list.maximum'), width: 140, colKey: 'maximum' },
+  { title: t('pages.bizField.list.description'), width: 300, colKey: 'description', ellipsis: true },
 ];
 const typeListData = ref<BizFieldTypeModel[]>([]);
-const typePagination = ref({pageSize: 10, total: 0, current: 1});
+const typePagination = ref({ pageSize: 10, total: 0, current: 1 });
 const typeLoading = ref(false);
 const selectedTypeKeys = ref<(string | number)[]>([]);
 
 const fetchTypeData = async () => {
   typeLoading.value = true;
   try {
-    const {rows, total} = await getBizFieldTypeList({
+    const { rows, total } = await getBizFieldTypeList({
       current: typePagination.value.current,
       pageSize: typePagination.value.pageSize,
     });
     typeListData.value = rows as BizFieldTypeModel[];
-    typePagination.value = {...typePagination.value, total};
+    typePagination.value = { ...typePagination.value, total };
   } finally {
     typeLoading.value = false;
   }
@@ -267,26 +266,26 @@ const addDomainFormData = ref<CreateBizFieldDomainRequest>({
 
 // 领域选择表格
 const DOMAIN_COLUMNS: PrimaryTableCol[] = [
-  {colKey: 'row-select', type: 'single', width: 64, fixed: 'left'},
-  {title: t('pages.bizDomain.list.name'), width: 200, colKey: 'name', ellipsis: true},
-  {title: t('pages.bizDomain.list.description'), width: 300, colKey: 'description', ellipsis: true},
-  {title: t('pages.bizDomain.list.createTime'), width: 180, colKey: 'createTime'},
-  {title: t('pages.bizDomain.list.updateTime'), width: 180, colKey: 'updateTime'},
+  { colKey: 'row-select', type: 'single', width: 64, fixed: 'left' },
+  { title: t('pages.bizDomain.list.name'), width: 200, colKey: 'name', ellipsis: true },
+  { title: t('pages.bizDomain.list.description'), width: 300, colKey: 'description', ellipsis: true },
+  { title: t('pages.bizDomain.list.createTime'), width: 180, colKey: 'createTime' },
+  { title: t('pages.bizDomain.list.updateTime'), width: 180, colKey: 'updateTime' },
 ];
 const domainListData = ref<BizDomainModel[]>([]);
-const domainPagination = ref({pageSize: 10, total: 0, current: 1});
+const domainPagination = ref({ pageSize: 10, total: 0, current: 1 });
 const domainLoading = ref(false);
 const selectedDomainKeys = ref<(string | number)[]>([]);
 
 const fetchDomainData = async () => {
   domainLoading.value = true;
   try {
-    const {rows, total} = await getBizDomainList({
+    const { rows, total } = await getBizDomainList({
       current: domainPagination.value.current,
       pageSize: domainPagination.value.pageSize,
     });
     domainListData.value = rows as any;
-    domainPagination.value = {...domainPagination.value, total} as any;
+    domainPagination.value = { ...domainPagination.value, total } as any;
   } finally {
     domainLoading.value = false;
   }
@@ -296,15 +295,14 @@ const onDomainPageChange = (pageInfo: PageInfo) => {
   domainPagination.value.pageSize = pageInfo.pageSize;
   fetchDomainData();
 };
-const onDomainChange = () => {
-};
+const onDomainChange = () => {};
 const onDomainSelectChange = (keys: (string | number)[]) => {
   selectedDomainKeys.value = keys;
   addDomainFormData.value.bizDomainId = keys[0] as number;
 };
 
 const addDomainFormRules: Record<string, FormRule[]> = {
-  bizDomainId: [{required: true, message: t('pages.bizField.addDomain.bizDomainRequired'), type: 'error'}],
+  bizDomainId: [{ required: true, message: t('pages.bizField.addDomain.bizDomainRequired'), type: 'error' }],
 };
 
 function handleClickAddDomainField(ctx: any) {
@@ -313,9 +311,9 @@ function handleClickAddDomainField(ctx: any) {
   const bizFieldTypeId = row?.bizFieldType?.id ?? row?.bizFieldTypeId;
   if (!bizFieldId || !bizFieldTypeId) return;
   currentBizFieldId.value = bizFieldId;
-  addDomainFormData.value = {bizFieldId, bizDomainId: 0, bizFieldTypeId} as any;
+  addDomainFormData.value = { bizFieldId, bizDomainId: 0, bizFieldTypeId } as any;
   selectedDomainKeys.value = [];
-  domainPagination.value = {pageSize: 10, total: 0, current: 1} as any;
+  domainPagination.value = { pageSize: 10, total: 0, current: 1 } as any;
   addDomainDialogVisible.value = true;
   fetchDomainData();
 }
@@ -346,22 +344,22 @@ const onAddDomainCancel = () => {
 // 创建表单验证规则
 const createFormRules: Record<string, FormRule[]> = {
   name: [
-    {required: true, message: t('pages.bizField.create.nameRequired'), type: 'error'},
-    {min: 1, max: 100, message: t('pages.bizField.create.nameLength'), type: 'error'},
+    { required: true, message: t('pages.bizField.create.nameRequired'), type: 'error' },
+    { min: 1, max: 100, message: t('pages.bizField.create.nameLength'), type: 'error' },
   ],
-  description: [{max: 255, message: t('pages.bizField.create.descriptionLength'), type: 'error'}],
-  bizFieldTypeId: [{required: true, message: t('pages.bizField.create.bizFieldTypeRequired'), type: 'error'}],
+  description: [{ max: 255, message: t('pages.bizField.create.descriptionLength'), type: 'error' }],
+  bizFieldTypeId: [{ required: true, message: t('pages.bizField.create.bizFieldTypeRequired'), type: 'error' }],
 };
 
 const fetchData = async () => {
   dataLoading.value = true;
   try {
-    const {rows, total} = await getBizFieldList({
+    const { rows, total } = await getBizFieldList({
       current: pagination.value.current,
       pageSize: pagination.value.pageSize,
     });
     listData.value = rows;
-    pagination.value = {...pagination.value, total};
+    pagination.value = { ...pagination.value, total };
   } catch (e) {
     console.log(e);
     await MessagePlugin.error(t('pages.bizField.list.fetchFailed'));
@@ -373,8 +371,8 @@ const fetchData = async () => {
 const deleteIdx = ref(-1);
 const confirmBody = computed(() => {
   if (deleteIdx.value > -1) {
-    const {name} = listData.value[deleteIdx.value];
-    return t('pages.bizField.list.confirmDeleteBody', {name});
+    const { name } = listData.value[deleteIdx.value];
+    return t('pages.bizField.list.confirmDeleteBody', { name });
   }
   return '';
 });
@@ -428,9 +426,9 @@ const handleClickDetail = (row: any) => {
 
 const handleCreate = () => {
   createDialogVisible.value = true;
-  createFormData.value = {name: '', description: '', bizFieldTypeId: undefined as unknown as number};
+  createFormData.value = { name: '', description: '', bizFieldTypeId: undefined as unknown as number };
   selectedTypeKeys.value = [];
-  typePagination.value = {pageSize: 10, total: 0, current: 1} as any;
+  typePagination.value = { pageSize: 10, total: 0, current: 1 } as any;
   fetchTypeData();
 };
 
@@ -461,7 +459,7 @@ const onCreateSubmit = async () => {
 
 const onCreateCancel = () => {
   createDialogVisible.value = false;
-  createFormData.value = {name: '', description: '', bizFieldTypeId: undefined as unknown as number};
+  createFormData.value = { name: '', description: '', bizFieldTypeId: undefined as unknown as number };
 };
 
 const headerAffixedTop = computed(

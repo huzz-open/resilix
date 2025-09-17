@@ -51,4 +51,3 @@ function onListChange(list: any[]) {
 }
 </script>
 <style scoped></style>
-

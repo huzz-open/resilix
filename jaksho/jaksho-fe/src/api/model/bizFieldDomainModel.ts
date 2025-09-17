@@ -13,5 +13,3 @@ export interface BizFieldDomainModel {
   updateTime: string;
   workspaceId: number;
 }
-
-

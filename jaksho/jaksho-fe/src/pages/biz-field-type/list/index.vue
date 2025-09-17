@@ -153,7 +153,7 @@ import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
 
-import { createBizFieldType, getBizFieldTypeList, deleteBizFieldType } from '@/api/bizFieldType';
+import { createBizFieldType, deleteBizFieldType, getBizFieldTypeList } from '@/api/bizFieldType';
 import type { CreateBizFieldTypeRequest } from '@/api/model/bizFieldTypeModel';
 import JTreeData from '@/components/j-tree-data/index.vue';
 import { prefix } from '@/config/global';
@@ -267,8 +267,16 @@ const shouldShowMinMax = computed(() => supportsMinMax.value);
 const objectRefColumns: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple' },
   { title: t('pages.bizFieldType.create.objectRef.name'), colKey: 'bizField.name', ellipsis: true },
-  { title: t('pages.bizFieldType.create.objectRef.basicFieldType'), colKey: 'bizFieldType.basicFieldType', ellipsis: true },
-  { title: t('pages.bizFieldType.create.objectRef.collectionType'), colKey: 'bizFieldType.collectionType', ellipsis: true },
+  {
+    title: t('pages.bizFieldType.create.objectRef.basicFieldType'),
+    colKey: 'bizFieldType.basicFieldType',
+    ellipsis: true,
+  },
+  {
+    title: t('pages.bizFieldType.create.objectRef.collectionType'),
+    colKey: 'bizFieldType.collectionType',
+    ellipsis: true,
+  },
   { title: t('pages.bizFieldType.create.objectRef.minimum'), colKey: 'bizFieldType.minimum', ellipsis: true },
   { title: t('pages.bizFieldType.create.objectRef.maximum'), colKey: 'bizFieldType.maximum', ellipsis: true },
   { title: t('pages.bizFieldType.list.createTime'), colKey: 'bizField.createTime', ellipsis: true },
