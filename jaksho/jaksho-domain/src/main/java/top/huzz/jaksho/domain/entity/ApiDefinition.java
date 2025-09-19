@@ -11,7 +11,6 @@ import lombok.ToString;
 import lombok.experimental.Accessors;
 import top.huzz.jaksho.common.constant.BodyType;
 import top.huzz.jaksho.common.constant.HttpMethod;
-import top.huzz.jaksho.common.constant.RawType;
 import top.huzz.jaksho.common.entity.BasicProperties;
 
 import java.io.Serial;
@@ -75,12 +74,6 @@ public class ApiDefinition extends BasicProperties implements Serializable {
     private BodyType bodyType;
 
     /**
-     * raw类型的子类型，当body_type=RAW起作用
-     */
-    @TableField("raw_type")
-    private RawType rawType;
-
-    /**
      * 工作空间ID
      */
     @TableField(value = "workspace_id", fill = FieldFill.INSERT)
@@ -114,7 +107,6 @@ public class ApiDefinition extends BasicProperties implements Serializable {
         props.put("path", path);
         props.put("description", description);
         props.put("bodyType", bodyType);
-        props.put("rawType", rawType);
         props.put("workspaceId", workspaceId);
         props.put("createTime", createTime);
         props.put("updateTime", updateTime);

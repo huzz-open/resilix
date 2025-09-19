@@ -85,7 +85,6 @@ CREATE TABLE IF NOT EXISTS sr_api_definition
     `path`                  varchar(200)                   NOT NULL COMMENT '接口路径，如: /users/{userId}',
     `description`           varchar(255) DEFAULT ''        NOT NULL COMMENT '接口描述',
     `body_type`             varchar(30)  DEFAULT 'NONE'    NOT NULL COMMENT '请求体类型',
-    `raw_type`              varchar(20)  DEFAULT 'TEXT'    NOT NULL COMMENT 'raw类型的子类型，当body_type=RAW起作用',
     `workspace_id`          int(11)                        NOT NULL COMMENT '工作空间ID',
     `create_time`           datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`           datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
