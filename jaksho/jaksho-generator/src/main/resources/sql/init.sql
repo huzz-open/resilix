@@ -86,7 +86,6 @@ CREATE TABLE IF NOT EXISTS sr_api_definition
     `description`           varchar(255) DEFAULT ''        NOT NULL COMMENT '接口描述',
     `body_type`             varchar(30)  DEFAULT 'NONE'    NOT NULL COMMENT '请求体类型',
     `raw_type`              varchar(20)  DEFAULT 'TEXT'    NOT NULL COMMENT 'raw类型的子类型，当body_type=RAW起作用',
-    `raw_biz_field_type_id` int(11)      DEFAULT -1        NOT NULL COMMENT '当body_type=RAW且raw_type=TEXT时，指定对应的业务字段类型id',
     `workspace_id`          int(11)                        NOT NULL COMMENT '工作空间ID',
     `create_time`           datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`           datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',

@@ -81,12 +81,6 @@ public class ApiDefinition extends BasicProperties implements Serializable {
     private RawType rawType;
 
     /**
-     * 当body_type=RAW且raw_type=TEXT时，指定对应的业务字段类型id
-     */
-    @TableField("raw_biz_field_type_id")
-    private Integer rawBizFieldTypeId;
-
-    /**
      * 工作空间ID
      */
     @TableField(value = "workspace_id", fill = FieldFill.INSERT)
@@ -121,7 +115,6 @@ public class ApiDefinition extends BasicProperties implements Serializable {
         props.put("description", description);
         props.put("bodyType", bodyType);
         props.put("rawType", rawType);
-        props.put("rawBizFieldTypeId", rawBizFieldTypeId);
         props.put("workspaceId", workspaceId);
         props.put("createTime", createTime);
         props.put("updateTime", updateTime);
