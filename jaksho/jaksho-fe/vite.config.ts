@@ -46,7 +46,7 @@ export default ({ mode }: ConfigEnv): UserConfig => {
       port: 3002,
       host: '0.0.0.0',
       proxy: {
-        [VITE_API_URL_PREFIX]: {
+        [`${VITE_API_URL_PREFIX}/`]: {
           target: 'http://127.0.0.1:8080/',
           changeOrigin: true,
           rewrite: (path) => path.replace(new RegExp(`^${VITE_API_URL_PREFIX}`), ''),

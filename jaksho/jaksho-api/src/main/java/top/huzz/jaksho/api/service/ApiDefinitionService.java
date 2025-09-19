@@ -10,10 +10,13 @@ import org.apache.dubbo.remoting.http12.rest.Param;
 import org.apache.dubbo.remoting.http12.rest.ParamType;
 import org.hibernate.validator.constraints.Length;
 import top.huzz.jaksho.api.CascadedRequestProvider;
+import top.huzz.jaksho.api.dto.AbstractPageQuery;
 import top.huzz.jaksho.api.dto.ApiDefinitionFieldDTO;
 import top.huzz.jaksho.common.constant.BodyType;
 import top.huzz.jaksho.common.constant.HttpMethod;
 import top.huzz.jaksho.common.constant.RawType;
+import top.huzz.jaksho.common.entity.PageResult;
+import top.huzz.jaksho.domain.entity.ApiDefinition;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
 import java.util.List;
@@ -69,6 +72,13 @@ public interface ApiDefinitionService {
         public List<ApiDefinitionFieldDTO> cascadedRequests() {
             return apiDefinitionFieldDTOList;
         }
+    }
+
+    @Mapping(path = "/page", method = HttpMethods.POST)
+    PageResult<ApiDefinition> pageQuery(ApiDefinitionService.PageQueryRequest request);
+
+    class PageQueryRequest extends AbstractPageQuery<ApiDefinition> {
+
     }
 
     @Mapping(path = "/{id}", method = HttpMethods.DELETE)
