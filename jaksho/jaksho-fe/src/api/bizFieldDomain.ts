@@ -18,6 +18,7 @@ export function getBizFieldDomainList(params: {
   pageSize: number;
   keyword?: string;
   bizFieldId?: number;
+  excludeDefaultFieldDomain?: boolean;
 }) {
   return request.post<{ rows: any[]; total: number }>({
     url: Api.BizFieldDomainList,

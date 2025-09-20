@@ -169,6 +169,63 @@
         </div>
       </t-form>
     </t-dialog>
+
+    <!-- 详情抽屉 -->
+    <t-drawer v-model:visible="detailDrawerVisible" placement="right" size="40%" :footer="false">
+      <template #header>
+        <span>{{ t('pages.bizField.detail.title') }}</span>
+      </template>
+      <div>
+        <t-card :title="t('pages.bizField.detail.basicInfo')" :bordered="false" style="margin-bottom: 16px">
+          <t-descriptions :column="2" item-layout="horizontal" size="small" :label-width="100">
+            <!-- 名称 独占一行 -->
+            <t-descriptions-item :label="t('pages.bizField.list.name')" :span="2">
+              {{ detailRecord?.bizField?.name ?? detailRecord?.name }}
+            </t-descriptions-item>
+            <!-- 字段类型、基础类型 -->
+            <t-descriptions-item :label="t('pages.bizField.list.bizFieldTypeName')">
+              {{ detailRecord?.bizFieldType?.name }}
+            </t-descriptions-item>
+            <t-descriptions-item :label="t('pages.bizField.list.basicFieldType')">
+              {{ detailRecord?.bizFieldType?.basicFieldType }}
+            </t-descriptions-item>
+            <!-- 集合类型、描述 -->
+            <t-descriptions-item :label="t('pages.bizField.list.collectionType')">
+              {{ detailRecord?.bizFieldType?.collectionType }}
+            </t-descriptions-item>
+            <t-descriptions-item :label="t('pages.bizField.list.description')">
+              {{ detailRecord?.bizField?.description ?? detailRecord?.description }}
+            </t-descriptions-item>
+            <!-- 最小值、最大值 -->
+            <t-descriptions-item :label="t('pages.bizField.list.minimum')">
+              {{ detailRecord?.bizFieldType?.minimum }}
+            </t-descriptions-item>
+            <t-descriptions-item :label="t('pages.bizField.list.maximum')">
+              {{ detailRecord?.bizFieldType?.maximum }}
+            </t-descriptions-item>
+            <!-- 创建时间、更新时间 -->
+            <t-descriptions-item :label="t('pages.bizField.list.createTime')">
+              {{ detailRecord?.bizField?.createTime ?? detailRecord?.createTime }}
+            </t-descriptions-item>
+            <t-descriptions-item :label="t('pages.bizField.list.updateTime')">
+              {{ detailRecord?.bizField?.updateTime ?? detailRecord?.updateTime }}
+            </t-descriptions-item>
+          </t-descriptions>
+        </t-card>
+
+        <t-card :title="t('pages.bizField.detail.domainList')" :bordered="false">
+          <t-table
+            :data="detailDomainList"
+            :columns="DETAIL_DOMAIN_COLUMNS"
+            row-key="id"
+            :hover="true"
+            :pagination="detailDomainPagination"
+            :loading="detailDomainLoading"
+            @page-change="onDetailDomainPageChange"
+          />
+        </t-card>
+      </div>
+    </t-drawer>
   </div>
 </template>
 <script setup lang="ts">
@@ -179,7 +236,7 @@ import { computed, onMounted, ref } from 'vue';
 
 import { getBizDomainList } from '@/api/bizDomain';
 import { createBizField, deleteBizField, getBizFieldList } from '@/api/bizField';
-import { createBizFieldDomain } from '@/api/bizFieldDomain';
+import { createBizFieldDomain, getBizFieldDomainList } from '@/api/bizFieldDomain';
 import { getBizFieldTypeList } from '@/api/bizFieldType';
 import type { BizDomainModel } from '@/api/model/bizDomainModel';
 import type { CreateBizFieldDomainRequest } from '@/api/model/bizFieldDomainModel';
@@ -491,7 +548,10 @@ const rehandleChange = (changeParams: unknown, triggerAndData: unknown) => {
 };
 
 const handleClickDetail = (row: any) => {
-  console.log('查看详情', row);
+  detailRecord.value = row?.row ?? row;
+  detailDomainPagination.value = { pageSize: 10, total: 0, current: 1 } as any;
+  detailDrawerVisible.value = true;
+  fetchDetailDomainData();
 };
 
 const isObjectType = (row: any) => {
@@ -544,6 +604,43 @@ const headerAffixedTop = computed(
       container: `.${prefix}-layout`,
     }) as any,
 );
+
+// 详情抽屉状态与数据
+const detailDrawerVisible = ref(false);
+const detailRecord = ref<any | null>(null);
+const DETAIL_DOMAIN_COLUMNS: PrimaryTableCol[] = [
+  { title: t('pages.bizField.detail.domainName'), width: 200, colKey: 'bizDomain.name', ellipsis: true },
+  { title: t('pages.bizField.detail.domainDescription'), width: 300, colKey: 'bizDomain.description', ellipsis: true },
+  { title: t('pages.bizField.detail.createTime'), width: 180, colKey: 'createTime' },
+  { title: t('pages.bizField.detail.updateTime'), width: 180, colKey: 'updateTime' },
+];
+const detailDomainList = ref<any[]>([]);
+const detailDomainPagination = ref({ pageSize: 10, total: 0, current: 1 });
+const detailDomainLoading = ref(false);
+
+const fetchDetailDomainData = async () => {
+  if (!detailRecord.value) return;
+  detailDomainLoading.value = true;
+  try {
+    const bizFieldId = (detailRecord.value?.bizField?.id ?? detailRecord.value?.id) as number | undefined;
+    const { rows, total } = await getBizFieldDomainList({
+      current: detailDomainPagination.value.current,
+      pageSize: detailDomainPagination.value.pageSize,
+      bizFieldId,
+      excludeDefaultFieldDomain: true,
+    });
+    detailDomainList.value = rows as any[];
+    detailDomainPagination.value = { ...detailDomainPagination.value, total } as any;
+  } finally {
+    detailDomainLoading.value = false;
+  }
+};
+
+const onDetailDomainPageChange = (pageInfo: PageInfo) => {
+  detailDomainPagination.value.current = pageInfo.current;
+  detailDomainPagination.value.pageSize = pageInfo.pageSize;
+  fetchDetailDomainData();
+};
 </script>
 <style lang="less" scoped>
 .list-card-container {

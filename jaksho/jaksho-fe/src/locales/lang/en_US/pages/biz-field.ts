@@ -44,4 +44,13 @@ export default {
     createSuccess: 'Created successfully',
     createFailed: 'Create failed, please retry',
   },
+  detail: {
+    title: 'Field Detail',
+    basicInfo: 'Basic Info',
+    domainList: 'Associated Biz Domains',
+    domainName: 'Domain Name',
+    domainDescription: 'Domain Description',
+    createTime: 'Create Time',
+    updateTime: 'Update Time',
+  },
 };

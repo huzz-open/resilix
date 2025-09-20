@@ -53,4 +53,13 @@ export default {
     createSuccess: '添加成功',
     createFailed: '添加失败，请重试',
   },
+  detail: {
+    title: '字段详情',
+    basicInfo: '基本信息',
+    domainList: '已关联的业务领域',
+    domainName: '领域名称',
+    domainDescription: '领域描述',
+    createTime: '创建时间',
+    updateTime: '更新时间',
+  },
 };
