@@ -1,3 +1,4 @@
+import apiDefinition from './api-definition';
 import bizDomain from './biz-domain';
 import bizField from './biz-field';
 import bizFieldType from './biz-field-type';
@@ -36,6 +37,7 @@ export default {
   result,
   bizFieldType,
   bizField,
+  apiDefinition,
   dev: {
     jTreeDataDemo: {
       title: 'j-tree-data Demo',
