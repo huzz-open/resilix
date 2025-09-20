@@ -7,6 +7,7 @@ export default [
     component: Layout,
     redirect: '/result/success',
     meta: {
+      hidden: true,
       title: {
         zh_CN: '结果页',
         en_US: 'Result',
