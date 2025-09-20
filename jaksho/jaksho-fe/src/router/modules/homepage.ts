@@ -7,7 +7,7 @@ export default [
   {
     path: '/dashboard',
     component: Layout,
-    redirect: '/dashboard/base',
+    redirect: '/api-definition/list',
     name: 'dashboard',
     meta: {
       title: {
@@ -17,40 +17,6 @@ export default [
       icon: shallowRef(DashboardIcon),
       orderNo: 0,
     },
-    children: [
-      {
-        path: 'base',
-        name: 'DashboardBase',
-        component: () => import('@/pages/dashboard/base/index.vue'),
-        meta: {
-          title: {
-            zh_CN: '概览仪表盘',
-            en_US: 'Overview',
-          },
-        },
-      },
-      {
-        path: 'j-tree-data-demo',
-        name: 'JTreeDataDemo',
-        component: () => import('@/pages/dev/j-tree-data-demo/index.vue'),
-        meta: {
-          title: {
-            zh_CN: 'j-tree-data 演示',
-            en_US: 'j-tree-data Demo',
-          },
-        },
-      },
-      {
-        path: 'detail',
-        name: 'DashboardDetail',
-        component: () => import('@/pages/dashboard/detail/index.vue'),
-        meta: {
-          title: {
-            zh_CN: '统计报表',
-            en_US: 'Dashboard Detail',
-          },
-        },
-      },
-    ],
+    children: [],
   },
 ];
