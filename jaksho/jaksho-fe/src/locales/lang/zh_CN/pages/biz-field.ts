@@ -16,6 +16,7 @@ export default {
     operation: '操作',
     detail: '详情',
     addDomainField: '添加领域字段',
+    addDomainDisabledTip: '基础类型为 OBJECT 时不可添加领域字段',
     delete: '删除',
     confirmDelete: '确认删除当前所选字段？',
     confirmDeleteBody: '删除后，{name}的所有信息将被清空，且无法恢复',

@@ -26,7 +26,9 @@
             left join sr_biz_domain bd on bfd.biz_domain_id = bd.id and bfd.workspace_id = bd.workspace_id
         where
             bfd.workspace_id = #{p.workspaceId}
+        <if test="p.excludeDefaultFieldDomain != null and p.excludeDefaultFieldDomain">
             and bfd.biz_domain_id != -1
+        </if>
         <if test="p.bizFieldId != null">
             and bfd.biz_field_id = #{p.bizFieldId}
         </if>

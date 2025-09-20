@@ -8,6 +8,8 @@ import top.huzz.jaksho.api.context.CreateRunContext;
 import top.huzz.jaksho.api.helper.QueryHelper;
 import top.huzz.jaksho.api.phase.CreatePhase;
 import top.huzz.jaksho.api.service.BizFieldTypeService;
+import top.huzz.jaksho.common.constant.BasicFieldType;
+import top.huzz.jaksho.common.constant.CollectionType;
 import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.common.session.Session;
 import top.huzz.jaksho.domain.entity.BizFieldType;
@@ -47,6 +49,14 @@ public class BizFieldTypeServiceImpl implements BizFieldTypeService {
         Page<BizFieldType> page = request.toPage();
         List<BizFieldType> rows = QueryHelper.lambdaQuery(BizFieldTypeMapper.class, page, wp -> {
             wp.eq(BizFieldType::getWorkspaceId, workspaceId);
+            BasicFieldType basicFieldType = request.getBasicFieldType();
+            if (basicFieldType != null) {
+                wp.eq(BizFieldType::getBasicFieldType, basicFieldType);
+            }
+            CollectionType collectionType = request.getCollectionType();
+            if (collectionType != null) {
+                wp.eq(BizFieldType::getCollectionType, collectionType);
+            }
         });
         return PageResult.of(rows, page);
     }

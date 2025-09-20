@@ -65,8 +65,11 @@ public interface BizFieldTypeService {
     @Mapping(path = "/page", method = HttpMethods.POST)
     PageResult<BizFieldType> pageQuery(PageQueryRequest request);
 
+    @Getter
+    @Setter
     class PageQueryRequest extends AbstractPageQuery<BizFieldType> {
-
+        private BasicFieldType basicFieldType;
+        private CollectionType collectionType;
     }
 
     @Mapping(path = "/{id}", method = HttpMethods.DELETE)

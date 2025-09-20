@@ -70,8 +70,8 @@ function get(obj: any, path: string): any {
   display: inline-block;
   padding: 2px 8px;
   border-radius: 8px;
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.25);
-  background: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(255, 255, 255, 0.02));
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 25%);
+  background: linear-gradient(180deg, rgb(255 255 255 / 6%), rgb(255 255 255 / 2%));
   border: 1px solid var(--td-component-border);
   color: var(--td-text-color-primary);
 }
@@ -113,8 +113,7 @@ function get(obj: any, path: string): any {
 .panel-grid {
   display: grid;
   grid-template-columns: 120px 1fr;
-  grid-row-gap: 4px;
-  grid-column-gap: 12px;
+  grid-gap: 4px 12px;
 }
 
 .panel-grid .label {

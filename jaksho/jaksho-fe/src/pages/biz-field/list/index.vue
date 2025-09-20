@@ -33,9 +33,16 @@
         <template #op="slotProps">
           <t-space>
             <t-link theme="primary" @click="handleClickDetail(slotProps)">{{ t('pages.bizField.list.detail') }}</t-link>
-            <t-link theme="primary" @click="handleClickAddDomainField(slotProps)">
-              {{ t('pages.bizField.list.addDomainField') }}
-            </t-link>
+            <template v-if="isObjectType(slotProps.row)">
+              <t-tooltip :content="t('pages.bizField.list.addDomainDisabledTip')">
+                <t-link theme="primary" disabled>{{ t('pages.bizField.list.addDomainField') }}</t-link>
+              </t-tooltip>
+            </template>
+            <template v-else>
+              <t-link theme="primary" @click="handleClickAddDomainField(slotProps)">
+                {{ t('pages.bizField.list.addDomainField') }}
+              </t-link>
+            </template>
             <t-link theme="danger" @click="handleClickDelete(slotProps)">{{ t('pages.bizField.list.delete') }}</t-link>
           </t-space>
         </template>
@@ -177,7 +184,7 @@ import { getBizFieldTypeList } from '@/api/bizFieldType';
 import type { BizDomainModel } from '@/api/model/bizDomainModel';
 import type { CreateBizFieldDomainRequest } from '@/api/model/bizFieldDomainModel';
 import type { CreateBizFieldRequest } from '@/api/model/bizFieldModel';
-import type { BizFieldTypeModel } from '@/api/model/bizFieldTypeModel';
+import type { BasicFieldType, BizFieldTypeModel, CollectionType } from '@/api/model/bizFieldTypeModel';
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
@@ -204,6 +211,7 @@ const COLUMNS: PrimaryTableCol[] = [
       return h(Tooltip, { content: desc || '' }, { default: () => name });
     },
   },
+  { title: t('pages.bizField.list.basicFieldType'), width: 140, colKey: 'bizFieldType.basicFieldType' },
   { title: t('pages.bizField.list.collectionType'), width: 140, colKey: 'bizFieldType.collectionType' },
   { title: t('pages.bizField.list.minimum'), width: 140, colKey: 'bizFieldType.minimum' },
   { title: t('pages.bizField.list.maximum'), width: 140, colKey: 'bizFieldType.maximum' },
@@ -322,6 +330,9 @@ const addTypeListData = ref<BizFieldTypeModel[]>([]);
 const addTypePagination = ref({ pageSize: 10, total: 0, current: 1 });
 const addTypeLoading = ref(false);
 const selectedAddTypeKeys = ref<(string | number)[]>([]);
+// 依据当前字段的类型进行过滤
+const filterBasicFieldType = ref<BasicFieldType | undefined>(undefined);
+const filterCollectionType = ref<CollectionType | undefined>(undefined);
 
 const fetchAddTypeData = async () => {
   addTypeLoading.value = true;
@@ -329,6 +340,8 @@ const fetchAddTypeData = async () => {
     const { rows, total } = await getBizFieldTypeList({
       current: addTypePagination.value.current,
       pageSize: addTypePagination.value.pageSize,
+      basicFieldType: filterBasicFieldType.value,
+      collectionType: filterCollectionType.value,
     });
     addTypeListData.value = rows as BizFieldTypeModel[];
     addTypePagination.value = { ...addTypePagination.value, total } as any;
@@ -357,9 +370,14 @@ function handleClickAddDomainField(ctx: any) {
   const row = ctx?.row;
   const bizFieldId = row?.bizField?.id ?? row?.id;
   const bizFieldTypeId = row?.bizFieldType?.id ?? row?.bizFieldTypeId;
+  const basicFieldType = row?.bizFieldType?.basicFieldType ?? row?.basicFieldType;
+  const collectionType = row?.bizFieldType?.collectionType ?? row?.collectionType;
   if (!bizFieldId || !bizFieldTypeId) return;
   currentBizFieldId.value = bizFieldId;
   addDomainFormData.value = { bizFieldId, bizDomainId: 0, bizFieldTypeId } as any;
+  // 过滤条件：同基础类型且集合类型一致
+  filterBasicFieldType.value = basicFieldType as BasicFieldType | undefined;
+  filterCollectionType.value = collectionType as CollectionType | undefined;
   selectedDomainKeys.value = [];
   domainPagination.value = { pageSize: 10, total: 0, current: 1 } as any;
   addDomainDialogVisible.value = true;
@@ -474,6 +492,11 @@ const rehandleChange = (changeParams: unknown, triggerAndData: unknown) => {
 
 const handleClickDetail = (row: any) => {
   console.log('查看详情', row);
+};
+
+const isObjectType = (row: any) => {
+  const basic = row?.bizFieldType?.basicFieldType ?? row?.basicFieldType;
+  return basic === 'OBJECT';
 };
 
 const handleCreate = () => {

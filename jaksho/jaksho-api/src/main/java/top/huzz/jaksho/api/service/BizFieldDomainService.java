@@ -9,6 +9,7 @@ import org.apache.dubbo.remoting.http12.rest.ParamType;
 import top.huzz.jaksho.api.dto.AbstractPageQuery;
 import top.huzz.jaksho.common.entity.CombineResult;
 import top.huzz.jaksho.common.entity.PageResult;
+import top.huzz.jaksho.domain.entity.BizFieldDomain;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
 /**
@@ -25,13 +26,17 @@ public interface BizFieldDomainService {
 
     @Getter
     @Setter
-    @BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.BizFieldDomain', bizFieldId, bizDomainId, bizFieldTypeId)")
+    @BizCheck.List({
+            @BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.BizFieldDomain', bizFieldId, bizDomainId, bizFieldTypeId)"),
+            @BizCheck("#isBizFieldDomainMatched(bizFieldId, bizFieldTypeId)"),
+    })
     class CreateBizFieldDomainRequest {
         @BizCheck("#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizField', #this)")
         private Integer bizFieldId;
         @BizCheck("#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizDomain', #this)")
         private Integer bizDomainId;
         @BizCheck("#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizFieldType', #this)")
+        @BizCheck("#mustNotBasicObjectType(#this)")
         private Integer bizFieldTypeId;
     }
 
@@ -42,6 +47,11 @@ public interface BizFieldDomainService {
     @Setter
     class PageQueryRequest extends AbstractPageQuery<CombineResult> {
         private Integer bizFieldId;
+        /**
+         * 是否排除默认字段域。
+         * <p>每个业务字段被创建的时候，都会创建创建一个与之对应的{@link BizFieldDomain}，且bizDomainId = -1，当excludeDefaultFieldDomain为true的时候，则排除掉这些数据</p>
+         */
+        private Boolean excludeDefaultFieldDomain;
     }
 
     @Mapping(path = "/{id}", method = HttpMethods.DELETE)

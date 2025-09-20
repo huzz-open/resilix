@@ -15,6 +15,8 @@ export default {
     updateTime: 'Update Time',
     operation: 'Operation',
     detail: 'Detail',
+    addDomainField: 'Add Domain Field',
+    addDomainDisabledTip: 'Cannot add domain field when basic type is OBJECT',
     delete: 'Delete',
     confirmDelete: 'Confirm delete current field?',
     confirmDeleteBody: 'After deletion, all information of {name} will be cleared and cannot be recovered',

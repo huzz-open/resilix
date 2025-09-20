@@ -48,6 +48,7 @@ public class BizFieldDomainServiceImpl implements BizFieldDomainService {
         Page<CombineResult> page = request.toPage();
         Map<String, Object> p = new HashMap<>();
         p.put("bizFieldId", request.getBizFieldId());
+        p.put("excludeDefaultFieldDomain", request.getExcludeDefaultFieldDomain());
         p.put("workspaceId", workspaceId);
         List<CombineResult> rows = bizFieldDomainMapper.query(page, p);
         return PageResult.of(rows, page);

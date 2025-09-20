@@ -1,4 +1,9 @@
-import type { BizFieldTypeListResult, CreateBizFieldTypeRequest } from '@/api/model/bizFieldTypeModel';
+import type {
+  BasicFieldType,
+  BizFieldTypeListResult,
+  CollectionType,
+  CreateBizFieldTypeRequest,
+} from '@/api/model/bizFieldTypeModel';
 import { request } from '@/utils/request';
 
 const Api = {
@@ -7,7 +12,12 @@ const Api = {
   DeleteBizFieldType: '/sr/biz-field-type',
 };
 
-export function getBizFieldTypeList(params: { current: number; pageSize: number }) {
+export function getBizFieldTypeList(params: {
+  current: number;
+  pageSize: number;
+  basicFieldType?: BasicFieldType;
+  collectionType?: CollectionType;
+}) {
   return request.post<BizFieldTypeListResult>({
     url: Api.BizFieldTypeList,
     data: params,
