@@ -24,12 +24,12 @@
       >
         <template #op="slotProps">
           <t-space>
-            <t-link theme="primary" @click="openDrawerForDetail(slotProps.row)">{{
-              t('pages.apiDefinition.list.detail')
-            }}</t-link>
-            <t-link theme="danger" @click="confirmDelete(slotProps.row)">{{
-              t('pages.apiDefinition.list.delete')
-            }}</t-link>
+            <t-link theme="primary" @click="openDrawerForDetail(slotProps.row)"
+              >{{ t('pages.apiDefinition.list.detail') }}
+            </t-link>
+            <t-link theme="danger" @click="confirmDelete(slotProps.row)"
+              >{{ t('pages.apiDefinition.list.delete') }}
+            </t-link>
           </t-space>
         </template>
       </t-table>
@@ -168,6 +168,7 @@ const detailRecord = ref<ApiDefinitionModel | null>(null);
 function openDrawerForCreate() {
   createDialogVisible.value = true;
 }
+
 function openDrawerForDetail(row: ApiDefinitionModel) {
   detailRecord.value = row;
   detailDrawerVisible.value = true;
@@ -177,6 +178,7 @@ async function onCreateSuccess() {
   createDialogVisible.value = false;
   await fetchData();
 }
+
 async function onDrawerSuccess() {
   detailDrawerVisible.value = false;
   await fetchData();
@@ -201,5 +203,15 @@ async function onDrawerSuccess() {
     margin-left: var(--td-comp-margin-l);
     color: var(--td-text-color-secondary);
   }
+}
+</style>
+<style lang="less" scoped>
+/* 全局作用于 TDesign Dialog：隐藏横向滚动条（部分内容含栅格负边距会溢出） */
+
+/* 使用 :deep 以在 Teleport 到 body 的对话框中生效 */
+:deep(.t-dialog),
+:deep(.t-dialog__content),
+:deep(.t-dialog__body) {
+  overflow-x: hidden;
 }
 </style>

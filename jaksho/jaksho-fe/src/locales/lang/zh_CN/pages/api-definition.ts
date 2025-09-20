@@ -21,6 +21,8 @@ export default {
   drawer: {
     titleCreate: '创建接口',
     titleDetail: '接口详情 / 编辑',
+    pathParams: '路径参数',
+    selectPathField: '选择路径参数字段',
     tabs: {
       params: '请求参数',
       body: '请求体',
@@ -73,6 +75,8 @@ export default {
     close: '关闭',
     save: '保存',
     saveSuccess: '保存成功',
+    pathParamRemoved: '已移除路径参数 {name}',
+    pathParamRemovedMultiple: '已移除路径参数 {names}',
     validate: {
       nameRequired: '请输入接口名称',
       methodRequired: '请选择方法',

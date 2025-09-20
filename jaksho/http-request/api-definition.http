@@ -54,3 +54,6 @@ POST {{endpoint}}/sr/api-definition
     "bodyType": "NONE",
     "method": "POST"
 }
+
+###
+GET {{endpoint}}/sr/api-definition/11

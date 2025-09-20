@@ -29,6 +29,18 @@
         <if test="p.excludeDefaultFieldDomain != null and p.excludeDefaultFieldDomain">
             and bfd.biz_domain_id != -1
         </if>
+        <if test="p.id != null">
+            and bfd.id = #{p.id}
+        </if>
+        <if test="p.notBasicFieldTypes != null and p.notBasicFieldTypes.size() > 0">
+            and bft.basic_field_type not in
+            <foreach collection="p.notBasicFieldTypes" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        <if test="p.collectionType != null">
+            and bft.collection_type = #{p.collectionType}
+        </if>
         <if test="p.bizFieldId != null">
             and bfd.biz_field_id = #{p.bizFieldId}
         </if>

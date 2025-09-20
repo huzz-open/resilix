@@ -1,17 +1,23 @@
 package top.huzz.jaksho.service.impl;
 
+import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.dubbo.config.annotation.DubboService;
+import org.springframework.beans.BeanUtils;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
 import top.huzz.jaksho.api.helper.QueryHelper;
 import top.huzz.jaksho.api.phase.CreatePhase;
 import top.huzz.jaksho.api.service.ApiDefinitionService;
+import top.huzz.jaksho.api.service.BizFieldDomainService;
+import top.huzz.jaksho.common.entity.CombineResult;
 import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.common.session.Session;
 import top.huzz.jaksho.domain.entity.ApiDefinition;
 import top.huzz.jaksho.domain.entity.ApiDefinitionField;
+import top.huzz.jaksho.domain.mapper.ApiDefinitionFieldMapper;
 import top.huzz.jaksho.domain.mapper.ApiDefinitionMapper;
 import top.huzz.resilix.core.RunHandlerManager;
 import top.huzz.resilix.core.RunHandlerManagerHelper;
@@ -26,6 +32,11 @@ import java.util.List;
 public class ApiDefinitionServiceImpl implements ApiDefinitionService {
     @Resource
     private ApiDefinitionMapper apiDefinitionMapper;
+    @Resource
+    private ApiDefinitionFieldMapper apiDefinitionFieldMapper;
+    @Resource
+    private BizFieldDomainService bizFieldDomainService;
+
 
     @Override
     @Transactional
@@ -53,5 +64,27 @@ public class ApiDefinitionServiceImpl implements ApiDefinitionService {
     @Override
     public int delete(Integer id) {
         return apiDefinitionMapper.deleteById(id);
+    }
+
+    @Override
+    public DetailResponse detail(Integer id) {
+        ApiDefinition apiDefinition = apiDefinitionMapper.selectById(id);
+        if (apiDefinition == null) {
+            throw new IllegalStateException("API definition not found for id: " + id);
+        }
+        DetailResponse response = new DetailResponse();
+        BeanUtils.copyProperties(apiDefinition, response);
+        List<ApiDefinitionField> apiDefinitionFields = apiDefinitionFieldMapper.selectList(Wrappers.lambdaQuery(ApiDefinitionField.class).eq(ApiDefinitionField::getApiId, id));
+        if (CollectionUtils.isNotEmpty(apiDefinitionFields)) {
+            List<CombineResult> list = apiDefinitionFields.stream().map(adf -> {
+                Integer bizFieldDomainId = adf.getBizFieldDomainId();
+                CombineResult detail = bizFieldDomainService.detail(bizFieldDomainId);
+                detail.put("apiDefinitionField", adf);
+                return detail;
+            }).toList();
+            response.setApiDefinitionFields(list);
+        }
+
+        return response;
     }
 }

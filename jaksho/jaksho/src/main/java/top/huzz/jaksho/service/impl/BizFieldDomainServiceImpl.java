@@ -2,6 +2,7 @@ package top.huzz.jaksho.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import jakarta.annotation.Resource;
+import org.apache.commons.beanutils.BeanMap;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
@@ -46,9 +47,8 @@ public class BizFieldDomainServiceImpl implements BizFieldDomainService {
     public PageResult<CombineResult> pageQuery(BizFieldDomainService.PageQueryRequest request) {
         int workspaceId = Session.currentWorkspaceId();
         Page<CombineResult> page = request.toPage();
-        Map<String, Object> p = new HashMap<>();
-        p.put("bizFieldId", request.getBizFieldId());
-        p.put("excludeDefaultFieldDomain", request.getExcludeDefaultFieldDomain());
+        BeanMap beanMap = new BeanMap(request);
+        Map<Object, Object> p = new HashMap<>(beanMap);
         p.put("workspaceId", workspaceId);
         List<CombineResult> rows = bizFieldDomainMapper.query(page, p);
         return PageResult.of(rows, page);
@@ -57,5 +57,10 @@ public class BizFieldDomainServiceImpl implements BizFieldDomainService {
     @Override
     public int delete(Integer id) {
         return bizFieldDomainMapper.deleteById(id);
+    }
+
+    @Override
+    public CombineResult detail(Integer id) {
+        return bizFieldDomainMapper.query(null, Map.of("id", id, "workspaceId", Session.currentWorkspaceId())).stream().findFirst().orElse(null);
     }
 }

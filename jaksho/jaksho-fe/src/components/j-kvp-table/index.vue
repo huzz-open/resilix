@@ -54,6 +54,10 @@ const props = defineProps<{
   rowKey?: string;
   hideDeleteForLastEmpty?: boolean;
   valueTitleKey?: string; // 默认列标题 key，支持请求参数场景改为“默认值”
+  // 选择字段时附加到后端查询的过滤条件
+  selectorFilters?: Record<string, any>;
+  // 是否通过点击 Key 输入框弹出选择器（路径参数场景需禁用）
+  openByClick?: boolean;
 }>();
 const emit = defineEmits<{ (e: 'update:rows', v: KvpRow[]): void }>();
 
@@ -78,7 +82,7 @@ const columns = computed<PrimaryTableCol[]>(() => [
         readonly: true,
         placeholder: t('pages.apiDefinition.drawer.selectFieldPlaceholder'),
         value: row?.key ?? '',
-        onClick: () => openSelector(p.rowIndex),
+        onClick: props.openByClick === false ? undefined : () => openSelector(p.rowIndex),
       });
 
       if (!row?.__meta) return inputVNode;
@@ -257,7 +261,12 @@ async function fetchSelectorPage() {
   try {
     const rs = await request.post<{ rows: any[]; total: number }>({
       url: '/sr/biz-field-domain/page',
-      data: { current: pagination.current, pageSize: pagination.pageSize, keyword: selector.keyword },
+      data: {
+        current: pagination.current,
+        pageSize: pagination.pageSize,
+        keyword: selector.keyword,
+        ...(props.selectorFilters || {}),
+      },
     });
     listData.value = rs.rows || [];
     pagination.total = rs.total || 0;

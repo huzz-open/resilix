@@ -3,8 +3,7 @@ import { request } from '@/utils/request';
 
 const Api = {
   Page: '/sr/api-definition/page',
-  Create: '/sr/api-definition',
-  Delete: '/sr/api-definition',
+  Base: '/sr/api-definition',
 };
 
 export function getApiDefinitionList(params: { current: number; pageSize: number }) {
@@ -16,13 +15,19 @@ export function getApiDefinitionList(params: { current: number; pageSize: number
 
 export function createApiDefinition(data: CreateApiDefinitionRequest) {
   return request.post<number>({
-    url: Api.Create,
+    url: Api.Base,
     data,
   });
 }
 
 export function deleteApiDefinition(id: number) {
   return request.delete<number>({
-    url: `${Api.Delete}/${id}`,
+    url: `${Api.Base}/${id}`,
+  });
+}
+
+export function getApiDefinitionDetail(id: number) {
+  return request.get<any>({
+    url: `${Api.Base}/${id}`,
   });
 }

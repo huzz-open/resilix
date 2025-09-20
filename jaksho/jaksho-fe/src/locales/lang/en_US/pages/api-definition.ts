@@ -21,6 +21,8 @@ export default {
   drawer: {
     titleCreate: 'Create API',
     titleDetail: 'API Detail / Edit',
+    pathParams: 'Path Params',
+    selectPathField: 'Select Path Field',
     tabs: {
       params: 'Params',
       body: 'Body',
@@ -73,6 +75,8 @@ export default {
     close: 'Close',
     save: 'Save',
     saveSuccess: 'Saved',
+    pathParamRemoved: 'Path param {name} removed',
+    pathParamRemovedMultiple: 'Path params {names} removed',
     validate: {
       nameRequired: 'Enter API name',
       methodRequired: 'Select method',

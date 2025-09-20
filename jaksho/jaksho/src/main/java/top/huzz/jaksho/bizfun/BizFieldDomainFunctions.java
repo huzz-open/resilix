@@ -1,4 +1,4 @@
-package top.huzz.jaksho.api.validation.biz;
+package top.huzz.jaksho.bizfun;
 
 import org.springframework.context.annotation.Configuration;
 import top.huzz.jaksho.common.constant.BasicFieldType;
@@ -13,14 +13,15 @@ import top.huzz.resilix.validation.annotation.BizCheckFunction;
  * @since 1.0.2
  */
 @Configuration
-public class BizFieldDomainValidations {
+@SuppressWarnings("unused")
+public class BizFieldDomainFunctions {
 
     private static BizFieldMapper bizFieldMapper;
     private static BizFieldTypeMapper bizFieldTypeMapper;
 
-    public BizFieldDomainValidations(BizFieldMapper bizFieldMapper, BizFieldTypeMapper bizFieldTypeMapper) {
-        BizFieldDomainValidations.bizFieldMapper = bizFieldMapper;
-        BizFieldDomainValidations.bizFieldTypeMapper = bizFieldTypeMapper;
+    public BizFieldDomainFunctions(BizFieldMapper bizFieldMapper, BizFieldTypeMapper bizFieldTypeMapper) {
+        BizFieldDomainFunctions.bizFieldMapper = bizFieldMapper;
+        BizFieldDomainFunctions.bizFieldTypeMapper = bizFieldTypeMapper;
     }
 
     /**

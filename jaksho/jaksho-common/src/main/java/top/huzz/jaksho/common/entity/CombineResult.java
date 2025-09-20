@@ -44,4 +44,19 @@ public class CombineResult {
         }
         return (T) domains.values().iterator().next();
     }
+
+    public CombineResult put(String domainName, BasicProperties domain) {
+        this.domains.put(domainName, domain);
+        return this;
+    }
+
+    public static CombineResult of(String domainName1, BasicProperties domain1) {
+        CombineResult combineResult = new CombineResult();
+        combineResult.getDomains().put(domainName1, domain1);
+        return combineResult;
+    }
+
+    public static CombineResult of(String domainName1, BasicProperties domain1, String domainName2, BasicProperties domain2) {
+        return of(domainName1, domain1).put(domainName2, domain2);
+    }
 }

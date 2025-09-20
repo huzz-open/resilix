@@ -37,11 +37,20 @@
         <t-textarea v-model="form.description" :maxlength="255" :height="80" show-word-limit />
       </t-form-item>
 
-      <!-- 类别切换：请求参数 / 请求体 -->
+      <!-- 类别切换：路径参数 / 请求参数 / 请求体 -->
       <t-tabs v-model="activeCategory">
+        <t-tab-panel :label="t('pages.apiDefinition.drawer.pathParams')" value="path">
+          <t-form-item :label="t('pages.apiDefinition.drawer.pathParams')">
+            <j-kvp-table v-model:rows="pathRows" hide-delete-for-last-empty :open-by-click="false" />
+          </t-form-item>
+        </t-tab-panel>
         <t-tab-panel :label="t('pages.apiDefinition.drawer.tabs.params')" value="params">
           <t-form-item :label="t('pages.apiDefinition.drawer.queryParams')">
-            <j-kvp-table v-model:rows="queryRows" hide-delete-for-last-empty />
+            <j-kvp-table
+              v-model:rows="queryRows"
+              hide-delete-for-last-empty
+              :selector-filters="{ notBasicFieldTypes: ['OBJECT', 'FILE'], collectionType: 'NONE' }"
+            />
           </t-form-item>
         </t-tab-panel>
 
@@ -57,7 +66,11 @@
           </template>
 
           <template v-if="form.bodyType === 'FORM_DATA' || form.bodyType === 'FORM_URLENCODED'">
-            <j-kvp-table v-model:rows="kvpRows" hide-delete-for-last-empty />
+            <j-kvp-table
+              v-model:rows="kvpRows"
+              hide-delete-for-last-empty
+              :selector-filters="{ notBasicFieldTypes: ['OBJECT', 'FILE'], collectionType: 'NONE' }"
+            />
           </template>
 
           <template v-if="form.bodyType === 'RAW_TEXT'">
@@ -68,10 +81,12 @@
             />
           </template>
 
-          <template v-if="form.bodyType === 'RAW_JSON'">
+          <!-- RAW_JSON 面板：受控树数据，通过 v-model:treeDtoList 回显与同步 -->
+          <div v-show="form.bodyType === 'RAW_JSON'">
             <t-space direction="vertical" style="width: 100%">
               <j-tree-data
                 ref="jTreeRef"
+                v-model:tree-dto-list="rawJsonTreeDTO"
                 :fetch-page="fetchBizFieldDomainPage"
                 :columns="jsonFieldColumns"
                 row-key="bizFieldDomain.id"
@@ -81,13 +96,41 @@
                 :default-page-size="10"
               />
             </t-space>
-          </template>
+          </div>
 
           <template v-if="form.bodyType === 'BINARY'">
             <t-alert theme="info" :message="t('pages.apiDefinition.drawer.binaryTip')" />
           </template>
         </t-tab-panel>
       </t-tabs>
+
+      <!-- 路径字段选择对话框：在路径输入包含“{”时弹出 -->
+      <t-dialog
+        v-model:visible="pathSelector.visible"
+        :header="t('pages.apiDefinition.drawer.selectPathField')"
+        width="70%"
+        :on-cancel="onPathSelectorCancel"
+      >
+        <template #body>
+          <t-space direction="vertical" style="width: 100%">
+            <t-input
+              v-model="pathSelector.keyword"
+              :placeholder="t('pages.apiDefinition.drawer.searchPlaceholder')"
+              @change="onPathKeywordChange"
+            />
+            <t-table
+              :data="pathListData"
+              :columns="pathSelectorColumns"
+              row-key="bizFieldDomain.id"
+              hover
+              :pagination="pathPagination"
+              :loading="pathLoading"
+              @page-change="onPathPageChange"
+              @row-click="onPathSelectorRowClick"
+            />
+          </t-space>
+        </template>
+      </t-dialog>
 
       <div class="footer">
         <t-space>
@@ -104,9 +147,9 @@
 import type { FormInstanceFunctions, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ulid } from 'ulid';
-import { onMounted, ref, watch } from 'vue';
+import { nextTick, onMounted, reactive, ref, watch } from 'vue';
 
-import { createApiDefinition } from '@/api/apiDefinition';
+import { createApiDefinition, getApiDefinitionDetail } from '@/api/apiDefinition';
 import type {
   ApiDefinitionFieldDTO,
   ApiDefinitionModel,
@@ -127,8 +170,8 @@ const METHODS: HttpMethod[] = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'TRACE', 
 const BODY_TYPES: BodyType[] = ['NONE', 'FORM_DATA', 'FORM_URLENCODED', 'RAW_JSON', 'RAW_TEXT', 'BINARY'];
 
 const formRef = ref<FormInstanceFunctions>();
-// 类别页签：请求参数 / 请求体
-const activeCategory = ref<'params' | 'body'>('params');
+// 类别页签：路径参数 / 请求参数 / 请求体
+const activeCategory = ref<'path' | 'params' | 'body'>('params');
 const form = ref<CreateApiDefinitionRequest>({
   name: '',
   path: '',
@@ -152,6 +195,8 @@ const kvpRows = ref<KVPRow[]>([]);
 
 // 行行为改由 kvp-table 统一处理
 
+// Path / Query 列表
+const pathRows = ref<KVPRow[]>([]);
 // Query 列表：始终保留一行空白行
 const queryRows = ref<KVPRow[]>([]);
 // 列由 kvp-table 定义
@@ -160,16 +205,24 @@ const queryRows = ref<KVPRow[]>([]);
 
 // RAW 文本
 const rawText = ref('');
+// RAW_JSON 受控树 DTO 列表
+const rawJsonTreeDTO = ref<any[]>([]);
+// 提取路径参数名称
+function extractPathParamNames(source: string | null | undefined): string[] {
+  return Array.from(String(source || '').matchAll(/\{(.*?)\}/g))
+    .map((m) => (m?.[1] || '').trim())
+    .filter(Boolean);
+}
 
 // RAW JSON 使用 j-tree-data 选择 BizFieldDomain 构建树
 const jTreeRef = ref<InstanceType<typeof JTreeData> | null>(null);
 const jsonFieldColumns: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple' },
-  { title: '字段名', colKey: 'bizField.name', ellipsis: true },
-  { title: '类型', colKey: 'bizFieldType.basicFieldType', ellipsis: true },
-  { title: '集合', colKey: 'bizFieldType.collectionType', ellipsis: true },
-  { title: '最小', colKey: 'bizFieldType.minimum', ellipsis: true },
-  { title: '最大', colKey: 'bizFieldType.maximum', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.name'), colKey: 'name', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.basicFieldType'), colKey: 'basicFieldType', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.collectionType'), colKey: 'collectionType', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.minimum'), colKey: 'minimum', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.maximum'), colKey: 'maximum', ellipsis: true },
 ];
 
 async function fetchBizFieldDomainPage(params: { current: number; pageSize: number; keyword?: string }) {
@@ -191,13 +244,34 @@ function onBodyTypeChange() {
 
 function buildFieldsByBodyType(): ApiDefinitionFieldDTO[] {
   const list: ApiDefinitionFieldDTO[] = [];
-  // 为避免 ESLint 报告未转义的 '}'，将正则中的 '}' 转义
-  const pathParams = Array.from(form.value.path.matchAll(/\{(.*?)\}/g))
-    .map((m) => m[1])
-    .filter(Boolean);
-  pathParams.forEach((p, idx) => {
-    list.push({ fieldType: 'PATH', ulid: ulid(), parentUlid: null, sortOrder: idx, isRequired: true, description: p });
-  });
+  // 路径参数：优先使用“路径参数”页签内容；若为空则回退到路径解析
+  const pathRowsFiltered = (pathRows.value || []).filter((r) => String(r.key || '').trim() !== '');
+  if (pathRowsFiltered.length > 0) {
+    pathRowsFiltered.forEach((row, idx) => {
+      list.push({
+        fieldType: 'PATH',
+        ulid: row.ulid,
+        parentUlid: null,
+        sortOrder: idx,
+        isRequired: row.isRequired,
+        description: row.key,
+        // 由选择器注入
+        bizFieldDomainId: (row as any).bizFieldDomainId,
+      });
+    });
+  } else {
+    const names = extractPathParamNames(form.value.path);
+    names.forEach((p, idx) => {
+      list.push({
+        fieldType: 'PATH',
+        ulid: ulid(),
+        parentUlid: null,
+        sortOrder: idx,
+        isRequired: true,
+        description: p,
+      });
+    });
+  }
 
   // Query 参数：过滤掉空白行
   queryRows.value.forEach((row, idx) => {
@@ -210,6 +284,8 @@ function buildFieldsByBodyType(): ApiDefinitionFieldDTO[] {
       sortOrder: idx,
       description: row.key,
       isRequired: row.isRequired,
+      // 由选择器注入
+      bizFieldDomainId: (row as any).bizFieldDomainId,
     });
   });
 
@@ -225,6 +301,8 @@ function buildFieldsByBodyType(): ApiDefinitionFieldDTO[] {
         sortOrder: idx,
         description: row.key,
         isRequired: row.isRequired,
+        // 由选择器注入到 kvp 行
+        bizFieldDomainId: (row as any).bizFieldDomainId,
       });
     });
   }
@@ -248,6 +326,9 @@ function buildFieldsByBodyType(): ApiDefinitionFieldDTO[] {
 }
 
 const submitting = ref(false);
+// 提前声明以避免 watch(immediate) 时未初始化
+const braceInsertIndex = ref<number>(-1);
+const pathAutoPopupEnabled = ref(true);
 
 async function onSubmit() {
   submitting.value = true;
@@ -268,11 +349,115 @@ watch(
   () => props.value,
   (val) => {
     if (props.mode === 'detail' && val) {
-      form.value.name = val.name;
-      form.value.path = val.path;
-      form.value.method = val.method as HttpMethod;
-      form.value.bodyType = val.bodyType as BodyType;
-      form.value.description = val.description || '';
+      // 统一从详情接口获取完整数据
+      void (async () => {
+        try {
+          pathAutoPopupEnabled.value = false;
+          const detail = await getApiDefinitionDetail((val as any).id);
+          const data = (detail as any)?.data || detail;
+          form.value.name = data?.name || '';
+          form.value.path = data?.path || '';
+          form.value.method = (data?.method as HttpMethod) || 'GET';
+          form.value.bodyType = (data?.bodyType as BodyType) || 'NONE';
+          form.value.description = data?.description || '';
+
+          const rows: any[] = (data?.apiDefinitionFields || []) as any[];
+          // 统一提取 apiDefinitionField + 元数据
+          const normalized = rows.map((r) => ({
+            api: r?.apiDefinitionField || {},
+            bizField: r?.bizField || {},
+            bizFieldType: r?.bizFieldType || {},
+            bizDomain: r?.bizDomain || {},
+          }));
+          const sorted = normalized.sort((a, b) => (a.api?.sortOrder ?? 0) - (b.api?.sortOrder ?? 0));
+
+          // PATH → 路径参数
+          const pathFields = sorted.filter((x) => x.api?.fieldType === 'PATH');
+          pathRows.value = pathFields.map((f) => ({
+            ulid: f.api.ulid,
+            key: f.bizField?.name ?? f.api?.description ?? '',
+            value: '',
+            isRequired: !!f.api.isRequired,
+            bizFieldDomainId: f.api.bizFieldDomainId,
+            __meta: {
+              bizField: f.bizField,
+              bizFieldType: f.bizFieldType,
+              bizDomain: f.bizDomain,
+              name: f.bizField?.name,
+              description: f.bizField?.description,
+              basicFieldType: f.bizFieldType?.basicFieldType,
+              minimum: f.bizFieldType?.minimum,
+              maximum: f.bizFieldType?.maximum,
+            },
+          }));
+
+          // QUERY → 请求参数
+          const queryFields = sorted.filter((x) => x.api?.fieldType === 'QUERY');
+          queryRows.value = queryFields.map((f) => ({
+            ulid: f.api.ulid,
+            key: f.bizField?.name ?? f.api?.description ?? '',
+            value: '',
+            isRequired: !!f.api.isRequired,
+            bizFieldDomainId: f.api.bizFieldDomainId,
+            __meta: {
+              bizField: f.bizField,
+              bizFieldType: f.bizFieldType,
+              bizDomain: f.bizDomain,
+              name: f.bizField?.name,
+              description: f.bizField?.description,
+              basicFieldType: f.bizFieldType?.basicFieldType,
+              minimum: f.bizFieldType?.minimum,
+              maximum: f.bizFieldType?.maximum,
+            },
+          }));
+
+          // FORM_DATA / FORM_URLENCODED → 键值对表
+          const formDataFields = sorted.filter((x) => x.api?.fieldType === 'FORM_DATA');
+          const urlEncodedFields = sorted.filter((x) => x.api?.fieldType === 'FORM_URLENCODED');
+          const toKvp = (f: any) => ({
+            ulid: f.api.ulid,
+            key: f.bizField?.name ?? f.api?.description ?? '',
+            value: '',
+            isRequired: !!f.api.isRequired,
+            bizFieldDomainId: f.api.bizFieldDomainId,
+            __meta: {
+              bizField: f.bizField,
+              bizFieldType: f.bizFieldType,
+              bizDomain: f.bizDomain,
+              name: f.bizField?.name,
+              description: f.bizField?.description,
+              basicFieldType: f.bizFieldType?.basicFieldType,
+              minimum: f.bizFieldType?.minimum,
+              maximum: f.bizFieldType?.maximum,
+            },
+          });
+          if ((data?.bodyType as BodyType) === 'FORM_DATA' || (data?.bodyType as BodyType) === 'FORM_URLENCODED') {
+            kvpRows.value = ((data?.bodyType as BodyType) === 'FORM_DATA' ? formDataFields : urlEncodedFields).map(
+              toKvp,
+            );
+          } else {
+            kvpRows.value = [];
+          }
+
+          // RAW_JSON → 树 DTO（包含用于列展示的扁平字段）
+          const rawJson = sorted.filter((x) => x.api?.fieldType === 'RAW_JSON');
+          rawJsonTreeDTO.value = rawJson.map((f) => ({
+            ulid: f.api.ulid,
+            parentUlid: f.api.parentUlid || null,
+            sortOrder: f.api.sortOrder ?? 0,
+            bizFieldDomainId: f.api.bizFieldDomainId,
+            name: f.bizField?.name ?? '',
+            basicFieldType: f.bizFieldType?.basicFieldType ?? '',
+            collectionType: f.bizFieldType?.collectionType ?? '',
+            minimum: f.bizFieldType?.minimum ?? null,
+            maximum: f.bizFieldType?.maximum ?? null,
+          }));
+          form.value.bodyType = (data?.bodyType as BodyType) || 'RAW_JSON';
+          activeCategory.value = 'body';
+        } finally {
+          void nextTick(() => (pathAutoPopupEnabled.value = true));
+        }
+      })();
     } else {
       form.value = {
         name: '',
@@ -284,6 +469,7 @@ watch(
         apiDefinitionFieldDTOList: [],
       };
       // 初始化：参数与表单类均预置一行空白，保障可编辑
+      pathRows.value = [];
       queryRows.value = [{ ulid: ulid(), key: '', value: '', isRequired: false }];
       kvpRows.value = [];
       rawText.value = '';
@@ -296,6 +482,146 @@ watch(
 onMounted(() => {
   // 末尾空白行由通用表格组件 kvp-table 自行维护
 });
+
+// ================= 路径输入：输入 "{" 时弹出字段选择器 =================
+// 已在上方提前声明，避免声明顺序问题
+watch(
+  () => form.value.path,
+  (newVal, oldVal) => {
+    if (!pathAutoPopupEnabled.value) return;
+    const count = (s: string) => (s.match(/\{/g) || []).length;
+    try {
+      const prev = String(oldVal || '');
+      const curr = String(newVal || '');
+      if (count(curr) > count(prev)) {
+        braceInsertIndex.value = String(newVal || '').lastIndexOf('{');
+        openPathSelector();
+        return;
+      }
+      // 处理删除：当路径中的 {name} 被移除时，同步移除“路径参数”列表对应项并提示
+      const prevSet = new Set<string>(extractPathParamNames(prev));
+      const currSet = new Set<string>(extractPathParamNames(curr));
+      const removed: string[] = [];
+      prevSet.forEach((p) => {
+        if (!currSet.has(p)) removed.push(p);
+      });
+      if (removed.length > 0) {
+        pathRows.value = (pathRows.value || []).filter((r) => !removed.includes(String(r.key || '').trim()));
+        const msg =
+          removed.length === 1
+            ? t('pages.apiDefinition.drawer.pathParamRemoved', { name: removed[0] })
+            : t('pages.apiDefinition.drawer.pathParamRemovedMultiple', { names: removed.join(', ') });
+        void MessagePlugin.info(msg);
+      }
+    } catch {
+      // ignore
+    }
+  },
+);
+
+const pathSelector = reactive({ visible: false, keyword: '' });
+const pathPagination = reactive({ pageSize: 10, total: 0, current: 1 });
+const pathLoading = ref(false);
+const pathListData = ref<any[]>([]);
+
+const pathSelectorColumns: PrimaryTableCol[] = [
+  { title: t('pages.apiDefinition.drawer.selector.name'), colKey: 'bizField.name', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.domain'), colKey: 'bizDomain.name', width: 160 },
+  {
+    title: t('pages.apiDefinition.drawer.selector.basicFieldType'),
+    colKey: 'bizFieldType.basicFieldType',
+    ellipsis: true,
+  },
+  {
+    title: t('pages.apiDefinition.drawer.selector.collectionType'),
+    colKey: 'bizFieldType.collectionType',
+    ellipsis: true,
+  },
+  { title: t('pages.apiDefinition.drawer.selector.minimum'), colKey: 'bizFieldType.minimum', width: 120 },
+  { title: t('pages.apiDefinition.drawer.selector.maximum'), colKey: 'bizFieldType.maximum', width: 120 },
+  { title: t('pages.apiDefinition.drawer.selector.description'), colKey: 'bizField.description', ellipsis: true },
+];
+
+function openPathSelector() {
+  pathSelector.visible = true;
+  pathPagination.current = 1;
+  void fetchPathSelectorPage();
+}
+
+function onPathSelectorCancel() {
+  const idx = braceInsertIndex.value;
+  if (idx >= 0) {
+    const p = String(form.value.path || '');
+    form.value.path = p.slice(0, idx) + p.slice(idx + 1);
+  }
+  braceInsertIndex.value = -1;
+  pathSelector.visible = false;
+}
+
+function onPathKeywordChange() {
+  pathPagination.current = 1;
+  void fetchPathSelectorPage();
+}
+
+function onPathPageChange(pageInfo: any) {
+  pathPagination.current = pageInfo.current;
+  if (pageInfo.pageSize) pathPagination.pageSize = pageInfo.pageSize as number;
+  void fetchPathSelectorPage();
+}
+
+async function fetchPathSelectorPage() {
+  pathLoading.value = true;
+  try {
+    const rs = await request.post<{ rows: any[]; total: number }>({
+      url: '/sr/biz-field-domain/page',
+      data: {
+        current: pathPagination.current,
+        pageSize: pathPagination.pageSize,
+        keyword: pathSelector.keyword,
+        // 后端过滤：路径参数不允许 OBJECT/FILE，集合类型仅 NONE
+        notBasicFieldTypes: ['OBJECT', 'FILE'],
+        collectionType: 'NONE',
+      },
+    });
+    pathListData.value = rs.rows || [];
+    pathPagination.total = rs.total || 0;
+  } finally {
+    pathLoading.value = false;
+  }
+}
+
+function applyPathField(row: any) {
+  const name = row?.bizField?.name ?? row?.name ?? '';
+  const idx = braceInsertIndex.value;
+  const p = String(form.value.path || '');
+  if (idx >= 0) {
+    form.value.path = `${p.slice(0, idx)}{${name}}${p.slice(idx + 1)}`;
+  } else {
+    form.value.path = `${p}{${name}}`;
+  }
+  braceInsertIndex.value = -1;
+
+  // 规范化“路径参数”列表：移除中间的空行，仅保留一个末尾空行
+  const isEmptyRow = (r: any) =>
+    String(r?.key || '').trim() === '' && String(r?.value || '').trim() === '' && !r?.isRequired;
+  const existing = (pathRows.value || []).filter((r) => !isEmptyRow(r));
+  const exists = existing.some((x) => String(x.key).trim() === String(name).trim());
+  // 记录 bizFieldDomainId，便于提交携带
+  const bizFieldDomainId = row?.id ?? row?.bizFieldDomain?.id ?? row?.bizField?.id;
+  let next = exists
+    ? existing
+    : [...existing, { ulid: ulid(), key: name, value: '', isRequired: true, bizFieldDomainId } as any];
+  // 确保仅有一个尾部空行
+  next = [...next, { ulid: ulid(), key: '', value: '', isRequired: false }];
+  pathRows.value = next;
+
+  activeCategory.value = 'path';
+  pathSelector.visible = false;
+}
+
+function onPathSelectorRowClick(params: any) {
+  applyPathField(params?.row);
+}
 </script>
 <style scoped>
 .footer {

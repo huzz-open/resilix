@@ -113,7 +113,7 @@ import { AddIcon, ArrowDownIcon, ArrowUpIcon, DeleteIcon, SearchIcon } from 'tde
 import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { ulid } from 'ulid';
-import { computed, nextTick, onMounted, reactive, ref } from 'vue';
+import { computed, nextTick, onMounted, reactive, ref, watch } from 'vue';
 
 import { t } from '@/locales';
 
@@ -147,7 +147,12 @@ const props = defineProps<{
   defaultPageSize?: number;
   pageSizeOptions?: number[];
   treeDepthThreshold?: number;
+  // 受控模式下的树 DTO 列表（ulid/parentUlid/sortOrder/bizFieldDomainId ...），支持 v-model:treeDtoList
+  treeDtoList?: Array<Record<string, any>>;
 }>();
+
+const emit = defineEmits<{ (e: 'update:treeDtoList', v: Array<Record<string, any>>): void }>();
+
 // 统一插入/放置动作常量与类型，避免字符串散落
 const ACTIONS = {
   AppendRoot: 'appendRoot',
@@ -493,6 +498,7 @@ function insertNodesByAction(rows: any[]) {
       .forEach((n) => tree.insertAfter(selector.targetValue, n));
   }
   recalcExtraWidth('insert');
+  emitCurrentDTOList();
 }
 
 function onSelectorConfirm() {
@@ -511,6 +517,7 @@ function onSelectorConfirm() {
 function remove(node: any) {
   treeRef.value.remove(node.value);
   recalcExtraWidth('remove');
+  emitCurrentDTOList();
 }
 
 function buildTreeDTOList() {
@@ -537,10 +544,61 @@ function buildTreeDTOList() {
   return list;
 }
 
+function setTreeDTOList(list: Array<Record<string, any>>) {
+  try {
+    const byId = new Map<string, any>();
+    const roots: any[] = [];
+    (list || [])
+      .slice()
+      .sort((a: any, b: any) => (a?.sortOrder ?? 0) - (b?.sortOrder ?? 0))
+      .forEach((item: any) => {
+        const node = {
+          value: item.ulid,
+          data: { ...(item || {}) },
+          children: [] as any[],
+        } as any;
+        byId.set(String(item.ulid), node);
+      });
+    (list || []).forEach((item: any) => {
+      const node = byId.get(String(item.ulid));
+      const parentUlid = item?.parentUlid ?? null;
+      if (parentUlid && byId.has(String(parentUlid))) {
+        byId.get(String(parentUlid)).children.push(node);
+      } else {
+        roots.push(node);
+      }
+    });
+    treeData.value = roots;
+    recalcExtraWidth('setTreeDTOList');
+  } catch {
+    treeData.value = [];
+  }
+  measureHeaderOnce();
+}
+
 defineExpose({ getTreeDTOList: buildTreeDTOList });
+
+function emitCurrentDTOList() {
+  try {
+    const dto = buildTreeDTOList();
+    emit('update:treeDtoList', dto);
+  } catch {
+    // ignore
+  }
+}
+
+// ============== 受控：监听外部传入列表 ==============
+watch(
+  () => props.treeDtoList,
+  (val) => {
+    if (Array.isArray(val)) setTreeDTOList(val as Array<Record<string, any>>);
+  },
+  { immediate: true },
+);
 
 function onTreeDragEnd() {
   recalcExtraWidth('dragend');
+  emitCurrentDTOList();
 }
 
 // ============== 限制：同层级去重（插入 + 拖拽） ==============

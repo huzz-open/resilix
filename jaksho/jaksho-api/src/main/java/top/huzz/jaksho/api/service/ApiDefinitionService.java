@@ -14,9 +14,10 @@ import top.huzz.jaksho.api.dto.AbstractPageQuery;
 import top.huzz.jaksho.api.dto.ApiDefinitionFieldDTO;
 import top.huzz.jaksho.common.constant.BodyType;
 import top.huzz.jaksho.common.constant.HttpMethod;
-import top.huzz.jaksho.common.constant.RawType;
+import top.huzz.jaksho.common.entity.CombineResult;
 import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.domain.entity.ApiDefinition;
+import top.huzz.jaksho.domain.entity.ApiDefinitionField;
 import top.huzz.resilix.validation.annotation.BizCheck;
 
 import java.util.List;
@@ -35,10 +36,7 @@ public interface ApiDefinitionService {
 
     @Getter
     @Setter
-    @BizCheck.List({
-            @BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.ApiDefinition', path, method)"),
-            @BizCheck(when = "bodyType != T(BodyType).NONE", value = "#checkApiDefinitionField(apiDefinitionFieldDTOList)")
-    })
+    @BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.ApiDefinition', path, method)")
     class CreateApiDefinitionRequest implements CascadedRequestProvider<ApiDefinitionFieldDTO> {
         @Length(min = 1, max = 100)
         @BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.ApiDefinition', #this)")
@@ -60,6 +58,7 @@ public interface ApiDefinitionService {
         @Length(max = 255)
         private String remark;
 
+        @BizCheck("#checkApiDefinitionField(#this)")
         private List<ApiDefinitionFieldDTO> apiDefinitionFieldDTOList;
 
         @Override
@@ -77,4 +76,13 @@ public interface ApiDefinitionService {
 
     @Mapping(path = "/{id}", method = HttpMethods.DELETE)
     int delete(@Param(value = "id", type = ParamType.PathVariable) Integer id);
+
+    @Mapping(value = "/{id}", method = HttpMethods.GET)
+    DetailResponse detail(@Param(value = "id", type = ParamType.PathVariable) Integer id);
+
+    @Getter
+    @Setter
+    class DetailResponse extends ApiDefinition {
+        private List<CombineResult> apiDefinitionFields;
+    }
 }
