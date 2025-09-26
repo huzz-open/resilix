@@ -1,5 +1,5 @@
 <template>
-  <t-table :data="rowsModel" :columns="columns" :row-key="rowKey" bordered size="small" />
+  <t-table :data="rowsModel" :columns="columns" :row-key="rowKey" bordered size="small"/>
 
   <t-dialog
     v-model:visible="selector.visible"
@@ -16,6 +16,8 @@
           @change="onKeywordChange"
         />
         <t-table
+          v-model:selected-row-keys="selectedRowKeys"
+          select-on-row-click
           :data="listData"
           :columns="selectorColumns"
           row-key="bizFieldDomain.id"
@@ -23,21 +25,20 @@
           :pagination="pagination"
           :loading="loading"
           @page-change="onPageChange"
-          @row-click="onSelectorRowClick"
         />
       </t-space>
     </template>
   </t-dialog>
 </template>
 <script setup lang="ts">
-import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
-import { Input, Link, Switch as TSwitch, Tooltip } from 'tdesign-vue-next';
-import { ulid } from 'ulid';
-import { computed, h, onMounted, reactive, ref, watch } from 'vue';
+import type {PageInfo, PrimaryTableCol} from 'tdesign-vue-next';
+import {Input, Link, Switch as TSwitch, Tooltip} from 'tdesign-vue-next';
+import {ulid} from 'ulid';
+import {computed, h, onMounted, reactive, ref, watch} from 'vue';
 
 import JBizFieldDomainCard from '@/components/j-biz-field-domain-card/index.vue';
-import { t } from '@/locales';
-import { request } from '@/utils/request';
+import {t} from '@/locales';
+import {request} from '@/utils/request';
 
 export interface KvpRow {
   ulid: string;
@@ -49,16 +50,19 @@ export interface KvpRow {
   __meta?: Record<string, any> | null;
 }
 
-const props = defineProps<{
-  rows: KvpRow[];
-  rowKey?: string;
-  hideDeleteForLastEmpty?: boolean;
-  valueTitleKey?: string; // 默认列标题 key，支持请求参数场景改为“默认值”
-  // 选择字段时附加到后端查询的过滤条件
-  selectorFilters?: Record<string, any>;
-  // 是否通过点击 Key 输入框弹出选择器（路径参数场景需禁用）
-  openByClick?: boolean;
-}>();
+const props = withDefaults(
+  defineProps<{
+    rows: KvpRow[];
+    rowKey?: string;
+    hideDeleteForLastEmpty?: boolean;
+    valueTitleKey?: string; // 默认列标题 key，支持请求参数场景改为“默认值”
+    // 选择字段时附加到后端查询的过滤条件
+    selectorFilters?: Record<string, any>;
+    // 是否通过点击 Key 输入框弹出选择器（路径参数场景需禁用）
+    openByClick?: boolean;
+  }>(),
+  {openByClick: true},
+);
 const emit = defineEmits<{ (e: 'update:rows', v: KvpRow[]): void }>();
 
 const rowKey = computed(() => props.rowKey ?? 'ulid');
@@ -87,9 +91,9 @@ const columns = computed<PrimaryTableCol[]>(() => [
 
       if (!row?.__meta) return inputVNode;
 
-      const contentVNode = h(JBizFieldDomainCard as any, { entity: buildEntityFromMeta(row.__meta), mode: 'panel' });
+      const contentVNode = h(JBizFieldDomainCard as any, {entity: buildEntityFromMeta(row.__meta), mode: 'panel'});
 
-      return h(Tooltip as any, { placement: 'top-left' }, { default: () => inputVNode, content: () => contentVNode });
+      return h(Tooltip as any, {placement: 'top-left'}, {default: () => inputVNode, content: () => contentVNode});
     },
   },
   {
@@ -130,15 +134,15 @@ const columns = computed<PrimaryTableCol[]>(() => [
       if (isSingleRow()) {
         return h(
           Link as any,
-          { theme: 'primary', onClick: () => clearRow(idx) },
-          { default: () => t('pages.apiDefinition.drawer.clear') },
+          {theme: 'primary', onClick: () => clearRow(idx)},
+          {default: () => t('pages.apiDefinition.drawer.clear')},
         );
       }
       if (hideDeleteForLastEmpty.value && isLastEmptyRow(idx)) return null as any;
       return h(
         Link as any,
-        { theme: 'danger', onClick: () => removeRow(idx) },
-        { default: () => t('pages.apiDefinition.drawer.remove') },
+        {theme: 'danger', onClick: () => removeRow(idx)},
+        {default: () => t('pages.apiDefinition.drawer.remove')},
       );
     },
   },
@@ -148,7 +152,7 @@ function ensureTrailingEmptyRow() {
   const arr = rowsModel.value || [];
   const last = arr[arr.length - 1];
   if (!last || String(last.key || '').trim() !== '' || String(last.value || '').trim() !== '') {
-    rowsModel.value = [...arr, { ulid: ulid(), key: '', value: '', isRequired: false }];
+    rowsModel.value = [...arr, {ulid: ulid(), key: '', value: '', isRequired: false}];
   }
 }
 
@@ -196,17 +200,19 @@ watch(
   () => {
     ensureTrailingEmptyRow();
   },
-  { deep: true },
+  {deep: true},
 );
 
 // ==================== 选择器（Key 字段选择 BizFieldDomain） ====================
-const selector = reactive({ visible: false, rowIndex: -1, keyword: '' });
-const pagination = reactive({ pageSize: 10, total: 0, current: 1 });
+const selector = reactive({visible: false, rowIndex: -1, keyword: ''});
+const pagination = reactive({pageSize: 10, total: 0, current: 1});
 const loading = ref(false);
 const listData = ref<any[]>([]);
+const selectedRowKeys = ref<Array<string | number>>([]);
 
 const selectorColumns: PrimaryTableCol[] = [
-  { title: t('pages.apiDefinition.drawer.selector.name'), colKey: 'bizField.name', ellipsis: true },
+  {colKey: 'row-select', type: 'multiple', width: 52},
+  {title: t('pages.apiDefinition.drawer.selector.name'), colKey: 'bizField.name', ellipsis: true},
   {
     title: t('pages.apiDefinition.drawer.selector.domain'),
     colKey: 'bizDomain.name',
@@ -218,8 +224,8 @@ const selectorColumns: PrimaryTableCol[] = [
       const domainDesc = (row?.bizDomain?.description as string | undefined) || t('pages.apiDefinition.drawer.none');
       return h(
         Tooltip as any,
-        { content: domainDesc, placement: 'top' },
-        { default: () => h('span', { class: 'domain-pill' }, domainName) },
+        {content: domainDesc, placement: 'top'},
+        {default: () => h('span', {class: 'domain-pill'}, domainName)},
       );
     },
   },
@@ -233,15 +239,16 @@ const selectorColumns: PrimaryTableCol[] = [
     colKey: 'bizFieldType.collectionType',
     ellipsis: true,
   },
-  { title: t('pages.apiDefinition.drawer.selector.minimum'), colKey: 'bizFieldType.minimum', width: 120 },
-  { title: t('pages.apiDefinition.drawer.selector.maximum'), colKey: 'bizFieldType.maximum', width: 120 },
-  { title: t('pages.apiDefinition.drawer.selector.description'), colKey: 'bizField.description', ellipsis: true },
+  {title: t('pages.apiDefinition.drawer.selector.minimum'), colKey: 'bizFieldType.minimum', width: 120},
+  {title: t('pages.apiDefinition.drawer.selector.maximum'), colKey: 'bizFieldType.maximum', width: 120},
+  {title: t('pages.apiDefinition.drawer.selector.description'), colKey: 'bizField.description', ellipsis: true},
 ];
 
 function openSelector(rowIndex: number) {
   selector.visible = true;
   selector.rowIndex = rowIndex;
   pagination.current = 1;
+  selectedRowKeys.value = [];
   void fetchSelectorPage();
 }
 
@@ -275,29 +282,63 @@ async function fetchSelectorPage() {
   }
 }
 
-function onSelectorRowClick({ row }: any) {
-  selector.visible = false;
-  const idx = selector.rowIndex;
-  const arr = rowsModel.value || [];
-  const target = arr[idx];
-  if (!target) return;
-  // 提取基础信息用于展示及后续提交
-  const name = row?.bizField?.name ?? row?.name ?? '';
-  target.key = name;
-  // 兜底ID：优先取 row.id；若有嵌套结构则取内层 id
-  (target as any).bizFieldDomainId = row?.id ?? row?.bizFieldDomain?.id ?? row?.bizField?.id;
-  (target as any).__meta = {
-    bizField: row?.bizField,
-    bizFieldType: row?.bizFieldType,
-    bizDomain: row?.bizDomain,
-    // 兼容旧依赖字段
-    name,
-    description: row?.bizField?.description ?? row?.description,
-    basicFieldType: row?.bizFieldType?.basicFieldType,
-    minimum: row?.bizFieldType?.minimum,
-    maximum: row?.bizFieldType?.maximum,
-  } as Record<string, any>;
-  rowsModel.value = [...arr];
+function getByPath(source: any, path: string): any {
+  if (!path) return undefined;
+  if (source == null) return undefined;
+  return path.split('.').reduce((acc: any, k: string) => (acc == null ? acc : acc[k]), source);
+}
+
+function applyRowsFromSelection() {
+  const idPath = 'bizFieldDomain.id';
+  const selectedRows = (listData.value || []).filter((r: any) =>
+    selectedRowKeys.value.includes(getByPath(r, idPath) as any),
+  );
+  if (selectedRows.length === 0) return;
+
+  const arr = (rowsModel.value || []).slice();
+  const idx = Math.max(0, selector.rowIndex);
+  const existingKeys = new Set<string>((arr || []).map((x: any) => String(x?.key || '').trim()).filter(Boolean));
+
+  const toItems = selectedRows
+    .map((row: any) => {
+      const name = row?.bizField?.name ?? row?.name ?? '';
+      return {
+        ulid: ulid(),
+        key: name,
+        value: '',
+        isRequired: false,
+        bizFieldDomainId: row?.id ?? row?.bizFieldDomain?.id ?? row?.bizField?.id,
+        __meta: {
+          bizField: row?.bizField,
+          bizFieldType: row?.bizFieldType,
+          bizDomain: row?.bizDomain,
+          name,
+          description: row?.bizField?.description ?? row?.description,
+          basicFieldType: row?.bizFieldType?.basicFieldType,
+          minimum: row?.bizFieldType?.minimum,
+          maximum: row?.bizFieldType?.maximum,
+        },
+      } as any;
+    })
+    .filter((it: any) => {
+      const k = String(it.key || '').trim();
+      if (!k) return false;
+      if (existingKeys.has(k)) return false;
+      existingKeys.add(k);
+      return true;
+    });
+
+  if (toItems.length === 0) return;
+
+  if (idx < arr.length) {
+    const first = toItems[0];
+    arr[idx] = { ...(arr[idx] || {}), ...first, ulid: (arr[idx] || {}).ulid || first.ulid } as any;
+    if (toItems.length > 1) arr.splice(idx + 1, 0, ...toItems.slice(1));
+  } else {
+    arr.push(...toItems);
+  }
+
+  rowsModel.value = arr;
   ensureTrailingEmptyRow();
 }
 
@@ -306,8 +347,8 @@ function buildEntityFromMeta(meta: any): any {
   if (meta.bizField || meta.bizFieldType || meta.bizDomain) return meta;
   // 兼容旧结构
   return {
-    bizField: { name: meta.name, description: meta.description },
-    bizFieldType: { basicFieldType: meta.basicFieldType, minimum: meta.minimum, maximum: meta.maximum },
+    bizField: {name: meta.name, description: meta.description},
+    bizFieldType: {basicFieldType: meta.basicFieldType, minimum: meta.minimum, maximum: meta.maximum},
   } as any;
 }
 
@@ -316,7 +357,7 @@ function onSelectorCancel() {
 }
 
 function onSelectorConfirm() {
-  // 行点击即应用，这里仅关闭
+  applyRowsFromSelection();
   selector.visible = false;
 }
 </script>

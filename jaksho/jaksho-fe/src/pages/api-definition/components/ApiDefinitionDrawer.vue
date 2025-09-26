@@ -519,6 +519,42 @@ watch(
   },
 );
 
+// ================= 当删除“路径参数”行时，同步移除路径中的 {name} =================
+const prevPathRowKeys = ref<string[]>([]);
+watch(
+  () => (pathRows.value || []).map((r) => String(r?.key || '').trim()),
+  (currKeys) => {
+    try {
+      const prevSet = new Set<string>((prevPathRowKeys.value || []).filter(Boolean));
+      const currSet = new Set<string>((currKeys || []).filter(Boolean));
+      const removed: string[] = [];
+      prevSet.forEach((k) => {
+        if (!currSet.has(k)) removed.push(k);
+      });
+      if (removed.length > 0) {
+        // 避免触发路径监听里的自动弹窗/二次同步
+        pathAutoPopupEnabled.value = false;
+        try {
+          let p = String(form.value.path || '');
+          removed.forEach((name) => {
+            const token = `{${name}}`;
+            // 全量移除所有出现的 {name}
+            while (p.includes(token)) p = p.replace(token, '');
+          });
+          // 规范化多余的斜杠（可选）：将重复斜杠折叠，保留协议中的双斜杠不处理（这里是相对路径，直接折叠）
+          p = p.replace(/\/+/, '/');
+          form.value.path = p;
+        } finally {
+          void nextTick(() => (pathAutoPopupEnabled.value = true));
+        }
+      }
+    } finally {
+      prevPathRowKeys.value = currKeys.slice();
+    }
+  },
+  { immediate: true, deep: true },
+);
+
 const pathSelector = reactive({ visible: false, keyword: '' });
 const pathPagination = reactive({ pageSize: 10, total: 0, current: 1 });
 const pathLoading = ref(false);
