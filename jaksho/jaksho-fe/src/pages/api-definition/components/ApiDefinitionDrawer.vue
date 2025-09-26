@@ -218,11 +218,11 @@ function extractPathParamNames(source: string | null | undefined): string[] {
 const jTreeRef = ref<InstanceType<typeof JTreeData> | null>(null);
 const jsonFieldColumns: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple' },
-  { title: t('pages.apiDefinition.drawer.selector.name'), colKey: 'name', ellipsis: true },
-  { title: t('pages.apiDefinition.drawer.selector.basicFieldType'), colKey: 'basicFieldType', ellipsis: true },
-  { title: t('pages.apiDefinition.drawer.selector.collectionType'), colKey: 'collectionType', ellipsis: true },
-  { title: t('pages.apiDefinition.drawer.selector.minimum'), colKey: 'minimum', ellipsis: true },
-  { title: t('pages.apiDefinition.drawer.selector.maximum'), colKey: 'maximum', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.name'), colKey: 'bizField.name', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.basicFieldType'), colKey: 'bizFieldType.basicFieldType', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.collectionType'), colKey: 'bizFieldType.collectionType', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.minimum'), colKey: 'bizFieldType.minimum', ellipsis: true },
+  { title: t('pages.apiDefinition.drawer.selector.maximum'), colKey: 'bizFieldType.maximum', ellipsis: true },
 ];
 
 async function fetchBizFieldDomainPage(params: { current: number; pageSize: number; keyword?: string }) {
