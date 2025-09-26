@@ -532,7 +532,7 @@ function buildTreeDTOList() {
         ulid: n.value,
         parentUlid,
         sortOrder: idx,
-        [props.customField]: n.data?.[props.customField],
+        [props.customField]: normalizeComparable(props.getCustomValue(n.data)),
       } as Record<string, any>;
       list.push(item);
       if (Array.isArray(n.children) && n.children.length > 0) {
@@ -580,8 +580,10 @@ defineExpose({ getTreeDTOList: buildTreeDTOList });
 
 function emitCurrentDTOList() {
   try {
-    const dto = buildTreeDTOList();
-    emit('update:treeDtoList', dto);
+    void nextTick(() => {
+      const dto = buildTreeDTOList();
+      emit('update:treeDtoList', dto);
+    });
   } catch {
     // ignore
   }
