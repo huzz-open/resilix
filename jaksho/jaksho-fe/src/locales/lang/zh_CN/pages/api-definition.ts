@@ -75,6 +75,7 @@ export default {
     close: '关闭',
     save: '保存',
     saveSuccess: '保存成功',
+    alreadySelected: '该字段已选择',
     pathParamRemoved: '已移除路径参数 {name}',
     pathParamRemovedMultiple: '已移除路径参数 {names}',
     validate: {

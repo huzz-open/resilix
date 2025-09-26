@@ -75,6 +75,7 @@ export default {
     close: 'Close',
     save: 'Save',
     saveSuccess: 'Saved',
+    alreadySelected: 'Field already selected',
     pathParamRemoved: 'Path param {name} removed',
     pathParamRemovedMultiple: 'Path params {names} removed',
     validate: {

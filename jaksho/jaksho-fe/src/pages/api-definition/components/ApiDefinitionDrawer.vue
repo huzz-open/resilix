@@ -123,6 +123,7 @@
               :columns="pathSelectorColumns"
               row-key="bizFieldDomain.id"
               hover
+              :row-class-name="pathRowClassName"
               :pagination="pathPagination"
               :loading="pathLoading"
               @page-change="onPathPageChange"
@@ -556,6 +557,7 @@ watch(
 );
 
 const pathSelector = reactive({ visible: false, keyword: '' });
+const pathSelectedRowKeys = ref<Array<string | number>>([]);
 const pathPagination = reactive({ pageSize: 10, total: 0, current: 1 });
 const pathLoading = ref(false);
 const pathListData = ref<any[]>([]);
@@ -578,9 +580,32 @@ const pathSelectorColumns: PrimaryTableCol[] = [
   { title: t('pages.apiDefinition.drawer.selector.description'), colKey: 'bizField.description', ellipsis: true },
 ];
 
+const pathSelectorTableColumns: PrimaryTableCol[] = [
+  { colKey: 'row-select', type: 'multiple', width: 52, checkProps: ({ row }: any) => ({ disabled: isPathRowDisabled(row) }) },
+  ...pathSelectorColumns,
+];
+
+function getRowBizFieldDomainId(row: any): string | number | undefined {
+  return row?.bizFieldDomain?.id ?? row?.bizField?.id ?? row?.id;
+}
+
+function pathRowClassName({ row }: any) {
+  const existing = new Set((pathRows.value || []).map((r: any) => r?.bizFieldDomainId).filter(Boolean));
+  const id = getRowBizFieldDomainId(row);
+  return existing.has(id) ? 'is-disabled' : '';
+}
+
+function isPathRowDisabled(row: any): boolean {
+  const id = getRowBizFieldDomainId(row);
+  if (id == null) return false;
+  const existing = new Set((pathRows.value || []).map((r: any) => r?.bizFieldDomainId).filter(Boolean));
+  return existing.has(id);
+}
+
 function openPathSelector() {
   pathSelector.visible = true;
   pathPagination.current = 1;
+  pathSelectedRowKeys.value = [];
   void fetchPathSelectorPage();
 }
 
@@ -621,9 +646,40 @@ async function fetchPathSelectorPage() {
     });
     pathListData.value = rs.rows || [];
     pathPagination.total = rs.total || 0;
+    updatePathPreselectedForCurrentPage();
   } finally {
     pathLoading.value = false;
   }
+}
+
+function updatePathPreselectedForCurrentPage() {
+  try {
+    const toSelect = new Set<any>(pathSelectedRowKeys.value as any[]);
+    (pathListData.value || []).forEach((row: any) => {
+      if (isPathRowDisabled(row)) {
+        const id = getRowBizFieldDomainId(row);
+        if (id != null) toSelect.add(id);
+      }
+    });
+    pathSelectedRowKeys.value = Array.from(toSelect);
+  } catch {
+    // ignore
+  }
+}
+
+function onPathSelectorConfirm() {
+  const selectedRows = (pathListData.value || []).filter((r: any) =>
+    pathSelectedRowKeys.value.includes((r?.bizFieldDomain?.id ?? r?.bizField?.id ?? r?.id) as any),
+  );
+  const existingIds = new Set<string>((pathRows.value || [])
+    .map((x: any) => (x?.bizFieldDomainId == null ? null : String(x.bizFieldDomainId)))
+    .filter(Boolean) as string[]);
+  selectedRows.forEach((row: any) => {
+    const id = String(getRowBizFieldDomainId(row));
+    if (existingIds.has(id)) return;
+    applyPathField(row);
+    existingIds.add(id);
+  });
 }
 
 function applyPathField(row: any) {
@@ -656,7 +712,14 @@ function applyPathField(row: any) {
 }
 
 function onPathSelectorRowClick(params: any) {
-  applyPathField(params?.row);
+  const row = params?.row;
+  const id = getRowBizFieldDomainId(row);
+  const existing = new Set((pathRows.value || []).map((r: any) => r?.bizFieldDomainId).filter(Boolean));
+  if (existing.has(id)) {
+    void MessagePlugin.info(t('pages.apiDefinition.drawer.alreadySelected'));
+    return;
+  }
+  applyPathField(row);
 }
 </script>
 <style scoped>

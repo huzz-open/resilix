@@ -211,7 +211,12 @@ const listData = ref<any[]>([]);
 const selectedRowKeys = ref<Array<string | number>>([]);
 
 const selectorColumns: PrimaryTableCol[] = [
-  {colKey: 'row-select', type: 'multiple', width: 52},
+  {
+    colKey: 'row-select',
+    type: 'multiple',
+    width: 52,
+    checkProps: ({ row }: any) => ({ disabled: isRowDisabled(row) }),
+  },
   {title: t('pages.apiDefinition.drawer.selector.name'), colKey: 'bizField.name', ellipsis: true},
   {
     title: t('pages.apiDefinition.drawer.selector.domain'),
@@ -243,6 +248,18 @@ const selectorColumns: PrimaryTableCol[] = [
   {title: t('pages.apiDefinition.drawer.selector.maximum'), colKey: 'bizFieldType.maximum', width: 120},
   {title: t('pages.apiDefinition.drawer.selector.description'), colKey: 'bizField.description', ellipsis: true},
 ];
+
+function getRowId(row: any): string | number | undefined {
+  return row?.bizFieldDomain?.id ?? row?.bizField?.id ?? row?.id;
+}
+
+function isRowDisabled(row: any): boolean {
+  const id = getRowId(row);
+  if (id == null) return false;
+  const arr = rowsModel.value || [];
+  const exists = (arr as any[]).some((r: any) => String(r?.bizFieldDomainId) === String(id));
+  return exists;
+}
 
 function openSelector(rowIndex: number) {
   selector.visible = true;
@@ -277,6 +294,8 @@ async function fetchSelectorPage() {
     });
     listData.value = rs.rows || [];
     pagination.total = rs.total || 0;
+    // 当前页中已存在于表格的数据项：禁用并预勾选
+    updatePreselectedForCurrentPage();
   } finally {
     loading.value = false;
   }
@@ -288,6 +307,21 @@ function getByPath(source: any, path: string): any {
   return path.split('.').reduce((acc: any, k: string) => (acc == null ? acc : acc[k]), source);
 }
 
+function updatePreselectedForCurrentPage() {
+  try {
+    const toSelect = new Set<any>(selectedRowKeys.value as any[]);
+    (listData.value || []).forEach((row: any) => {
+      if (isRowDisabled(row)) {
+        const id = getRowId(row);
+        if (id != null) toSelect.add(id);
+      }
+    });
+    selectedRowKeys.value = Array.from(toSelect);
+  } catch {
+    // ignore
+  }
+}
+
 function applyRowsFromSelection() {
   const idPath = 'bizFieldDomain.id';
   const selectedRows = (listData.value || []).filter((r: any) =>
@@ -297,17 +331,20 @@ function applyRowsFromSelection() {
 
   const arr = (rowsModel.value || []).slice();
   const idx = Math.max(0, selector.rowIndex);
-  const existingKeys = new Set<string>((arr || []).map((x: any) => String(x?.key || '').trim()).filter(Boolean));
+  const existingIds = new Set<string>((arr || [])
+    .map((x: any) => (x?.bizFieldDomainId == null ? null : String(x.bizFieldDomainId)))
+    .filter(Boolean) as string[]);
 
   const toItems = selectedRows
     .map((row: any) => {
+      const id = row?.id ?? row?.bizFieldDomain?.id ?? row?.bizField?.id;
       const name = row?.bizField?.name ?? row?.name ?? '';
       return {
         ulid: ulid(),
         key: name,
         value: '',
         isRequired: false,
-        bizFieldDomainId: row?.id ?? row?.bizFieldDomain?.id ?? row?.bizField?.id,
+        bizFieldDomainId: id,
         __meta: {
           bizField: row?.bizField,
           bizFieldType: row?.bizFieldType,
@@ -321,10 +358,10 @@ function applyRowsFromSelection() {
       } as any;
     })
     .filter((it: any) => {
-      const k = String(it.key || '').trim();
-      if (!k) return false;
-      if (existingKeys.has(k)) return false;
-      existingKeys.add(k);
+      const id = it?.bizFieldDomainId == null ? null : String(it.bizFieldDomainId);
+      if (!id) return false;
+      if (existingIds.has(id)) return false;
+      existingIds.add(id);
       return true;
     });
 
