@@ -1,127 +1,156 @@
 <template>
-  <div class="j-bfd-card">
-    <!-- 第一行：名称：bizDomain.name bizFieldType.name[bizFieldType.basicFieldType] -->
-    <div class="row1">
-      <t-tooltip
-        placement="top"
-        :content="get(entity, 'bizDomain.description') || t('pages.apiDefinition.drawer.none')"
-      >
-        <span class="domain-pill">{{ get(entity, 'bizDomain.name') || t('pages.apiDefinition.drawer.none') }}</span>
+  <div :class="cardClasses">
+    <!-- 主行：领域 + 名称 + 类型 -->
+    <div class="card-main">
+      <t-tooltip v-if="showDomain && domainName" :content="domainDescription" placement="top">
+        <span class="domain-badge">{{ domainName }}</span>
       </t-tooltip>
-      <span class="name">
-        {{ get(entity, 'bizFieldType.name') || get(entity, 'bizField.name') || get(entity, 'name') }}
-        <span class="type">[{{ get(entity, 'bizFieldType.basicFieldType') || '-' }}]</span>
-      </span>
+
+      <span class="field-name">{{ fieldName }}</span>
+
+      <span v-if="basicFieldType" class="field-type">[{{ basicFieldType }}]</span>
     </div>
 
-    <!-- 第二行：取值区间 -->
-    <div class="row2">
-      <span class="label">{{ t('pages.apiDefinition.drawer.rangeTitle') }}：</span>
-      <span class="val"
-        >[{{ get(entity, 'bizFieldType.minimum') ?? '-' }}, {{ get(entity, 'bizFieldType.maximum') ?? '-' }}]</span
-      >
+    <!-- 次行：取值区间 -->
+    <div v-if="showRange && hasRange" class="card-row">
+      <span class="row-label">{{ t('pages.apiDefinition.drawer.rangeTitle') }}：</span>
+      <span class="row-value">[{{ minimum ?? '-' }}, {{ maximum ?? '-' }}]</span>
     </div>
 
-    <!-- 第三行：字段类型描述 -->
-    <div
-      v-if="
-        get(entity, 'bizFieldType.description') || get(entity, 'bizField.description') || get(entity, 'description')
-      "
-      class="row3"
-    >
-      <span class="label">{{ t('pages.apiDefinition.drawer.fieldTypeDescriptionTitle') }}：</span>
-      <span class="val">{{
-        get(entity, 'bizFieldType.description') || get(entity, 'bizField.description') || get(entity, 'description')
-      }}</span>
+    <!-- 描述行 -->
+    <div v-if="showDescription && description" class="card-row">
+      <span class="row-label">{{ t('pages.apiDefinition.drawer.fieldTypeDescriptionTitle') }}：</span>
+      <span class="row-value">{{ description }}</span>
     </div>
   </div>
 </template>
+
 <script setup lang="ts">
-import { computed } from 'vue';
+import { computed } from 'vue'
+import { get } from 'lodash'
+import { t } from '@/locales'
+import type { BizFieldDomainEntity, JBizFieldDomainCardProps } from './types'
+import type { Density } from '@/types/common'
 
-import { t } from '@/locales';
+const props = withDefaults(
+  defineProps<{
+    entity: BizFieldDomainEntity | null | undefined
+    density?: Density
+    showDomain?: boolean
+    showRange?: boolean
+    showDescription?: boolean
+  }>(),
+  {
+    density: 'comfortable',
+    showDomain: true,
+    showRange: true,
+    showDescription: true,
+  },
+)
 
-const props = defineProps<{ entity: Record<string, any> | null | undefined; mode?: 'inline' | 'panel' }>();
+// ========== 计算属性 ==========
+const cardClasses = computed(() => ['j-biz-field-domain-card', `density-${props.density}`])
 
-const entity = computed(() => props.entity || {});
-computed(
+const domainName = computed(() => get(props.entity, 'bizDomain.name'))
+
+const domainDescription = computed(() => get(props.entity, 'bizDomain.description') || t('pages.apiDefinition.drawer.none'))
+
+const fieldName = computed(
+  () => get(props.entity, 'bizFieldType.name') || get(props.entity, 'bizField.name') || get(props.entity, 'name'),
+)
+
+const basicFieldType = computed(() => get(props.entity, 'bizFieldType.basicFieldType') || get(props.entity, 'basicFieldType'))
+
+const minimum = computed(() => get(props.entity, 'bizFieldType.minimum'))
+
+const maximum = computed(() => get(props.entity, 'bizFieldType.maximum'))
+
+const hasRange = computed(() => minimum.value != null || maximum.value != null)
+
+const description = computed(
   () =>
-    entity.value?.bizFieldType &&
-    (entity.value.bizFieldType.minimum != null || entity.value.bizFieldType.maximum != null),
-);
-function get(obj: any, path: string): any {
-  if (!obj) return undefined;
-  return path.split('.').reduce((acc, k) => (acc == null ? acc : acc[k]), obj);
-}
+    get(props.entity, 'bizFieldType.description') ||
+    get(props.entity, 'bizField.description') ||
+    get(props.entity, 'description'),
+)
 </script>
-<style scoped>
-.j-bfd-card {
+
+<style lang="less" scoped>
+// ========== 基础样式 ==========
+.j-biz-field-domain-card {
   max-width: 520px;
+
+  .card-main {
+    display: flex;
+    align-items: center;
+    gap: var(--card-gap);
+  }
+
+  .domain-badge {
+    display: inline-flex;
+    align-items: center;
+    padding: var(--badge-padding);
+    border-radius: var(--td-radius-default);
+    background: var(--td-bg-color-secondarycontainer);
+    border: 1px solid var(--td-component-border);
+    color: var(--td-text-color-primary);
+    font-size: var(--badge-font-size);
+    white-space: nowrap;
+  }
+
+  .field-name {
+    font-weight: 600;
+    color: var(--td-text-color-primary);
+    font-size: var(--field-name-font-size);
+  }
+
+  .field-type {
+    color: var(--td-text-color-placeholder);
+    font-size: var(--field-type-font-size);
+  }
+
+  .card-row {
+    margin-top: var(--row-spacing);
+    font-size: var(--row-font-size);
+
+    .row-label {
+      color: var(--td-text-color-placeholder);
+    }
+
+    .row-value {
+      color: var(--td-text-color-primary);
+    }
+  }
 }
 
-.row1 {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-bottom: 6px;
+// ========== 密度变体（CSS Variables）==========
+.density-compact {
+  --card-gap: 6px;
+  --badge-padding: 1px 6px;
+  --badge-font-size: 12px;
+  --field-name-font-size: 13px;
+  --field-type-font-size: 12px;
+  --row-spacing: 2px;
+  --row-font-size: 12px;
 }
 
-.domain-pill {
-  display: inline-block;
-  padding: 2px 8px;
-  border-radius: 8px;
-  box-shadow: inset 0 1px 3px rgb(0 0 0 / 25%);
-  background: linear-gradient(180deg, rgb(255 255 255 / 6%), rgb(255 255 255 / 2%));
-  border: 1px solid var(--td-component-border);
-  color: var(--td-text-color-primary);
+.density-comfortable {
+  --card-gap: 10px;
+  --badge-padding: 2px 8px;
+  --badge-font-size: 13px;
+  --field-name-font-size: 14px;
+  --field-type-font-size: 13px;
+  --row-spacing: 4px;
+  --row-font-size: 13px;
 }
 
-.name {
-  font-weight: 600;
-}
-
-.name .type {
-  margin-left: 6px;
-  color: var(--td-text-color-placeholder);
-  font-weight: 400;
-}
-
-.row2,
-.row3 {
-  margin: 3px 0;
-}
-
-.label {
-  color: var(--td-text-color-placeholder);
-}
-
-.val {
-  color: var(--td-text-color-primary);
-}
-
-.tags :deep(.t-tag) {
-  line-height: 18px;
-  height: 20px;
-}
-
-.desc {
-  margin-top: 4px;
-  color: var(--td-text-color-secondary);
-  font-size: 12px;
-}
-
-.panel-grid {
-  display: grid;
-  grid-template-columns: 120px 1fr;
-  grid-gap: 4px 12px;
-}
-
-.panel-grid .label {
-  color: var(--td-text-color-placeholder);
-}
-
-.panel-grid .val {
-  color: var(--td-text-color-primary);
-  word-break: break-all;
+.density-spacious {
+  --card-gap: 14px;
+  --badge-padding: 4px 12px;
+  --badge-font-size: 14px;
+  --field-name-font-size: 15px;
+  --field-type-font-size: 14px;
+  --row-spacing: 8px;
+  --row-font-size: 14px;
 }
 </style>
