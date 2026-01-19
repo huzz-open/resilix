@@ -18,6 +18,7 @@ public class AppConfig {
     private ApiDefinitionConfig apiDefinition = new ApiDefinitionConfig();
     private PackagesConfig packages = new PackagesConfig();
     private CombineResultConfig combineResult = new CombineResultConfig();
+    private ServiceConfig service = new ServiceConfig();
 
     @Getter
     @Setter
@@ -119,5 +120,25 @@ public class AppConfig {
          * <p>这种情况适用于表名和实体类名不一致的场景，比如表名称具备一些特殊前缀、或具备分表后缀等。</p>
          */
         private boolean useDomainClassAsKey = true;
+    }
+
+    @Getter
+    @Setter
+    public static class ServiceConfig {
+        /**
+         * 服务码位数（默认4位）
+         * 范围：1-10位（对应数据库int类型最大值）
+         */
+        private int serviceCodeLength = 4;
+
+        /**
+         * 服务码最小值（默认1000，4位数最小值）
+         */
+        private int serviceCodeMinValue = 1;
+
+        /**
+         * 服务码最大值（默认9999，4位数最大值）
+         */
+        private int serviceCodeMaxValue = 9999;
     }
 }

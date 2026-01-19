@@ -110,3 +110,18 @@ CREATE TABLE IF NOT EXISTS sr_api_definition_field
 
     PRIMARY KEY (`id`)
 ) COMMENT '接口关联字段';
+
+CREATE TABLE IF NOT EXISTS `sr_service`
+(
+    `id`           int(11) AUTO_INCREMENT         NOT NULL COMMENT '数据库主键ID',
+    `service_code` int(11)                        NOT NULL COMMENT '服务码（如：1000），长度由配置决定',
+    `name`         varchar(100)                   NOT NULL COMMENT '服务名称',
+    `description`  varchar(255) DEFAULT ''        NOT NULL COMMENT '服务描述',
+    `workspace_id` int(11)                        NOT NULL COMMENT '工作空间ID',
+    `create_time`  datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `update_time`  datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
+    `remark`       varchar(255) DEFAULT ''        NOT NULL COMMENT '备注',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_service_code_workspace` (`service_code`, `workspace_id`),
+    INDEX `idx_workspace_id` (`workspace_id`)
+) COMMENT '服务管理表';

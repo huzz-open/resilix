@@ -25,7 +25,8 @@ public class Settings {
             "sr_biz_domain",
             "sr_biz_field_domain",
             "sr_api_definition",
-            "sr_api_definition_field"
+            "sr_api_definition_field",
+            "sr_service"
     );
 
     public static Map<String, Class<?>> tableFiledTypeMap = new LinkedHashMap<>();
