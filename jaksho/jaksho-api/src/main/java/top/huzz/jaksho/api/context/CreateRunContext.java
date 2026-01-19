@@ -12,6 +12,7 @@ import top.huzz.resilix.util.ReflectionUtils;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BiConsumer;
+import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
@@ -53,6 +54,11 @@ public class CreateRunContext<R, T extends BasicProperties, C extends BasicPrope
      */
     @NotNull
     protected BiConsumer<C, Integer> cascadedCreatedObjectIdSetter;
+
+    /**
+     * 创建对象前的消费者，与创建对象在事务中执行
+     */
+    protected Consumer<T> preCreatedObjectConsumer;
 
     /**
      * 创建对象后执行的消费者，与创建对象在同一个事务中执行

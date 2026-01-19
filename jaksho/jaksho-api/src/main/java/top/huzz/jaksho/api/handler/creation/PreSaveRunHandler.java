@@ -10,6 +10,7 @@ import top.huzz.resilix.handler.PredictableRunHandler;
 import top.huzz.resilix.predicate.HandlerRunPredicate;
 
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * @author chenji
@@ -24,7 +25,10 @@ public class PreSaveRunHandler<R, T extends BasicProperties, C extends BasicProp
 
     @Override
     public void handle(CreateRunContext<R, T, C> context) throws Exception {
-
+        Consumer<T> preCreatedObjectConsumer = context.getPreCreatedObjectConsumer();
+        if (preCreatedObjectConsumer != null) {
+            preCreatedObjectConsumer.accept(context.getCreatedObject());
+        }
     }
 
     @Nonnull
