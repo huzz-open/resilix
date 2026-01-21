@@ -1,5 +1,6 @@
 import type {
   BasicFieldType,
+  BizFieldTypeDetailResponse,
   BizFieldTypeListResult,
   CollectionType,
   CreateBizFieldTypeRequest,
@@ -34,5 +35,25 @@ export function createBizFieldType(data: CreateBizFieldTypeRequest) {
 export function deleteBizFieldType(id: number) {
   return request.delete<number>({
     url: `${Api.DeleteBizFieldType}/${id}`,
+  });
+}
+
+export function getBizFieldTypeDetail(id: number) {
+  return request.get<BizFieldTypeDetailResponse>({
+    url: `${Api.DeleteBizFieldType}/${id}`,
+  });
+}
+
+export function updateBizFieldType(id: number, data: { name?: string; description?: string }) {
+  return request.put<number>({
+    url: `${Api.DeleteBizFieldType}/${id}`,
+    data,
+  });
+}
+
+export function updateBizFieldTypeObjectRefs(id: number, data: { objectBizFieldTypeRefDTOList: any[] }) {
+  return request.put<number>({
+    url: `${Api.DeleteBizFieldType}/${id}/object-refs`,
+    data,
   });
 }

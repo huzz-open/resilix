@@ -45,3 +45,7 @@ export interface CreateBizFieldTypeRequest {
 export interface ObjectBizFieldTypeRefDTO extends TreeDTO {
   bizFieldDomainId: number | string;
 }
+
+export interface BizFieldTypeDetailResponse extends BizFieldTypeModel {
+  objectBizFieldTypeRefList?: any[];
+}

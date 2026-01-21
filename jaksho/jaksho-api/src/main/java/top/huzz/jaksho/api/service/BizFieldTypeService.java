@@ -13,6 +13,7 @@ import top.huzz.jaksho.api.dto.AbstractPageQuery;
 import top.huzz.jaksho.api.dto.ObjectBizFieldTypeRefDTO;
 import top.huzz.jaksho.common.constant.BasicFieldType;
 import top.huzz.jaksho.common.constant.CollectionType;
+import top.huzz.jaksho.common.entity.CombineResult;
 import top.huzz.jaksho.common.entity.PageResult;
 import top.huzz.jaksho.domain.entity.BizFieldType;
 import top.huzz.resilix.validation.annotation.BizCheck;
@@ -74,4 +75,36 @@ public interface BizFieldTypeService {
 
     @Mapping(path = "/{id}", method = HttpMethods.DELETE)
     int delete(@Param(value = "id", type = ParamType.PathVariable) Integer id);
+
+    @Mapping(value = "/{id}", method = HttpMethods.GET)
+    DetailResponse detail(@Param(value = "id", type = ParamType.PathVariable) Integer id);
+
+    @Mapping(path = "/{id}", method = HttpMethods.PUT)
+    int update(@Param(value = "id", type = ParamType.PathVariable) Integer id, @Param(type = ParamType.Body) UpdateBizFieldTypeRequest request);
+
+    @Mapping(path = "/{id}/object-refs", method = HttpMethods.PUT)
+    int updateObjectRefs(@Param(value = "id", type = ParamType.PathVariable) Integer id, @Param(type = ParamType.Body) UpdateObjectRefsRequest request);
+
+    @Getter
+    @Setter
+    class UpdateBizFieldTypeRequest {
+        @Length(min = 1, max = 100)
+        @BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.BizFieldType', #this)")
+        private String name;
+
+        @Length(max = 255)
+        private String description;
+    }
+
+    @Getter
+    @Setter
+    class UpdateObjectRefsRequest {
+        private List<ObjectBizFieldTypeRefDTO> objectBizFieldTypeRefDTOList;
+    }
+
+    @Getter
+    @Setter
+    class DetailResponse extends BizFieldType {
+        private List<CombineResult> objectBizFieldTypeRefList;
+    }
 }

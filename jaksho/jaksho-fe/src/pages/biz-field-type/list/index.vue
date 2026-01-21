@@ -145,6 +145,117 @@
         </div>
       </t-form>
     </t-dialog>
+
+    <!-- 详情抽屉 -->
+    <t-drawer v-model:visible="detailDrawerVisible" placement="right" size="40%" :footer="false">
+      <template #header>
+        <span>{{ t('pages.bizFieldType.detail.title') }}</span>
+      </template>
+      <div>
+        <t-card :title="t('pages.bizFieldType.detail.basicInfo')" :bordered="false" style="margin-bottom: 16px">
+          <t-descriptions :column="2" item-layout="horizontal" size="small" :label-width="100">
+            <!-- 名称 独占一行 - 可编辑 -->
+            <t-descriptions-item :label="t('pages.bizFieldType.list.name')" :span="2">
+              <div v-if="!editingField.name" class="editable-field" @click="startEdit('name')">
+                <span>{{ detailRecord?.name }}</span>
+                <t-icon name="edit" size="14px" class="edit-icon" />
+              </div>
+              <div v-else class="editing-field">
+                <t-input
+                  v-model="editingValue.name"
+                  size="small"
+                  :maxlength="100"
+                  autofocus
+                  @blur="saveEdit('name')"
+                  @keyup.enter="saveEdit('name')"
+                  @keyup.esc="cancelEdit('name')"
+                />
+                <t-space size="4px" style="margin-left: 8px">
+                  <t-button size="small" theme="primary" @click="saveEdit('name')">
+                    <t-icon name="check" />
+                  </t-button>
+                  <t-button size="small" theme="default" @click="cancelEdit('name')">
+                    <t-icon name="close" />
+                  </t-button>
+                </t-space>
+              </div>
+            </t-descriptions-item>
+            <!-- 基础字段类型、集合类型 -->
+            <t-descriptions-item :label="t('pages.bizFieldType.list.basicFieldType')">
+              {{ detailRecord?.basicFieldType }}
+            </t-descriptions-item>
+            <t-descriptions-item :label="t('pages.bizFieldType.list.collectionType')">
+              {{ detailRecord?.collectionType }}
+            </t-descriptions-item>
+            <!-- 最小值、最大值 -->
+            <t-descriptions-item :label="t('pages.bizFieldType.list.minimum')">
+              {{ detailRecord?.minimum }}
+            </t-descriptions-item>
+            <t-descriptions-item :label="t('pages.bizFieldType.list.maximum')">
+              {{ detailRecord?.maximum }}
+            </t-descriptions-item>
+            <!-- 描述 独占一行 - 可编辑 -->
+            <t-descriptions-item :label="t('pages.bizFieldType.list.description')" :span="2">
+              <div v-if="!editingField.description" class="editable-field" @click="startEdit('description')">
+                <span>{{ detailRecord?.description || '-' }}</span>
+                <t-icon name="edit" size="14px" class="edit-icon" />
+              </div>
+              <div v-else class="editing-field">
+                <t-textarea
+                  v-model="editingValue.description"
+                  :maxlength="255"
+                  :autosize="{ minRows: 3, maxRows: 6 }"
+                  autofocus
+                  @blur="saveEdit('description')"
+                  @keyup.esc="cancelEdit('description')"
+                />
+                <t-space size="4px" style="margin-top: 8px">
+                  <t-button size="small" theme="primary" @click="saveEdit('description')">
+                    <t-icon name="check" />
+                  </t-button>
+                  <t-button size="small" theme="default" @click="cancelEdit('description')">
+                    <t-icon name="close" />
+                  </t-button>
+                </t-space>
+              </div>
+            </t-descriptions-item>
+            <!-- 创建时间、更新时间 -->
+            <t-descriptions-item :label="t('pages.bizFieldType.list.createTime')">
+              {{ detailRecord?.createTime }}
+            </t-descriptions-item>
+            <t-descriptions-item :label="t('pages.bizFieldType.list.updateTime')">
+              {{ detailRecord?.updateTime }}
+            </t-descriptions-item>
+          </t-descriptions>
+        </t-card>
+
+        <!-- OBJECT 类型的关联字段列表 - 使用树形组件 -->
+        <t-card
+          v-if="detailRecord?.basicFieldType === 'OBJECT'"
+          :title="t('pages.bizFieldType.detail.objectRefList')"
+          :bordered="false"
+        >
+          <j-tree-data
+            v-if="detailObjectRefTreeData.length > 0"
+            ref="jTreeRefDetail"
+            :tree-dto-list="detailObjectRefTreeData"
+            :fetch-page="fetchBizFieldDomainPage"
+            :columns="DETAIL_OBJECT_REF_COLUMNS"
+            :show-columns="DETAIL_OBJECT_REF_SHOW_COLUMNS"
+            row-key="bizFieldDomain.id"
+            selection="multiple"
+            custom-field="bizFieldDomainId"
+            :get-custom-value="(row: any) => row.bizFieldDomain.id"
+          />
+          <t-empty v-else description="暂无关联字段" />
+          <div v-if="detailObjectRefTreeData.length > 0" style="margin-top: 16px; text-align: right">
+            <t-button theme="primary" size="small" @click="saveObjectRefTree">
+              {{ t('pages.bizFieldType.detail.saveFieldList') }}
+            </t-button>
+          </div>
+        </t-card>
+      </div>
+    </t-drawer>
   </div>
 </template>
 <script setup lang="ts">
@@ -153,8 +264,15 @@ import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
 
-import { createBizFieldType, deleteBizFieldType, getBizFieldTypeList } from '@/api/bizFieldType';
-import type { CreateBizFieldTypeRequest } from '@/api/model/bizFieldTypeModel';
+import {
+  createBizFieldType,
+  deleteBizFieldType,
+  getBizFieldTypeDetail,
+  getBizFieldTypeList,
+  updateBizFieldType,
+  updateBizFieldTypeObjectRefs,
+} from '@/api/bizFieldType';
+import type { BizFieldTypeDetailResponse, CreateBizFieldTypeRequest } from '@/api/model/bizFieldTypeModel';
 import JTreeData from '@/components/j-tree-data/index.vue';
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
@@ -167,6 +285,7 @@ defineOptions({
 
 const store = useSettingStore();
 const jTreeRef = ref<InstanceType<typeof JTreeData> | null>(null);
+const jTreeRefDetail = ref<any>(null);
 
 const COLUMNS: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple', width: 64, fixed: 'left' },
@@ -362,8 +481,36 @@ const rehandleChange = (changeParams: unknown, triggerAndData: unknown) => {
   console.log('统一Change', changeParams, triggerAndData);
 };
 
-const handleClickDetail = (row: any) => {
-  console.log('查看详情', row);
+const handleClickDetail = async (row: any) => {
+  try {
+    const id = row.row?.id;
+    if (!id) return;
+    const detail = await getBizFieldTypeDetail(id);
+    detailRecord.value = detail;
+    detailDrawerVisible.value = true;
+
+    // 如果是 OBJECT 类型，准备展示关联字段列表（树形结构）
+    if (detail.basicFieldType === 'OBJECT' && detail.objectBizFieldTypeRefList) {
+      detailObjectRefList.value = detail.objectBizFieldTypeRefList;
+      // 转换为树形数据格式
+      detailObjectRefTreeData.value = detail.objectBizFieldTypeRefList.map((item: any) => ({
+        ulid: item.objectBizFieldTypeRef?.ulid,
+        parentUlid: item.objectBizFieldTypeRef?.parentUlid || '',
+        sortOrder: item.objectBizFieldTypeRef?.sortOrder || 0,
+        bizFieldDomainId: item.objectBizFieldTypeRef?.bizFieldDomainId,
+        ...item,
+      }));
+      detailObjectRefPagination.value = {
+        ...detailObjectRefPagination.value,
+        total: detail.objectBizFieldTypeRefList.length,
+      };
+    } else {
+      detailObjectRefTreeData.value = [];
+    }
+  } catch (error) {
+    console.error('获取详情失败:', error);
+    await MessagePlugin.error(t('pages.bizFieldType.list.fetchFailed'));
+  }
 };
 
 const handleCreate = () => {
@@ -439,6 +586,180 @@ const headerAffixedTop = computed(
       container: `.${prefix}-layout`,
     }) as any,
 );
+
+// 详情抽屉状态与数据
+const detailDrawerVisible = ref(false);
+const detailRecord = ref<BizFieldTypeDetailResponse | null>(null);
+const DETAIL_OBJECT_REF_COLUMNS: PrimaryTableCol[] = [
+  { colKey: 'row-select', type: 'multiple' },
+  { title: t('pages.bizFieldType.detail.fieldName'), colKey: 'bizField.name', ellipsis: true },
+  {
+    title: t('pages.bizFieldType.detail.fieldBasicType'),
+    colKey: 'bizFieldType.basicFieldType',
+    ellipsis: true,
+  },
+  {
+    title: t('pages.bizFieldType.detail.fieldCollectionType'),
+    colKey: 'bizFieldType.collectionType',
+    ellipsis: true,
+  },
+  { title: t('pages.bizFieldType.detail.fieldMinimum'), colKey: 'bizFieldType.minimum', ellipsis: true },
+  { title: t('pages.bizFieldType.detail.fieldMaximum'), colKey: 'bizFieldType.maximum', ellipsis: true },
+];
+const DETAIL_OBJECT_REF_SHOW_COLUMNS: PrimaryTableCol[] = [
+  { title: t('pages.bizFieldType.detail.fieldName'), colKey: 'bizField.name', ellipsis: true },
+  {
+    title: t('pages.bizFieldType.detail.fieldBasicType'),
+    colKey: 'bizFieldType.basicFieldType',
+    ellipsis: true,
+  },
+  {
+    title: t('pages.bizFieldType.detail.fieldCollectionType'),
+    colKey: 'bizFieldType.collectionType',
+    ellipsis: true,
+  },
+];
+const detailObjectRefList = ref<any[]>([]);
+const detailObjectRefTreeData = ref<any[]>([]);
+const detailObjectRefPagination = ref({ pageSize: 10, total: 0, current: 1 });
+const detailObjectRefLoading = ref(false);
+
+const onDetailObjectRefPageChange = (pageInfo: PageInfo) => {
+  detailObjectRefPagination.value.current = pageInfo.current;
+  detailObjectRefPagination.value.pageSize = pageInfo.pageSize;
+};
+
+// 保存字段列表
+const saveObjectRefTree = async () => {
+  if (!detailRecord.value || !jTreeRefDetail.value) return;
+  
+  try {
+    // 从树形组件获取当前的树形数据（只包含结构信息）
+    const treeStructure = jTreeRefDetail.value.getTreeDTOList();
+    
+    // 需要将结构信息与原始数据合并
+    // 因为 getTreeDTOList 只返回 ulid/parentUlid/sortOrder/bizFieldDomainId
+    // 我们需要保留其他字段以便后续显示
+    const dataMap = new Map();
+    detailObjectRefTreeData.value.forEach((item: any) => {
+      dataMap.set(item.ulid, item);
+    });
+    
+    // 合并数据：保留原始的显示字段，更新结构字段
+    const mergedData = treeStructure.map((structItem: any) => {
+      const originalItem = dataMap.get(structItem.ulid);
+      return {
+        ...originalItem, // 保留所有原始字段（bizField, bizFieldType 等）
+        ...structItem, // 更新结构字段（ulid, parentUlid, sortOrder）
+      };
+    });
+    
+    // 准备后端需要的数据格式
+    const objectBizFieldTypeRefDTOList = treeStructure.map((item: any) => ({
+      ulid: item.ulid,
+      parentUlid: item.parentUlid || '',
+      sortOrder: item.sortOrder,
+      bizFieldDomainId: item.bizFieldDomainId,
+    }));
+    
+    // 调用后端接口更新
+    await updateBizFieldTypeObjectRefs(detailRecord.value.id!, {
+      objectBizFieldTypeRefDTOList,
+    });
+    
+    // 更新本地数据
+    detailObjectRefTreeData.value = mergedData;
+    
+    await MessagePlugin.success(t('pages.bizFieldType.detail.saveFieldListSuccess'));
+    
+    // 刷新详情数据
+    const detail = await getBizFieldTypeDetail(detailRecord.value.id!);
+    detailRecord.value = detail;
+    
+    // 重新转换树形数据
+    if (detail.basicFieldType === 'OBJECT' && detail.objectBizFieldTypeRefList) {
+      detailObjectRefTreeData.value = detail.objectBizFieldTypeRefList.map((item: any) => ({
+        ulid: item.objectBizFieldTypeRef?.ulid,
+        parentUlid: item.objectBizFieldTypeRef?.parentUlid || '',
+        sortOrder: item.objectBizFieldTypeRef?.sortOrder || 0,
+        bizFieldDomainId: item.objectBizFieldTypeRef?.bizFieldDomainId,
+        ...item,
+      }));
+    }
+  } catch (error) {
+    console.error('保存字段列表失败:', error);
+    await MessagePlugin.error(t('pages.bizFieldType.detail.saveFieldListFailed'));
+  }
+};
+
+// 内联编辑功能
+const editingField = ref<Record<string, boolean>>({
+  name: false,
+  description: false,
+});
+const editingValue = ref<Record<string, string>>({
+  name: '',
+  description: '',
+});
+const originalValue = ref<Record<string, string>>({
+  name: '',
+  description: '',
+});
+
+const startEdit = (field: string) => {
+  if (!detailRecord.value) return;
+  editingField.value[field] = true;
+  const value = (detailRecord.value as any)[field] || '';
+  editingValue.value[field] = value;
+  originalValue.value[field] = value;
+};
+
+const cancelEdit = (field: string) => {
+  editingField.value[field] = false;
+  editingValue.value[field] = originalValue.value[field];
+};
+
+const saveEdit = async (field: string) => {
+  if (!detailRecord.value) return;
+  
+  // 验证
+  if (field === 'name' && (!editingValue.value.name || editingValue.value.name.trim() === '')) {
+    await MessagePlugin.warning(t('pages.bizFieldType.create.nameRequired'));
+    return;
+  }
+  
+  if (field === 'name' && (editingValue.value.name.length < 1 || editingValue.value.name.length > 100)) {
+    await MessagePlugin.warning(t('pages.bizFieldType.create.nameLength'));
+    return;
+  }
+  
+  // 如果没有变化，直接取消编辑
+  if (editingValue.value[field] === originalValue.value[field]) {
+    editingField.value[field] = false;
+    return;
+  }
+  
+  try {
+    const updateData: any = {};
+    updateData[field] = editingValue.value[field];
+    
+    await updateBizFieldType(detailRecord.value.id!, updateData);
+    await MessagePlugin.success(t('pages.bizFieldType.detail.editSuccess'));
+    
+    // 更新本地数据
+    (detailRecord.value as any)[field] = editingValue.value[field];
+    originalValue.value[field] = editingValue.value[field];
+    editingField.value[field] = false;
+    
+    // 刷新列表
+    await fetchData();
+  } catch (error) {
+    console.error('保存失败:', error);
+    await MessagePlugin.error(t('pages.bizFieldType.detail.editFailed'));
+    // 恢复原值
+    editingValue.value[field] = originalValue.value[field];
+  }
+};
 </script>
 <style lang="less" scoped>
 .list-card-container {
@@ -474,5 +795,41 @@ const headerAffixedTop = computed(
 .dialog-footer {
   margin-top: var(--td-comp-margin-l);
   text-align: right;
+}
+
+.editable-field {
+  display: inline-flex;
+  align-items: center;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 3px;
+  transition: background-color 0.2s;
+  min-height: 28px;
+
+  &:hover {
+    background-color: var(--td-bg-color-container-hover);
+
+    .edit-icon {
+      opacity: 1;
+    }
+  }
+
+  .edit-icon {
+    margin-left: 8px;
+    opacity: 0;
+    transition: opacity 0.2s;
+    color: var(--td-text-color-placeholder);
+  }
+}
+
+.editing-field {
+  display: flex;
+  align-items: flex-start;
+  width: 100%;
+
+  :deep(.t-input),
+  :deep(.t-textarea) {
+    flex: 1;
+  }
 }
 </style>
