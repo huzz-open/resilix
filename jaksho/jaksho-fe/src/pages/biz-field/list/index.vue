@@ -364,6 +364,7 @@ const fetchDomainData = async () => {
     const { rows, total } = await getBizDomainList({
       current: domainPagination.value.current,
       pageSize: domainPagination.value.pageSize,
+      bizFieldId: currentBizFieldId.value,
     });
     domainListData.value = rows as any;
     domainPagination.value = { ...domainPagination.value, total } as any;

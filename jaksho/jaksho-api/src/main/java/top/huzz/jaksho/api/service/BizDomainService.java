@@ -38,8 +38,13 @@ public interface BizDomainService {
     @Mapping(path = "/page", method = HttpMethods.POST)
     PageResult<BizDomain> pageQuery(BizDomainService.PageQueryRequest request);
 
+    @Getter
+    @Setter
     class PageQueryRequest extends AbstractPageQuery<BizDomain> {
-
+        /**
+         * 字段ID，用于过滤已分配给该字段的领域
+         */
+        private Integer bizFieldId;
     }
 
     @Mapping(path = "/{id}", method = HttpMethods.DELETE)

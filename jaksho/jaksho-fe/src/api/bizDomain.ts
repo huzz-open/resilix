@@ -7,7 +7,11 @@ const Api = {
   DeleteBizDomain: '/sr/biz-domain',
 };
 
-export function getBizDomainList(params: { current: number; pageSize: number }) {
+export function getBizDomainList(params: { 
+  current: number; 
+  pageSize: number;
+  bizFieldId?: number;
+}) {
   return request.post<BizDomainListResult>({
     url: Api.BizDomainList,
     data: params,

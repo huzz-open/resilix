@@ -5,7 +5,6 @@ import org.apache.dubbo.config.annotation.DubboService;
 import jakarta.annotation.Resource;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
-import top.huzz.jaksho.api.helper.QueryHelper;
 import top.huzz.jaksho.api.phase.CreatePhase;
 import top.huzz.jaksho.api.service.BizDomainService;
 import top.huzz.jaksho.common.entity.BasicProperties;
@@ -16,7 +15,9 @@ import top.huzz.jaksho.domain.mapper.BizDomainMapper;
 import top.huzz.resilix.core.RunHandlerManager;
 import top.huzz.resilix.core.RunHandlerManagerHelper;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author chenji
@@ -44,9 +45,15 @@ public class BizDomainServiceImpl implements BizDomainService {
     public PageResult<BizDomain> pageQuery(BizDomainService.PageQueryRequest request) {
         int workspaceId = Session.currentWorkspaceId();
         Page<BizDomain> page = request.toPage();
-        List<BizDomain> rows = QueryHelper.lambdaQuery(BizDomainMapper.class, page, wp -> {
-            wp.eq(BizDomain::getWorkspaceId, workspaceId);
-        });
+        
+        Map<String, Object> params = new HashMap<>();
+        params.put("workspaceId", workspaceId);
+        // 如果传入了 bizFieldId，则在 SQL 中会通过 NOT EXISTS 排除已分配的领域
+        if (request.getBizFieldId() != null) {
+            params.put("bizFieldId", request.getBizFieldId());
+        }
+        
+        List<BizDomain> rows = bizDomainMapper.pageQuery(page, params);
         return PageResult.of(rows, page);
     }
 

@@ -17,4 +17,23 @@
         id, name, description, create_time, update_time, workspace_id
     </sql>
 
+    <!-- 分页查询业务领域 -->
+    <select id="pageQuery" resultMap="BaseResultMap">
+        SELECT
+            <include refid="Base_Column_List"/>
+        FROM sr_biz_domain bd
+        WHERE bd.workspace_id = #{p.workspaceId}
+        <!-- 如果传入了 bizFieldId，则排除已分配给该字段的领域 -->
+        <if test="p.bizFieldId != null">
+            AND NOT EXISTS (
+                SELECT 1
+                FROM sr_biz_field_domain bfd
+                WHERE bfd.biz_domain_id = bd.id
+                  AND bfd.biz_field_id = #{p.bizFieldId}
+                  AND bfd.workspace_id = #{p.workspaceId}
+            )
+        </if>
+        ORDER BY bd.update_time DESC
+    </select>
+
 </mapper>
