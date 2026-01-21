@@ -79,16 +79,16 @@ CREATE TABLE IF NOT EXISTS `sr_object_biz_field_type_ref`
 
 CREATE TABLE IF NOT EXISTS sr_api_definition
 (
-    `id`                    int(11) AUTO_INCREMENT         NOT NULL COMMENT '数据库主键ID',
-    `name`                  varchar(100)                   NOT NULL COMMENT '接口名称',
-    `method`                varchar(10)                    NOT NULL COMMENT 'HTTP方法',
-    `path`                  varchar(200)                   NOT NULL COMMENT '接口路径，如: /users/{userId}',
-    `description`           varchar(255) DEFAULT ''        NOT NULL COMMENT '接口描述',
-    `body_type`             varchar(30)  DEFAULT 'NONE'    NOT NULL COMMENT '请求体类型',
-    `workspace_id`          int(11)                        NOT NULL COMMENT '工作空间ID',
-    `create_time`           datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
-    `update_time`           datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
-    `remark`                varchar(255) DEFAULT ''        NOT NULL COMMENT '备注',
+    `id`           int(11) AUTO_INCREMENT         NOT NULL COMMENT '数据库主键ID',
+    `name`         varchar(100)                   NOT NULL COMMENT '接口名称',
+    `method`       varchar(10)                    NOT NULL COMMENT 'HTTP方法',
+    `path`         varchar(200)                   NOT NULL COMMENT '接口路径，如: /users/{userId}',
+    `description`  varchar(255) DEFAULT ''        NOT NULL COMMENT '接口描述',
+    `body_type`    varchar(30)  DEFAULT 'NONE'    NOT NULL COMMENT '请求体类型',
+    `workspace_id` int(11)                        NOT NULL COMMENT '工作空间ID',
+    `create_time`  datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `update_time`  datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
+    `remark`       varchar(255) DEFAULT ''        NOT NULL COMMENT '备注',
 
     PRIMARY KEY (`id`)
 ) COMMENT '接口定义表';
@@ -125,3 +125,41 @@ CREATE TABLE IF NOT EXISTS `sr_service`
     UNIQUE KEY `uk_service_code_workspace` (`service_code`, `workspace_id`),
     INDEX `idx_workspace_id` (`workspace_id`)
 ) COMMENT '服务管理表';
+
+CREATE TABLE IF NOT EXISTS `sr_biz_code`
+(
+    `id`              int(11) AUTO_INCREMENT         NOT NULL COMMENT '数据库主键ID',
+    `service_id`      int(11)                        NOT NULL COMMENT '服务ID，引用sr_service.id',
+    `code`            int(11)                        NOT NULL COMMENT '完整业务码（服务码+序号）',
+    `sequence_number` int(11)                        NOT NULL COMMENT '自增序号',
+    `http_status`     int(11)                        NOT NULL COMMENT 'HTTP状态码（如：200,400,500）',
+    `short_desc`      varchar(100)                   NOT NULL COMMENT '简短描述',
+    `detail_desc`     varchar(500) DEFAULT ''        NOT NULL COMMENT '详细描述',
+    `i18n_key`        varchar(100) DEFAULT ''        NOT NULL COMMENT '国际化key（如：biz.code.user.not.found）',
+    `workspace_id`    int(11)                        NOT NULL COMMENT '工作空间ID',
+    `create_time`     datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `update_time`     datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
+    `remark`          varchar(255) DEFAULT ''        NOT NULL COMMENT '备注',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_code_workspace` (`code`, `workspace_id`),
+    UNIQUE KEY `uk_service_sequence` (`service_id`, `sequence_number`, `workspace_id`),
+    INDEX `idx_service_id` (`service_id`),
+    INDEX `idx_workspace_id` (`workspace_id`),
+    INDEX `idx_http_status` (`http_status`)
+) COMMENT '业务码表';
+
+CREATE TABLE IF NOT EXISTS `sr_api_biz_code`
+(
+    `id`               int(11) AUTO_INCREMENT     NOT NULL COMMENT '数据库主键ID',
+    `api_id`           int(11)                    NOT NULL COMMENT '接口ID，引用sr_api_definition.id',
+    `biz_code_id` int(11)                    NOT NULL COMMENT '业务码ID，引用sr_biz_code.id',
+    `sort_order`       int(11)  DEFAULT 0         NOT NULL COMMENT '排序序号，值越小越靠前',
+    `workspace_id`     int(11)                    NOT NULL COMMENT '工作空间ID',
+    `create_time`      datetime DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `update_time`      datetime DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_api_biz_code` (`api_id`, `biz_code_id`, `workspace_id`),
+    INDEX `idx_api_id` (`api_id`),
+    INDEX `idx_biz_code_id` (`biz_code_id`),
+    INDEX `idx_workspace_id` (`workspace_id`)
+) COMMENT '接口业务码关联表';

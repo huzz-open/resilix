@@ -18,7 +18,7 @@ public class AppConfig {
     private ApiDefinitionConfig apiDefinition = new ApiDefinitionConfig();
     private PackagesConfig packages = new PackagesConfig();
     private CombineResultConfig combineResult = new CombineResultConfig();
-    private ServiceConfig service = new ServiceConfig();
+    private BizCodeConfig bizCode = new BizCodeConfig();
 
     @Getter
     @Setter
@@ -126,13 +126,12 @@ public class AppConfig {
     @Setter
     public static class ServiceConfig {
         /**
-         * 服务码位数（默认4位）
-         * 范围：1-10位（对应数据库int类型最大值）
+         * 服务码位数
          */
         private int serviceCodeLength = 4;
 
         /**
-         * 服务码最小值（默认1000，4位数最小值）
+         * 服务码最小值
          */
         private int serviceCodeMinValue = 1;
 
@@ -140,5 +139,36 @@ public class AppConfig {
          * 服务码最大值（默认9999，4位数最大值）
          */
         private int serviceCodeMaxValue = 9999;
+    }
+
+    @Getter
+    @Setter
+    public static class BizCodeConfig {
+        /**
+         * 服务码位数
+         */
+        private int serviceCodeLength = 4;
+
+        /**
+         * 序号位数
+         */
+        private int sequenceLength = 5;
+
+        /**
+         * 是否启用国际化
+         */
+        private boolean i18nEnabled = true;
+
+        /**
+         * 默认语言
+         */
+        private String defaultLocale = "zh_CN";
+
+        /**
+         * 序号生成模式：auto-自动生成，manual-手动输入
+         * auto: 新系统接入时使用，自动获取下一个序号
+         * manual: 老系统导入时使用，允许手动输入序号
+         */
+        private String sequenceMode = "auto";
     }
 }

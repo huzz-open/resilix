@@ -19,6 +19,17 @@ export default [
     },
     children: [
       {
+        path: 'biz-code',
+        name: 'BizCodeList',
+        component: () => import('@/pages/biz-code/list/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '业务码管理',
+            en_US: 'Business Code',
+          },
+        },
+      },
+      {
         path: 'list',
         name: 'ApiDefinitionList',
         component: () => import('@/pages/api-definition/list/index.vue'),

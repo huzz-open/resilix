@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.huzz.jaksho.domain.mapper.BizCodeMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="top.huzz.jaksho.domain.entity.BizCode">
+        <id column="id" property="id" />
+        <result column="service_id" property="serviceId"  />
+        <result column="code" property="code"  />
+        <result column="sequence_number" property="sequenceNumber"  />
+        <result column="http_status" property="httpStatus"  />
+        <result column="short_desc" property="shortDesc"  />
+        <result column="detail_desc" property="detailDesc"  />
+        <result column="i18n_key" property="i18nKey"  />
+        <result column="workspace_id" property="workspaceId"  />
+        <result column="create_time" property="createTime"  />
+        <result column="update_time" property="updateTime"  />
+        <result column="remark" property="remark"  />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, service_id, code, sequence_number, http_status, short_desc, detail_desc, i18n_key, workspace_id, create_time, update_time, remark
+    </sql>
+
+    <!-- 多表联查（BizCode + Service） -->
+    <select id="query" resultType="top.huzz.jaksho.common.entity.CombineResult">
+        select bc.*, s.name as service_name, s.service_code as service_service_code
+        from sr_biz_code bc
+            inner join sr_service s on bc.service_id = s.id and bc.workspace_id = s.workspace_id
+        where bc.workspace_id = #{p.workspaceId}
+        <if test="p.id != null">
+            and bc.id = #{p.id}
+        </if>
+        <if test="p.serviceId != null">
+            and bc.service_id = #{p.serviceId}
+        </if>
+        <if test="p.code != null">
+            and bc.code = #{p.code}
+        </if>
+        <if test="p.httpStatus != null">
+            and bc.http_status = #{p.httpStatus}
+        </if>
+        <if test="p.shortDesc != null and p.shortDesc != ''">
+            and bc.short_desc like concat('%', #{p.shortDesc}, '%')
+        </if>
+        <if test="p.bizCodeIds != null and p.bizCodeIds.size() > 0">
+            and bc.id in
+            <foreach collection="p.bizCodeIds" item="item" open="(" separator="," close=")">
+                #{item}
+            </foreach>
+        </if>
+        order by bc.create_time desc
+    </select>
+
+</mapper>

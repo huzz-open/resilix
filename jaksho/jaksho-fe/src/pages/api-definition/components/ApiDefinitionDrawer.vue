@@ -102,9 +102,15 @@
             <t-alert theme="info" :message="t('pages.apiDefinition.drawer.binaryTip')" />
           </template>
         </t-tab-panel>
+        <t-tab-panel label="业务码" value="bizCode">
+          <div v-if="mode === 'detail' && props.value?.id" class="biz-code-panel">
+            <biz-code-selector :api-id="props.value.id" @change="onBizCodesChange" />
+          </div>
+          <t-alert v-else theme="info" message="请先创建接口后再关联业务码" style="margin-top: 16px;" />
+        </t-tab-panel>
       </t-tabs>
 
-      <!-- 路径字段选择对话框：在路径输入包含“{”时弹出 -->
+      <!-- 路径字段选择对话框：在路径输入包含"{"时弹出 -->
       <t-dialog
         v-model:visible="pathSelector.visible"
         :header="t('pages.apiDefinition.drawer.selectPathField')"
@@ -159,6 +165,7 @@ import type {
   FieldType,
   HttpMethod,
 } from '@/api/model/apiDefinitionModel';
+import BizCodeSelector from '@/components/biz-code-selector/index.vue';
 import JKvpTable from '@/components/j-kvp-table/index.vue';
 import JTreeData from '@/components/j-tree-data/index.vue';
 import { t } from '@/locales';
@@ -171,8 +178,8 @@ const METHODS: HttpMethod[] = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'TRACE', 
 const BODY_TYPES: BodyType[] = ['NONE', 'FORM_DATA', 'FORM_URLENCODED', 'RAW_JSON', 'RAW_TEXT', 'BINARY'];
 
 const formRef = ref<FormInstanceFunctions>();
-// 类别页签：路径参数 / 请求参数 / 请求体
-const activeCategory = ref<'path' | 'params' | 'body'>('params');
+// 类别页签：路径参数 / 请求参数 / 请求体 / 业务码
+const activeCategory = ref<'path' | 'params' | 'body' | 'bizCode'>('params');
 const form = ref<CreateApiDefinitionRequest>({
   name: '',
   path: '',
@@ -330,6 +337,12 @@ const submitting = ref(false);
 // 提前声明以避免 watch(immediate) 时未初始化
 const braceInsertIndex = ref<number>(-1);
 const pathAutoPopupEnabled = ref(true);
+
+// 业务码变化处理
+const onBizCodesChange = (bizCodes: any[]) => {
+  console.log('业务码已更新:', bizCodes);
+  // 业务码变化的回调，可以在这里做额外处理
+};
 
 async function onSubmit() {
   submitting.value = true;
@@ -726,6 +739,10 @@ function onPathSelectorRowClick(params: any) {
 .footer {
   display: flex;
   justify-content: flex-end;
+}
+
+.biz-code-panel {
+  padding: 16px 0;
 }
 
 .inline-label {
