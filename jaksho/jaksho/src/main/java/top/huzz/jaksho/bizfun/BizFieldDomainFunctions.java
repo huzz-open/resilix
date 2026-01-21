@@ -1,5 +1,6 @@
 package top.huzz.jaksho.bizfun;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import org.springframework.context.annotation.Configuration;
 import top.huzz.jaksho.common.constant.BasicFieldType;
 import top.huzz.jaksho.domain.entity.BizField;
@@ -7,6 +8,9 @@ import top.huzz.jaksho.domain.entity.BizFieldType;
 import top.huzz.jaksho.domain.mapper.BizFieldMapper;
 import top.huzz.jaksho.domain.mapper.BizFieldTypeMapper;
 import top.huzz.resilix.validation.annotation.BizCheckFunction;
+
+import java.util.List;
+import java.util.Objects;
 
 /**
  * @author huzz
@@ -37,7 +41,17 @@ public class BizFieldDomainFunctions {
             throw new IllegalArgumentException("业务字段不存在");
         }
         Integer dbBizFieldTypeId = bizField.getBizFieldTypeId();
-        if (!dbBizFieldTypeId.equals(bizFieldTypeId)) {
+        if (Objects.equals(dbBizFieldTypeId, bizFieldTypeId)) {
+            return;
+        }
+
+        List<BizFieldType> bizFieldTypes = bizFieldTypeMapper.selectList(new LambdaQueryWrapper<BizFieldType>().in(BizFieldType::getId, List.of(bizFieldTypeId, dbBizFieldTypeId)));
+        if (bizFieldTypes.size() != 2) {
+            throw new IllegalArgumentException("业务字段类型不存在");
+        }
+        BizFieldType type1 = bizFieldTypes.get(0);
+        BizFieldType type2 = bizFieldTypes.get(1);
+        if (!Objects.equals(type1.getBasicFieldType(), type2.getBasicFieldType())) {
             throw new IllegalArgumentException("字段类型与业务字段不匹配");
         }
     }
