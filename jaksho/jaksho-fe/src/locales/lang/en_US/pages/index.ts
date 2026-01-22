@@ -2,6 +2,7 @@ import apiDefinition from './api-definition';
 import bizDomain from './biz-domain';
 import bizField from './biz-field';
 import bizFieldType from './biz-field-type';
+import valueDict from './value-dict';
 import dashboardBase from './dashboard-base';
 import dashboardDetail from './dashboard-detail';
 import detailBase from './detail-base';
@@ -38,6 +39,7 @@ export default {
   bizFieldType,
   bizField,
   apiDefinition,
+  valueDict,
   dev: {
     jTreeDataDemo: {
       title: 'j-tree-data Demo',

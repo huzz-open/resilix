@@ -28,7 +28,9 @@ public class Settings {
             "sr_api_definition_field",
             "sr_service",
             "sr_biz_code",
-            "sr_api_biz_code"
+            "sr_api_biz_code",
+            "sr_value_dict",
+            "sr_value_dict_item"
     );
 
     public static Map<String, Class<?>> tableFiledTypeMap = new LinkedHashMap<>();

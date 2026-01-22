@@ -36,6 +36,37 @@ CREATE TABLE IF NOT EXISTS `sr_biz_field_domain`
     UNIQUE uk_biz_field_domain (`workspace_id`, `biz_field_id`, `biz_domain_id`, `biz_field_type_id`)
 ) COMMENT '业务字段领域';
 
+CREATE TABLE IF NOT EXISTS `sr_value_dict`
+(
+    `id`           int(11) AUTO_INCREMENT         NOT NULL COMMENT '数据库主键ID',
+    `name`         varchar(100)                   NOT NULL COMMENT '值字典名称（下划线命名，如：login_type），用于代码生成',
+    `description`  varchar(255) DEFAULT ''        NOT NULL COMMENT '值字典描述',
+    `type`         varchar(10)                    NOT NULL COMMENT '值字典类型：STR/INT/CHAR/FLOAT',
+    `remark`       varchar(255) DEFAULT ''        NOT NULL COMMENT '备注',
+    `workspace_id` int(11)                        NOT NULL COMMENT '工作空间ID',
+    `create_time`  datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `update_time`  datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_value_dict_name` (`workspace_id`, `name`)
+) COMMENT '值字典';
+
+CREATE TABLE IF NOT EXISTS `sr_value_dict_item`
+(
+    `id`            int(11) AUTO_INCREMENT         NOT NULL COMMENT '数据库主键ID',
+    `value_dict_id` int(11)                        NOT NULL COMMENT '所属值字典ID',
+    `name`          varchar(100)                   NOT NULL COMMENT '枚举项名称（大写下划线，如：PC_WEB），用于代码生成',
+    `raw_value`     varchar(100)                   NOT NULL COMMENT '原始值（如："PC", "1", "1.0"）',
+    `description`   varchar(255) DEFAULT ''        NOT NULL COMMENT '值字典项描述',
+    `sort_order`    int(11)      DEFAULT 0         NOT NULL COMMENT '排序序号（值越小越靠前）',
+    `remark`        varchar(255) DEFAULT ''        NOT NULL COMMENT '备注',
+    `workspace_id`  int(11)                        NOT NULL COMMENT '工作空间ID',
+    `create_time`   datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `update_time`   datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
+    PRIMARY KEY (`id`),
+    UNIQUE KEY `uk_value_dict_item_name` (`value_dict_id`, `name`),
+    CONSTRAINT `fk_value_dict_item_dict` FOREIGN KEY (`value_dict_id`) REFERENCES `sr_value_dict` (`id`) ON DELETE CASCADE
+) COMMENT '值字典项';
+
 CREATE TABLE IF NOT EXISTS `sr_biz_field_type`
 (
     `id`               int(11)                        NOT NULL AUTO_INCREMENT COMMENT '数据库主键id',
@@ -56,6 +87,7 @@ CREATE TABLE IF NOT EXISTS `sr_biz_field_type`
      * <p/>反之，如果该字段为集合类型，则该值表示集合中元素的最大个数。',
     `collection_type`  varchar(10)  DEFAULT 'NONE'    NOT NULL COMMENT '集合类型',
     `basic_field_type` varchar(20)                    NOT NULL COMMENT '基础字段类型名称',
+    `value_dict_id`    int(11)                        NULL COMMENT '关联值字典ID（可选，有值表示枚举类型）',
     `create_time`      datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`      datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
     `workspace_id`     int(11)      DEFAULT 0         NOT NULL COMMENT '工作空间数据库主键id',
@@ -105,7 +137,7 @@ CREATE TABLE IF NOT EXISTS sr_api_definition_field
     `is_required`         boolean      DEFAULT 0         NOT NULL COMMENT '是否必填：0-否，1-是',
     `description`         varchar(255) DEFAULT ''        NOT NULL COMMENT '字段说明',
     `workspace_id`        int(11)                        NOT NULL COMMENT '工作空间ID',
-    `create_time`         datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
+    `create_time`         datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',44
     `update_time`         datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
 
     PRIMARY KEY (`id`)

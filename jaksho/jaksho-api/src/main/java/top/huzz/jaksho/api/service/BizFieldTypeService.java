@@ -55,6 +55,8 @@ public interface BizFieldTypeService {
 
         private Integer maximum;
 
+        private Integer valueDictId;
+
         private List<ObjectBizFieldTypeRefDTO> objectBizFieldTypeRefDTOList;
 
         @Override
@@ -94,6 +96,8 @@ public interface BizFieldTypeService {
 
         @Length(max = 255)
         private String description;
+
+        private Integer valueDictId;
     }
 
     @Getter

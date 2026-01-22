@@ -1,4 +1,5 @@
 import type { TreeDTO } from '@/api/model/basic/treeDTO';
+import type { ValueDictModel, ValueDictItemModel } from '@/api/model/valueDictModel';
 
 export type CollectionType = 'NONE' | 'LIST' | 'SET' | 'ARRAY';
 
@@ -22,6 +23,7 @@ export interface BizFieldTypeModel {
   maximum?: number;
   collectionType: CollectionType;
   basicFieldType: BasicFieldType;
+  valueDictId?: number;
   createTime: string;
   updateTime: string;
   workspaceId: number;
@@ -39,6 +41,7 @@ export interface CreateBizFieldTypeRequest {
   maximum?: number;
   collectionType: CollectionType;
   basicFieldType: BasicFieldType;
+  valueDictId?: number;
   objectBizFieldTypeRefDTOList?: ObjectBizFieldTypeRefDTO[];
 }
 
@@ -48,4 +51,6 @@ export interface ObjectBizFieldTypeRefDTO extends TreeDTO {
 
 export interface BizFieldTypeDetailResponse extends BizFieldTypeModel {
   objectBizFieldTypeRefList?: any[];
+  valueDict?: ValueDictModel;
+  valueDictItems?: ValueDictItemModel[];
 }

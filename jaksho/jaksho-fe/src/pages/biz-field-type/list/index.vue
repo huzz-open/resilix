@@ -115,6 +115,28 @@
             </t-form-item>
           </t-col>
         </t-row>
+        <t-row :gutter="16">
+          <t-col :span="12">
+            <t-form-item label="关联值字典（可选）" name="valueDictId">
+              <t-select
+                v-model="createFormData.valueDictId"
+                :placeholder="'选择值字典（用于枚举类型）'"
+                clearable
+                filterable
+              >
+                <t-option
+                  v-for="dict in valueDictList"
+                  :key="dict.id"
+                  :value="dict.id"
+                  :label="`${dict.name} (${dict.description})`"
+                />
+              </t-select>
+              <template #tips>
+                选择值字典后，该字段类型将作为枚举类型，用于代码生成
+              </template>
+            </t-form-item>
+          </t-col>
+        </t-row>
         <t-form-item :label="t('pages.bizFieldType.create.descriptionLabel')" name="description">
           <t-textarea
             v-model="createFormData.description"
@@ -193,6 +215,10 @@
             </t-descriptions-item>
             <t-descriptions-item :label="t('pages.bizFieldType.list.maximum')">
               {{ detailRecord?.maximum }}
+            </t-descriptions-item>
+            <!-- 关联值字典 -->
+            <t-descriptions-item label="关联值字典" :span="2">
+              {{ getValueDictName(detailRecord?.valueDictId) || '-' }}
             </t-descriptions-item>
             <!-- 描述 独占一行 - 可编辑 -->
             <t-descriptions-item :label="t('pages.bizFieldType.list.description')" :span="2">
@@ -273,6 +299,8 @@ import {
   updateBizFieldTypeObjectRefs,
 } from '@/api/bizFieldType';
 import type { BizFieldTypeDetailResponse, CreateBizFieldTypeRequest } from '@/api/model/bizFieldTypeModel';
+import type { ValueDictModel } from '@/api/model/valueDictModel';
+import { getValueDictList } from '@/api/valueDict';
 import JTreeData from '@/components/j-tree-data/index.vue';
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
@@ -319,7 +347,11 @@ const createFormData = ref<CreateBizFieldTypeRequest>({
   collectionType: 'NONE',
   basicFieldType: 'STRING',
   objectBizFieldTypeRefDTOList: [],
+  valueDictId: undefined,
 });
+
+// 值字典列表
+const valueDictList = ref<ValueDictModel[]>([]);
 
 const collectionTypeOptions = [
   { label: t('pages.bizFieldType.create.collectionTypeOptions.NONE'), value: 'NONE' },
@@ -435,8 +467,26 @@ const confirmBody = computed(() => {
   return '';
 });
 
+// 加载值字典列表
+const loadValueDictList = async () => {
+  try {
+    const res = await getValueDictList({ current: 1, pageSize: 1000 });
+    valueDictList.value = res.rows || res.records || [];
+  } catch (error) {
+    console.error('Failed to load value dict list:', error);
+  }
+};
+
+// 获取值字典名称
+const getValueDictName = (valueDictId?: number) => {
+  if (!valueDictId) return '';
+  const dict = valueDictList.value.find((d) => d.id === valueDictId);
+  return dict ? `${dict.name} (${dict.description})` : '';
+};
+
 onMounted(() => {
   fetchData();
+  loadValueDictList();
 });
 
 const confirmVisible = ref(false);
@@ -523,6 +573,7 @@ const handleCreate = () => {
     collectionType: 'NONE',
     basicFieldType: 'STRING',
     objectBizFieldTypeRefDTOList: [],
+    valueDictId: undefined,
   };
 };
 

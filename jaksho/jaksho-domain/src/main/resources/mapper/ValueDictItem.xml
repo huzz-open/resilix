@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="top.huzz.jaksho.domain.mapper.ValueDictItemMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="top.huzz.jaksho.domain.entity.ValueDictItem">
+        <id column="id" property="id" />
+        <result column="value_dict_id" property="valueDictId"  />
+        <result column="name" property="name"  />
+        <result column="raw_value" property="rawValue"  />
+        <result column="description" property="description"  />
+        <result column="sort_order" property="sortOrder"  />
+        <result column="remark" property="remark"  />
+        <result column="workspace_id" property="workspaceId"  />
+        <result column="create_time" property="createTime"  />
+        <result column="update_time" property="updateTime"  />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, value_dict_id, name, raw_value, description, sort_order, remark, workspace_id, create_time, update_time
+    </sql>
+
+</mapper>
