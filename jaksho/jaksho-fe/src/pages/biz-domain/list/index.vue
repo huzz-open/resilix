@@ -32,8 +32,8 @@
       >
         <template #op="slotProps">
           <t-space>
-            <t-link theme="primary" @click="handleClickDetail(slotProps)"
-              >{{ t('pages.bizDomain.list.detail') }}
+            <t-link theme="primary" @click="goToEdit(slotProps.row.id)"
+              >{{ t('pages.bizDomain.list.edit') }}
             </t-link>
             <t-link theme="danger" @click="handleClickDelete(slotProps)">{{ t('pages.bizDomain.list.delete') }}</t-link>
           </t-space>
@@ -48,64 +48,21 @@
       :on-cancel="onCancel"
       @confirm="onConfirmDelete"
     />
-
-    <!-- 创建业务领域对话框 -->
-    <t-dialog
-      v-model:visible="createDialogVisible"
-      :header="t('pages.bizDomain.create.title')"
-      width="600px"
-      :footer="false"
-    >
-      <t-form
-        ref="createFormRef"
-        :data="createFormData"
-        :rules="createFormRules"
-        label-align="top"
-        label-width="120"
-        @submit="onCreateSubmit"
-      >
-        <t-form-item :label="t('pages.bizDomain.create.name')" name="name">
-          <t-input
-            v-model="createFormData.name"
-            :placeholder="t('pages.bizDomain.create.namePlaceholder')"
-            :maxlength="100"
-            show-word-limit
-          />
-        </t-form-item>
-        <t-form-item :label="t('pages.bizDomain.create.descriptionLabel')" name="description">
-          <t-textarea
-            v-model="createFormData.description"
-            :height="120"
-            :placeholder="t('pages.bizDomain.create.descriptionPlaceholder')"
-            :maxlength="255"
-            show-word-limit
-          />
-        </t-form-item>
-        <div class="dialog-footer">
-          <t-space>
-            <t-button theme="default" @click="onCreateCancel">
-              {{ t('pages.bizDomain.create.cancel') }}
-            </t-button>
-            <t-button theme="primary" type="submit" :loading="createSubmitLoading">
-              {{ t('pages.bizDomain.create.submit') }}
-            </t-button>
-          </t-space>
-        </div>
-      </t-form>
-    </t-dialog>
   </div>
 </template>
 <script setup lang="ts">
 import { SearchIcon } from 'tdesign-icons-vue-next';
-import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
+import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import { createBizDomain, deleteBizDomain, getBizDomainList } from '@/api/bizDomain';
-import type { CreateBizDomainRequest } from '@/api/model/bizDomainModel';
+import { deleteBizDomain, getBizDomainList } from '@/api/bizDomain';
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
+
+const router = useRouter();
 
 defineOptions({
   name: 'BizDomainList',
@@ -162,24 +119,6 @@ const pagination = ref({
 
 const searchValue = ref('');
 const dataLoading = ref(false);
-
-// 创建对话框相关
-const createDialogVisible = ref(false);
-const createFormRef = ref<FormInstanceFunctions>();
-const createSubmitLoading = ref(false);
-const createFormData = ref<CreateBizDomainRequest>({
-  name: '',
-  description: '',
-});
-
-// 创建表单验证规则
-const createFormRules: Record<string, FormRule[]> = {
-  name: [
-    { required: true, message: t('pages.bizDomain.create.nameRequired'), type: 'error' },
-    { min: 1, max: 100, message: t('pages.bizDomain.create.nameLength'), type: 'error' },
-  ],
-  description: [{ max: 255, message: t('pages.bizDomain.create.descriptionLength'), type: 'error' }],
-};
 
 const fetchData = async () => {
   dataLoading.value = true;
@@ -258,54 +197,22 @@ const rehandleChange = (changeParams: unknown, triggerAndData: unknown) => {
   console.log('统一Change', changeParams, triggerAndData);
 };
 
-const handleClickDetail = (row: any) => {
-  console.log('查看详情', row);
-  // TODO: 实现详情页面
+// 跳转到编辑页面
+const goToEdit = (id?: number) => {
+  if (id) {
+    router.push({ name: 'BizDomainEdit', params: { id } });
+  } else {
+    router.push({ name: 'BizDomainCreate' });
+  }
 };
 
 const handleCreate = () => {
-  createDialogVisible.value = true;
-  // 重置表单数据
-  createFormData.value = {
-    name: '',
-    description: '',
-  };
+  goToEdit();
 };
 
 const handleClickDelete = (row: { rowIndex: any }) => {
   deleteIdx.value = row.rowIndex;
   confirmVisible.value = true;
-};
-
-// 创建表单相关方法
-const onCreateSubmit = async () => {
-  if (!createFormRef.value) return;
-
-  const validateResult = await createFormRef.value.validate();
-  if (validateResult === true) {
-    createSubmitLoading.value = true;
-    try {
-      await createBizDomain(createFormData.value);
-      await MessagePlugin.success(t('pages.bizDomain.create.createSuccess'));
-      createDialogVisible.value = false;
-      // 刷新列表数据
-      await fetchData();
-    } catch (error) {
-      console.error('创建失败:', error);
-      await MessagePlugin.error(t('pages.bizDomain.create.createFailed'));
-    } finally {
-      createSubmitLoading.value = false;
-    }
-  }
-};
-
-const onCreateCancel = () => {
-  createDialogVisible.value = false;
-  // 重置表单数据
-  createFormData.value = {
-    name: '',
-    description: '',
-  };
 };
 
 const headerAffixedTop = computed(
@@ -339,10 +246,5 @@ const headerAffixedTop = computed(
 
 .search-input {
   width: 360px;
-}
-
-.dialog-footer {
-  margin-top: var(--td-comp-margin-l);
-  text-align: right;
 }
 </style>

@@ -10,7 +10,7 @@ export default {
   isFooterAside: false,
   isSidebarFixed: true,
   isHeaderFixed: true,
-  isUseTabsRouter: false,
+  isUseTabsRouter: true,
   showHeader: true,
   brandTheme: '#0052D9',
 };

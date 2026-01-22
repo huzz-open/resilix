@@ -9,6 +9,7 @@ export default {
     updateTime: 'Update Time',
     operation: 'Operation',
     detail: 'Detail',
+    edit: 'Edit',
     delete: 'Delete',
     confirmDelete: 'Confirm to delete the selected business domain?',
     deleteSuccess: 'Delete successful',
@@ -33,5 +34,12 @@ export default {
     createSuccess: 'Create successful',
     createFailed: 'Create failed, please try again',
     formReset: 'Form has been reset',
+  },
+  edit: {
+    title: 'Edit Business Domain',
+    back: 'Back',
+    updateSuccess: 'Update successful',
+    updateFailed: 'Update failed, please try again',
+    fetchFailed: 'Failed to fetch data',
   },
 };

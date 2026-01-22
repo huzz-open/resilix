@@ -140,12 +140,9 @@
       </t-dialog>
 
       <div class="footer">
-        <t-space>
-          <t-button theme="default" @click="$emit('close')">{{ t('pages.apiDefinition.drawer.close') }}</t-button>
-          <t-button v-if="mode === 'create'" theme="primary" type="submit" :loading="submitting"
-            >{{ t('pages.apiDefinition.drawer.save') }}
-          </t-button>
-        </t-space>
+        <t-button theme="primary" type="submit" :loading="submitting">
+          {{ mode === 'create' ? '创建' : '保存' }}
+        </t-button>
       </div>
     </t-form>
   </t-space>

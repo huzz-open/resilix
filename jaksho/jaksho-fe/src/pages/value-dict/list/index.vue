@@ -3,7 +3,7 @@
     <t-card class="list-card-container" :bordered="false">
       <t-row justify="space-between">
         <div class="left-operation-container">
-          <t-button @click="handleCreate">{{ t('pages.valueDict.list.createButton') }}</t-button>
+          <t-button @click="goToCreate">{{ t('pages.valueDict.list.createButton') }}</t-button>
         </div>
         <div class="search-input">
           <t-input v-model="searchValue" :placeholder="t('pages.valueDict.list.searchPlaceholder')" clearable>
@@ -33,7 +33,7 @@
 
         <template #op="{ row }">
           <t-space>
-            <t-link theme="primary" @click="handleEdit(row)">编辑</t-link>
+            <t-link theme="primary" @click="goToEdit(row.id)">编辑</t-link>
             <t-popconfirm
               :content="t('pages.valueDict.list.deleteConfirm')"
               @confirm="handleDelete(row)"
@@ -44,84 +44,21 @@
         </template>
       </t-table>
     </t-card>
-
-    <!-- 创建/编辑对话框 -->
-    <t-dialog
-      v-model:visible="dialogVisible"
-      :header="isEditing ? t('pages.valueDict.create.editTitle') : t('pages.valueDict.create.title')"
-      width="70%"
-      :footer="false"
-      destroy-on-close
-    >
-      <t-form
-        ref="formRef"
-        :data="formData"
-        :rules="formRules"
-        label-align="top"
-        @submit="onSubmit"
-      >
-        <t-row :gutter="16">
-          <t-col :span="6">
-            <t-form-item :label="t('pages.valueDict.create.nameLabel')" name="name">
-              <t-input
-                v-model="formData.name"
-                :placeholder="t('pages.valueDict.create.namePlaceholder')"
-                :maxlength="100"
-                show-word-limit
-              />
-              <template #tips>{{ t('pages.valueDict.create.nameHelp') }}</template>
-            </t-form-item>
-          </t-col>
-          <t-col :span="6">
-            <t-form-item :label="t('pages.valueDict.create.typeLabel')" name="type">
-              <t-select v-model="formData.type" :placeholder="t('pages.valueDict.create.typeRequired')">
-                <t-option value="STR" :label="t('pages.valueDict.create.typeStr')" />
-                <t-option value="INT" :label="t('pages.valueDict.create.typeInt')" />
-                <t-option value="CHAR" :label="t('pages.valueDict.create.typeChar')" />
-                <t-option value="FLOAT" :label="t('pages.valueDict.create.typeFloat')" />
-              </t-select>
-            </t-form-item>
-          </t-col>
-          <t-col :span="12">
-            <t-form-item :label="t('pages.valueDict.create.descriptionLabel')" name="description">
-              <t-input
-                v-model="formData.description"
-                :placeholder="t('pages.valueDict.create.descriptionPlaceholder')"
-                :maxlength="255"
-                show-word-limit
-              />
-            </t-form-item>
-          </t-col>
-        </t-row>
-
-        <t-form-item :label="t('pages.valueDict.create.itemsLabel')" name="items">
-          <dict-item-manager v-model="formData.items" :dict-type="formData.type" />
-        </t-form-item>
-
-        <div class="dialog-footer">
-          <t-space>
-            <t-button theme="default" @click="onCancel">{{ t('pages.valueDict.create.cancelButton') }}</t-button>
-            <t-button theme="primary" type="submit" :loading="submitLoading">
-              {{ t('pages.valueDict.create.submitButton') }}
-            </t-button>
-          </t-space>
-        </div>
-      </t-form>
-    </t-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from 'vue';
+import { useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { SearchIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import type { FormInstanceFunctions, FormRule, PaginationProps } from 'tdesign-vue-next';
-import { getValueDictList, createValueDict, updateValueDict, deleteValueDict, getValueDictDetail } from '@/api/valueDict';
-import type { ValueDictModel, ValueDictItemModel } from '@/api/model/valueDictModel';
-import DictItemManager from '../components/DictItemManager.vue';
+import type { PaginationProps } from 'tdesign-vue-next';
+import { getValueDictList, deleteValueDict } from '@/api/valueDict';
+import type { ValueDictModel } from '@/api/model/valueDictModel';
 
 const { t } = useI18n();
+const router = useRouter();
 
 // 列表数据
 const listData = ref<ValueDictModel[]>([]);
@@ -135,41 +72,6 @@ const pagination = ref<PaginationProps>({
   total: 0,
 });
 
-// 对话框
-const dialogVisible = ref(false);
-const isEditing = ref(false);
-const formRef = ref<FormInstanceFunctions>();
-const submitLoading = ref(false);
-
-interface FormData {
-  id?: number;
-  name: string;
-  description: string;
-  type: string;
-  remark: string;
-  items: ValueDictItemModel[];
-}
-
-const formData = ref<FormData>({
-  name: '',
-  description: '',
-  type: 'STR',
-  remark: '',
-  items: [],
-});
-
-const formRules = computed<Record<string, FormRule[]>>(() => ({
-  name: [{ required: true, message: t('pages.valueDict.create.nameRequired'), type: 'error' }],
-  type: [{ required: true, message: t('pages.valueDict.create.typeRequired'), type: 'error' }],
-  items: [
-    {
-      required: true,
-      message: t('pages.valueDict.create.itemsRequired'),
-      type: 'error',
-      validator: (val: ValueDictItemModel[]) => val && val.length > 0,
-    },
-  ],
-}));
 
 // 表格列
 const columns = computed(() => [
@@ -214,70 +116,14 @@ const handlePageChange = (pageInfo: PaginationProps) => {
   loadData();
 };
 
-// 创建
-const handleCreate = () => {
-  isEditing.value = false;
-  formData.value = {
-    name: '',
-    description: '',
-    type: 'STR',
-    remark: '',
-    items: [],
-  };
-  dialogVisible.value = true;
+// 路由跳转到创建页面
+const goToCreate = () => {
+  router.push({ name: 'ValueDictCreate' });
 };
 
-// 编辑
-const handleEdit = async (row: ValueDictModel) => {
-  try {
-    dataLoading.value = true;
-    // 先加载详情（包括 items）
-    const detail = await getValueDictDetail(row.id);
-    
-    isEditing.value = true;
-    formData.value = {
-      id: detail.id,
-      name: detail.name,
-      description: detail.description || '',
-      type: detail.type,
-      remark: detail.remark || '',
-      items: detail.items || [],
-    };
-    dialogVisible.value = true;
-  } catch (error) {
-    console.error('Failed to load value dict detail:', error);
-    MessagePlugin.error('加载字典详情失败');
-  } finally {
-    dataLoading.value = false;
-  }
-};
-
-// 提交
-const onSubmit = async ({ validateResult }: { validateResult: boolean }) => {
-  if (!validateResult) return;
-
-  try {
-    submitLoading.value = true;
-    if (isEditing.value) {
-      await updateValueDict(formData.value.id!, formData.value);
-      MessagePlugin.success(t('pages.valueDict.message.updateSuccess'));
-    } else {
-      await createValueDict(formData.value);
-      MessagePlugin.success(t('pages.valueDict.message.createSuccess'));
-    }
-    dialogVisible.value = false;
-    loadData();
-  } catch (error) {
-    console.error('Failed to submit:', error);
-    MessagePlugin.error('操作失败');
-  } finally {
-    submitLoading.value = false;
-  }
-};
-
-// 取消
-const onCancel = () => {
-  dialogVisible.value = false;
+// 路由跳转到编辑页面
+const goToEdit = (id: number) => {
+  router.push({ name: 'ValueDictEdit', params: { id } });
 };
 
 // 删除

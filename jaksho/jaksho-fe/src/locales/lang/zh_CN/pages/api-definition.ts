@@ -3,6 +3,7 @@ export default {
     create: '创建接口',
     selectedCount: '已选 {count} 项',
     detail: '详情',
+    edit: '编辑',
     delete: '删除',
     confirmDelete: '确认删除',
     confirmDeleteBody: '删除后不可恢复，确认删除该接口？',
@@ -84,5 +85,11 @@ export default {
       pathRequired: '请输入接口路径',
       bodyTypeRequired: '请选择请求体类型',
     },
+  },
+  edit: {
+    back: '返回',
+    createSuccess: '创建成功',
+    updateSuccess: '更新成功',
+    fetchFailed: '获取数据失败',
   },
 };

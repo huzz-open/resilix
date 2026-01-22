@@ -30,6 +30,32 @@ export default [
         },
       },
       {
+        path: 'biz-code/create',
+        name: 'BizCodeCreate',
+        component: () => import('@/pages/biz-code/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '新建业务码',
+            en_US: 'Create Business Code',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
+      {
+        path: 'biz-code/edit/:id',
+        name: 'BizCodeEdit',
+        component: () => import('@/pages/biz-code/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '编辑业务码',
+            en_US: 'Edit Business Code',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
+      {
         path: 'list',
         name: 'ApiDefinitionList',
         component: () => import('@/pages/api-definition/list/index.vue'),
@@ -38,6 +64,32 @@ export default [
             zh_CN: '接口列表',
             en_US: 'API List',
           },
+        },
+      },
+      {
+        path: 'create',
+        name: 'ApiDefinitionCreate',
+        component: () => import('@/pages/api-definition/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '新建接口',
+            en_US: 'Create API',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
+      {
+        path: 'edit/:id',
+        name: 'ApiDefinitionEdit',
+        component: () => import('@/pages/api-definition/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '接口详情',
+            en_US: 'API Detail',
+          },
+          keepAlive: false,
+          hidden: true,
         },
       },
     ],

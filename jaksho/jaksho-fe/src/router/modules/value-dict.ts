@@ -29,6 +29,32 @@ export default [
           },
         },
       },
+      {
+        path: 'create',
+        name: 'ValueDictCreate',
+        component: () => import('@/pages/value-dict/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '新建字典',
+            en_US: 'Create Dictionary',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
+      {
+        path: 'edit/:id',
+        name: 'ValueDictEdit',
+        component: () => import('@/pages/value-dict/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '编辑字典',
+            en_US: 'Edit Dictionary',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
     ],
   },
 ];

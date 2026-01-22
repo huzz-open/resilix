@@ -29,6 +29,32 @@ export default [
           },
         },
       },
+      {
+        path: 'create',
+        name: 'BizDomainCreate',
+        component: () => import('@/pages/biz-domain/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '新建业务领域',
+            en_US: 'Create Business Domain',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
+      {
+        path: 'edit/:id',
+        name: 'BizDomainEdit',
+        component: () => import('@/pages/biz-domain/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '编辑业务领域',
+            en_US: 'Edit Business Domain',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
     ],
   },
 ];

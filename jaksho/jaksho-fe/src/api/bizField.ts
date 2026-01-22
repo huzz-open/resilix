@@ -5,6 +5,7 @@ const Api = {
   BizFieldList: '/sr/biz-field/page',
   CreateBizField: '/sr/biz-field',
   DeleteBizField: '/sr/biz-field',
+  GetBizFieldDetail: '/sr/biz-field',
 };
 
 export function getBizFieldList(params: { current: number; pageSize: number }) {
@@ -24,5 +25,11 @@ export function createBizField(data: CreateBizFieldRequest) {
 export function deleteBizField(id: number) {
   return request.delete<number>({
     url: `${Api.DeleteBizField}/${id}`,
+  });
+}
+
+export function getBizFieldDetail(id: number) {
+  return request.get<any>({
+    url: `${Api.GetBizFieldDetail}/${id}`,
   });
 }

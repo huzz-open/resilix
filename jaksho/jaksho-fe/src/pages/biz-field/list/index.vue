@@ -32,17 +32,7 @@
       >
         <template #op="slotProps">
           <t-space>
-            <t-link theme="primary" @click="handleClickDetail(slotProps)">{{ t('pages.bizField.list.detail') }}</t-link>
-            <template v-if="isObjectType(slotProps.row)">
-              <t-tooltip :content="t('pages.bizField.list.addDomainDisabledTip')">
-                <t-link theme="primary" disabled>{{ t('pages.bizField.list.addDomainField') }}</t-link>
-              </t-tooltip>
-            </template>
-            <template v-else>
-              <t-link theme="primary" @click="handleClickAddDomainField(slotProps)">
-                {{ t('pages.bizField.list.addDomainField') }}
-              </t-link>
-            </template>
+            <t-link theme="primary" @click="goToDetail(slotProps.row?.bizField?.id ?? slotProps.row?.id)">{{ t('pages.bizField.list.edit') }}</t-link>
             <t-link theme="danger" @click="handleClickDelete(slotProps)">{{ t('pages.bizField.list.delete') }}</t-link>
           </t-space>
         </template>
@@ -56,195 +46,21 @@
       :on-cancel="onCancel"
       @confirm="onConfirmDelete"
     />
-
-    <t-dialog
-      v-model:visible="createDialogVisible"
-      :header="t('pages.bizField.create.title')"
-      width="50%"
-      :footer="false"
-    >
-      <t-form
-        ref="createFormRef"
-        :data="createFormData"
-        :rules="createFormRules"
-        label-align="top"
-        label-width="120"
-        @submit="onCreateSubmit"
-      >
-        <t-form-item :label="t('pages.bizField.create.name')" name="name">
-          <t-input
-            v-model="createFormData.name"
-            :placeholder="t('pages.bizField.create.namePlaceholder')"
-            :maxlength="100"
-            show-word-limit
-          />
-        </t-form-item>
-        <t-form-item :label="t('pages.bizField.create.descriptionLabel')" name="description">
-          <t-textarea
-            v-model="createFormData.description"
-            :height="120"
-            :placeholder="t('pages.bizField.create.descriptionPlaceholder')"
-            :maxlength="255"
-            show-word-limit
-          />
-        </t-form-item>
-        <t-form-item :label="t('pages.bizField.create.bizFieldTypeId')" name="bizFieldTypeId">
-          <t-table
-            :data="typeListData"
-            :columns="TYPE_COLUMNS"
-            select-on-row-click
-            row-key="id"
-            :hover="true"
-            :pagination="typePagination"
-            :selected-row-keys="selectedTypeKeys"
-            :loading="typeLoading"
-            @page-change="onTypePageChange"
-            @change="onTypeChange"
-            @select-change="onTypeSelectChange"
-          />
-        </t-form-item>
-        <div class="dialog-footer">
-          <t-space>
-            <t-button theme="default" @click="onCreateCancel">{{ t('pages.bizField.create.cancel') }}</t-button>
-            <t-button theme="primary" type="submit" :loading="createSubmitLoading"
-              >{{ t('pages.bizField.create.submit') }}
-            </t-button>
-          </t-space>
-        </div>
-      </t-form>
-    </t-dialog>
-
-    <!-- 添加领域字段 -->
-    <t-dialog
-      v-model:visible="addDomainDialogVisible"
-      :header="t('pages.bizField.addDomain.title')"
-      width="45%"
-      :footer="false"
-    >
-      <t-form
-        ref="addDomainFormRef"
-        :data="addDomainFormData"
-        :rules="addDomainFormRules"
-        label-align="top"
-        label-width="120"
-        @submit="onAddDomainSubmit"
-      >
-        <t-form-item :label="t('pages.bizField.addDomain.bizDomainId')" name="bizDomainId">
-          <t-table
-            :data="domainListData"
-            :columns="DOMAIN_COLUMNS"
-            select-on-row-click
-            row-key="id"
-            :hover="true"
-            :pagination="domainPagination"
-            :selected-row-keys="selectedDomainKeys"
-            :loading="domainLoading"
-            @page-change="onDomainPageChange"
-            @change="onDomainChange"
-            @select-change="onDomainSelectChange"
-          />
-        </t-form-item>
-        <t-form-item :label="t('pages.bizField.create.bizFieldTypeId')" name="bizFieldTypeId">
-          <t-table
-            :data="addTypeListData"
-            :columns="TYPE_COLUMNS"
-            select-on-row-click
-            row-key="id"
-            :hover="true"
-            :pagination="addTypePagination"
-            :selected-row-keys="selectedAddTypeKeys"
-            :loading="addTypeLoading"
-            @page-change="onAddTypePageChange"
-            @change="onAddTypeChange"
-            @select-change="onAddTypeSelectChange"
-          />
-        </t-form-item>
-        <div class="dialog-footer">
-          <t-space>
-            <t-button theme="default" @click="onAddDomainCancel">{{ t('pages.bizField.addDomain.cancel') }}</t-button>
-            <t-button theme="primary" type="submit" :loading="addDomainSubmitLoading">
-              {{ t('pages.bizField.addDomain.submit') }}
-            </t-button>
-          </t-space>
-        </div>
-      </t-form>
-    </t-dialog>
-
-    <!-- 详情抽屉 -->
-    <t-drawer v-model:visible="detailDrawerVisible" placement="right" size="40%" :footer="false">
-      <template #header>
-        <span>{{ t('pages.bizField.detail.title') }}</span>
-      </template>
-      <div>
-        <t-card :title="t('pages.bizField.detail.basicInfo')" :bordered="false" style="margin-bottom: 16px">
-          <t-descriptions :column="2" item-layout="horizontal" size="small" :label-width="100">
-            <!-- 名称 独占一行 -->
-            <t-descriptions-item :label="t('pages.bizField.list.name')" :span="2">
-              {{ detailRecord?.bizField?.name ?? detailRecord?.name }}
-            </t-descriptions-item>
-            <!-- 字段类型、基础类型 -->
-            <t-descriptions-item :label="t('pages.bizField.list.bizFieldTypeName')">
-              {{ detailRecord?.bizFieldType?.name }}
-            </t-descriptions-item>
-            <t-descriptions-item :label="t('pages.bizField.list.basicFieldType')">
-              {{ detailRecord?.bizFieldType?.basicFieldType }}
-            </t-descriptions-item>
-            <!-- 集合类型、描述 -->
-            <t-descriptions-item :label="t('pages.bizField.list.collectionType')">
-              {{ detailRecord?.bizFieldType?.collectionType }}
-            </t-descriptions-item>
-            <t-descriptions-item :label="t('pages.bizField.list.description')">
-              {{ detailRecord?.bizField?.description ?? detailRecord?.description }}
-            </t-descriptions-item>
-            <!-- 最小值、最大值 -->
-            <t-descriptions-item :label="t('pages.bizField.list.minimum')">
-              {{ detailRecord?.bizFieldType?.minimum }}
-            </t-descriptions-item>
-            <t-descriptions-item :label="t('pages.bizField.list.maximum')">
-              {{ detailRecord?.bizFieldType?.maximum }}
-            </t-descriptions-item>
-            <!-- 创建时间、更新时间 -->
-            <t-descriptions-item :label="t('pages.bizField.list.createTime')">
-              {{ detailRecord?.bizField?.createTime ?? detailRecord?.createTime }}
-            </t-descriptions-item>
-            <t-descriptions-item :label="t('pages.bizField.list.updateTime')">
-              {{ detailRecord?.bizField?.updateTime ?? detailRecord?.updateTime }}
-            </t-descriptions-item>
-          </t-descriptions>
-        </t-card>
-
-        <t-card :title="t('pages.bizField.detail.domainList')" :bordered="false">
-          <t-table
-            :data="detailDomainList"
-            :columns="DETAIL_DOMAIN_COLUMNS"
-            row-key="id"
-            :hover="true"
-            :pagination="detailDomainPagination"
-            :loading="detailDomainLoading"
-            @page-change="onDetailDomainPageChange"
-          />
-        </t-card>
-      </div>
-    </t-drawer>
   </div>
 </template>
 <script setup lang="ts">
 import { SearchIcon } from 'tdesign-icons-vue-next';
-import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
+import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin, Tooltip } from 'tdesign-vue-next';
-import { computed, onMounted, ref } from 'vue';
+import { computed, h, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
-import { getBizDomainList } from '@/api/bizDomain';
-import { createBizField, deleteBizField, getBizFieldList } from '@/api/bizField';
-import { createBizFieldDomain, getBizFieldDomainList } from '@/api/bizFieldDomain';
-import { getBizFieldTypeList } from '@/api/bizFieldType';
-import type { BizDomainModel } from '@/api/model/bizDomainModel';
-import type { CreateBizFieldDomainRequest } from '@/api/model/bizFieldDomainModel';
-import type { CreateBizFieldRequest } from '@/api/model/bizFieldModel';
-import type { BasicFieldType, BizFieldTypeModel, CollectionType } from '@/api/model/bizFieldTypeModel';
+import { deleteBizField, getBizFieldList } from '@/api/bizField';
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
+
+const router = useRouter();
 
 defineOptions({
   name: 'BizFieldList',
@@ -283,200 +99,16 @@ const pagination = ref({ pageSize: 20, total: 0, current: 1 });
 const searchValue = ref('');
 const dataLoading = ref(false);
 
-// 创建对话框相关
-const createDialogVisible = ref(false);
-const createFormRef = ref<FormInstanceFunctions>();
-const createSubmitLoading = ref(false);
-const createFormData = ref<CreateBizFieldRequest>({
-  name: '',
-  description: '',
-  bizFieldTypeId: undefined as unknown as number,
-});
-
-// 字段类型选择（表格单选）
-const TYPE_COLUMNS: PrimaryTableCol[] = [
-  { colKey: 'row-select', type: 'single', width: 64, fixed: 'left' },
-  { title: t('pages.bizField.list.bizFieldTypeName'), width: 200, colKey: 'name', ellipsis: true },
-  { title: t('pages.bizField.list.basicFieldType'), width: 80, colKey: 'basicFieldType', ellipsis: true },
-  { title: t('pages.bizField.list.collectionType'), width: 80, colKey: 'collectionType' },
-  { title: t('pages.bizField.list.minimum'), width: 80, colKey: 'minimum' },
-  { title: t('pages.bizField.list.maximum'), width: 80, colKey: 'maximum' },
-  { title: t('pages.bizField.list.description'), width: 300, colKey: 'description', ellipsis: true },
-];
-const typeListData = ref<BizFieldTypeModel[]>([]);
-const typePagination = ref({ pageSize: 10, total: 0, current: 1 });
-const typeLoading = ref(false);
-const selectedTypeKeys = ref<(string | number)[]>([]);
-
-const fetchTypeData = async () => {
-  typeLoading.value = true;
-  try {
-    const { rows, total } = await getBizFieldTypeList({
-      current: typePagination.value.current,
-      pageSize: typePagination.value.pageSize,
-    });
-    typeListData.value = rows as BizFieldTypeModel[];
-    typePagination.value = { ...typePagination.value, total };
-  } finally {
-    typeLoading.value = false;
+// 跳转到详情/编辑页面
+const goToDetail = (id?: number) => {
+  if (id) {
+    router.push({ name: 'BizFieldEdit', params: { id } });
   }
 };
 
-const onTypePageChange = (pageInfo: PageInfo) => {
-  typePagination.value.current = pageInfo.current;
-  typePagination.value.pageSize = pageInfo.pageSize;
-  fetchTypeData();
-};
-const onTypeChange = () => {
-  // no-op for now
-};
-const onTypeSelectChange = (keys: (string | number)[]) => {
-  selectedTypeKeys.value = keys;
-  createFormData.value.bizFieldTypeId = keys[0] as number as number;
-};
-// 添加领域字段（对话框状态）
-const addDomainDialogVisible = ref(false);
-const addDomainFormRef = ref<FormInstanceFunctions>();
-const addDomainSubmitLoading = ref(false);
-const currentBizFieldId = ref<number | null>(null);
-const addDomainFormData = ref<CreateBizFieldDomainRequest>({
-  bizFieldId: 0,
-  bizDomainId: 0,
-  bizFieldTypeId: 0,
-});
-
-// 领域选择表格
-const DOMAIN_COLUMNS: PrimaryTableCol[] = [
-  { colKey: 'row-select', type: 'single', width: 64, fixed: 'left' },
-  { title: t('pages.bizDomain.list.name'), width: 200, colKey: 'name', ellipsis: true },
-  { title: t('pages.bizDomain.list.description'), width: 300, colKey: 'description', ellipsis: true },
-  { title: t('pages.bizDomain.list.createTime'), width: 180, colKey: 'createTime' },
-  { title: t('pages.bizDomain.list.updateTime'), width: 180, colKey: 'updateTime' },
-];
-const domainListData = ref<BizDomainModel[]>([]);
-const domainPagination = ref({ pageSize: 10, total: 0, current: 1 });
-const domainLoading = ref(false);
-const selectedDomainKeys = ref<(string | number)[]>([]);
-
-const fetchDomainData = async () => {
-  domainLoading.value = true;
-  try {
-    const { rows, total } = await getBizDomainList({
-      current: domainPagination.value.current,
-      pageSize: domainPagination.value.pageSize,
-      bizFieldId: currentBizFieldId.value,
-    });
-    domainListData.value = rows as any;
-    domainPagination.value = { ...domainPagination.value, total } as any;
-  } finally {
-    domainLoading.value = false;
-  }
-};
-const onDomainPageChange = (pageInfo: PageInfo) => {
-  domainPagination.value.current = pageInfo.current;
-  domainPagination.value.pageSize = pageInfo.pageSize;
-  fetchDomainData();
-};
-const onDomainChange = () => {};
-const onDomainSelectChange = (keys: (string | number)[]) => {
-  selectedDomainKeys.value = keys;
-  addDomainFormData.value.bizDomainId = keys[0] as number;
-};
-
-// 添加领域字段-字段类型选择（表格单选）
-const addTypeListData = ref<BizFieldTypeModel[]>([]);
-const addTypePagination = ref({ pageSize: 10, total: 0, current: 1 });
-const addTypeLoading = ref(false);
-const selectedAddTypeKeys = ref<(string | number)[]>([]);
-// 依据当前字段的类型进行过滤
-const filterBasicFieldType = ref<BasicFieldType | undefined>(undefined);
-const filterCollectionType = ref<CollectionType | undefined>(undefined);
-
-const fetchAddTypeData = async () => {
-  addTypeLoading.value = true;
-  try {
-    const { rows, total } = await getBizFieldTypeList({
-      current: addTypePagination.value.current,
-      pageSize: addTypePagination.value.pageSize,
-      basicFieldType: filterBasicFieldType.value,
-      collectionType: filterCollectionType.value,
-    });
-    addTypeListData.value = rows as BizFieldTypeModel[];
-    addTypePagination.value = { ...addTypePagination.value, total } as any;
-  } finally {
-    addTypeLoading.value = false;
-  }
-};
-
-const onAddTypePageChange = (pageInfo: PageInfo) => {
-  addTypePagination.value.current = pageInfo.current;
-  addTypePagination.value.pageSize = pageInfo.pageSize;
-  fetchAddTypeData();
-};
-const onAddTypeChange = () => {};
-const onAddTypeSelectChange = (keys: (string | number)[]) => {
-  selectedAddTypeKeys.value = keys;
-  addDomainFormData.value.bizFieldTypeId = keys[0] as number;
-};
-
-const addDomainFormRules: Record<string, FormRule[]> = {
-  bizDomainId: [{ required: true, message: t('pages.bizField.addDomain.bizDomainRequired'), type: 'error' }],
-  bizFieldTypeId: [{ required: true, message: t('pages.bizField.create.bizFieldTypeRequired'), type: 'error' }],
-};
-
-function handleClickAddDomainField(ctx: any) {
-  const row = ctx?.row;
-  const bizFieldId = row?.bizField?.id ?? row?.id;
-  const bizFieldTypeId = row?.bizFieldType?.id ?? row?.bizFieldTypeId;
-  const basicFieldType = row?.bizFieldType?.basicFieldType ?? row?.basicFieldType;
-  const collectionType = row?.bizFieldType?.collectionType ?? row?.collectionType;
-  if (!bizFieldId || !bizFieldTypeId) return;
-  currentBizFieldId.value = bizFieldId;
-  addDomainFormData.value = { bizFieldId, bizDomainId: 0, bizFieldTypeId } as any;
-  // 过滤条件：同基础类型且集合类型一致
-  filterBasicFieldType.value = basicFieldType as BasicFieldType | undefined;
-  filterCollectionType.value = collectionType as CollectionType | undefined;
-  selectedDomainKeys.value = [];
-  domainPagination.value = { pageSize: 10, total: 0, current: 1 } as any;
-  addDomainDialogVisible.value = true;
-  fetchDomainData();
-  // 预选字段类型并拉取字段类型列表
-  selectedAddTypeKeys.value = [bizFieldTypeId];
-  addTypePagination.value = { pageSize: 10, total: 0, current: 1 } as any;
-  fetchAddTypeData();
-}
-
-const onAddDomainSubmit = async () => {
-  if (!addDomainFormRef.value) return;
-  const validateResult = await addDomainFormRef.value.validate();
-  if (validateResult === true) {
-    addDomainSubmitLoading.value = true;
-    try {
-      await createBizFieldDomain(addDomainFormData.value);
-      await MessagePlugin.success(t('pages.bizField.addDomain.createSuccess'));
-      addDomainDialogVisible.value = false;
-      await fetchData();
-    } catch (error) {
-      console.error('添加领域字段失败:', error);
-      await MessagePlugin.error(t('pages.bizField.addDomain.createFailed'));
-    } finally {
-      addDomainSubmitLoading.value = false;
-    }
-  }
-};
-
-const onAddDomainCancel = () => {
-  addDomainDialogVisible.value = false;
-};
-
-// 创建表单验证规则
-const createFormRules: Record<string, FormRule[]> = {
-  name: [
-    { required: true, message: t('pages.bizField.create.nameRequired'), type: 'error' },
-    { min: 1, max: 100, message: t('pages.bizField.create.nameLength'), type: 'error' },
-  ],
-  description: [{ max: 255, message: t('pages.bizField.create.descriptionLength'), type: 'error' }],
-  bizFieldTypeId: [{ required: true, message: t('pages.bizField.create.bizFieldTypeRequired'), type: 'error' }],
+// 跳转到创建页面
+const handleCreate = () => {
+  router.push({ name: 'BizFieldCreate' });
 };
 
 const fetchData = async () => {
@@ -548,54 +180,9 @@ const rehandleChange = (changeParams: unknown, triggerAndData: unknown) => {
   console.log('统一Change', changeParams, triggerAndData);
 };
 
-const handleClickDetail = (row: any) => {
-  detailRecord.value = row?.row ?? row;
-  detailDomainPagination.value = { pageSize: 10, total: 0, current: 1 } as any;
-  detailDrawerVisible.value = true;
-  fetchDetailDomainData();
-};
-
-const isObjectType = (row: any) => {
-  const basic = row?.bizFieldType?.basicFieldType ?? row?.basicFieldType;
-  return basic === 'OBJECT';
-};
-
-const handleCreate = () => {
-  createDialogVisible.value = true;
-  createFormData.value = { name: '', description: '', bizFieldTypeId: undefined as unknown as number };
-  selectedTypeKeys.value = [];
-  typePagination.value = { pageSize: 10, total: 0, current: 1 } as any;
-  fetchTypeData();
-};
-
 const handleClickDelete = (row: { rowIndex: any }) => {
   deleteIdx.value = row.rowIndex;
   confirmVisible.value = true;
-};
-
-// 创建表单相关方法
-const onCreateSubmit = async () => {
-  if (!createFormRef.value) return;
-  const validateResult = await createFormRef.value.validate();
-  if (validateResult === true) {
-    createSubmitLoading.value = true;
-    try {
-      await createBizField(createFormData.value);
-      await MessagePlugin.success(t('pages.bizField.create.createSuccess'));
-      createDialogVisible.value = false;
-      await fetchData();
-    } catch (error) {
-      console.error('创建失败:', error);
-      await MessagePlugin.error(t('pages.bizField.create.createFailed'));
-    } finally {
-      createSubmitLoading.value = false;
-    }
-  }
-};
-
-const onCreateCancel = () => {
-  createDialogVisible.value = false;
-  createFormData.value = { name: '', description: '', bizFieldTypeId: undefined as unknown as number };
 };
 
 const headerAffixedTop = computed(
@@ -605,43 +192,6 @@ const headerAffixedTop = computed(
       container: `.${prefix}-layout`,
     }) as any,
 );
-
-// 详情抽屉状态与数据
-const detailDrawerVisible = ref(false);
-const detailRecord = ref<any | null>(null);
-const DETAIL_DOMAIN_COLUMNS: PrimaryTableCol[] = [
-  { title: t('pages.bizField.detail.domainName'), width: 200, colKey: 'bizDomain.name', ellipsis: true },
-  { title: t('pages.bizField.detail.domainDescription'), width: 300, colKey: 'bizDomain.description', ellipsis: true },
-  { title: t('pages.bizField.detail.createTime'), width: 180, colKey: 'createTime' },
-  { title: t('pages.bizField.detail.updateTime'), width: 180, colKey: 'updateTime' },
-];
-const detailDomainList = ref<any[]>([]);
-const detailDomainPagination = ref({ pageSize: 10, total: 0, current: 1 });
-const detailDomainLoading = ref(false);
-
-const fetchDetailDomainData = async () => {
-  if (!detailRecord.value) return;
-  detailDomainLoading.value = true;
-  try {
-    const bizFieldId = (detailRecord.value?.bizField?.id ?? detailRecord.value?.id) as number | undefined;
-    const { rows, total } = await getBizFieldDomainList({
-      current: detailDomainPagination.value.current,
-      pageSize: detailDomainPagination.value.pageSize,
-      bizFieldId,
-      excludeDefaultFieldDomain: true,
-    });
-    detailDomainList.value = rows as any[];
-    detailDomainPagination.value = { ...detailDomainPagination.value, total } as any;
-  } finally {
-    detailDomainLoading.value = false;
-  }
-};
-
-const onDetailDomainPageChange = (pageInfo: PageInfo) => {
-  detailDomainPagination.value.current = pageInfo.current;
-  detailDomainPagination.value.pageSize = pageInfo.pageSize;
-  fetchDetailDomainData();
-};
 </script>
 <style lang="less" scoped>
 .list-card-container {

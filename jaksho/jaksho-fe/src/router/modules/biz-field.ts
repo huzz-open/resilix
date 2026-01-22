@@ -29,6 +29,32 @@ export default [
           },
         },
       },
+      {
+        path: 'create',
+        name: 'BizFieldCreate',
+        component: () => import('@/pages/biz-field/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '新建字段',
+            en_US: 'Create Field',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
+      {
+        path: 'edit/:id',
+        name: 'BizFieldEdit',
+        component: () => import('@/pages/biz-field/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '字段详情',
+            en_US: 'Field Detail',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
     ],
   },
 ];

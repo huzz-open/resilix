@@ -10,6 +10,9 @@ export default {
     createButton: 'Create Dictionary',
     deleteConfirm: 'Are you sure to delete this dictionary? Dictionary items will also be deleted.',
   },
+  edit: {
+    back: 'Back',
+  },
   create: {
     title: 'Create Value Dictionary',
     editTitle: 'Edit Value Dictionary',

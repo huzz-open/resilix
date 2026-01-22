@@ -49,4 +49,20 @@ public interface BizDomainService {
 
     @Mapping(path = "/{id}", method = HttpMethods.DELETE)
     int delete(@Param(value = "id", type = ParamType.PathVariable) Integer id);
+
+    @Mapping(path = "/{id}", method = HttpMethods.GET)
+    BizDomain detail(@Param(value = "id", type = ParamType.PathVariable) Integer id);
+
+    @Mapping(path = "/{id}", method = HttpMethods.PUT)
+    int update(@Param(value = "id", type = ParamType.PathVariable) Integer id, @Param(type = ParamType.Body) UpdateBizDomainRequest request);
+
+    @Getter
+    @Setter
+    class UpdateBizDomainRequest {
+        @Length(min = 1, max = 100)
+        private String name;
+
+        @Length(max = 255)
+        private String description;
+    }
 }

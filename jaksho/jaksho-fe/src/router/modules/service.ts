@@ -29,6 +29,32 @@ export default [
           },
         },
       },
+      {
+        path: 'create',
+        name: 'ServiceCreate',
+        component: () => import('@/pages/service/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '新建服务',
+            en_US: 'Create Service',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
+      {
+        path: 'edit/:id',
+        name: 'ServiceEdit',
+        component: () => import('@/pages/service/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '编辑服务',
+            en_US: 'Edit Service',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
     ],
   },
 ]

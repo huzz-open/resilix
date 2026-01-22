@@ -15,6 +15,7 @@ export default {
     updateTime: '更新时间',
     operation: '操作',
     detail: '详情',
+    edit: '编辑',
     addDomainField: '添加领域字段',
     addDomainDisabledTip: '基础类型为 OBJECT 时不可添加领域字段',
     delete: '删除',
@@ -61,5 +62,10 @@ export default {
     domainDescription: '领域描述',
     createTime: '创建时间',
     updateTime: '更新时间',
+  },
+  edit: {
+    title: '字段详情',
+    back: '返回',
+    fetchFailed: '获取数据失败',
   },
 };

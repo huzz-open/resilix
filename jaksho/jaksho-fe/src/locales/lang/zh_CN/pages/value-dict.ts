@@ -10,6 +10,9 @@ export default {
     createButton: '新建字典',
     deleteConfirm: '确认删除该字典吗？删除后字典项也会一并删除。',
   },
+  edit: {
+    back: '返回',
+  },
   create: {
     title: '新建值字典',
     editTitle: '编辑值字典',

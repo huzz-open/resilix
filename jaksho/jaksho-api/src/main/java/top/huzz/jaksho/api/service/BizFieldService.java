@@ -47,4 +47,7 @@ public interface BizFieldService {
 
     @Mapping(path = "/{id}", method = HttpMethods.DELETE)
     int delete(@Param(value = "id", type = ParamType.PathVariable) Integer id);
+
+    @Mapping(path = "/{id}", method = HttpMethods.GET)
+    CombineResult detail(@Param(value = "id", type = ParamType.PathVariable) Integer id);
 }

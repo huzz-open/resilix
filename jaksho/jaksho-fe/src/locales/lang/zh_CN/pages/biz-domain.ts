@@ -9,6 +9,7 @@ export default {
     updateTime: '更新时间',
     operation: '操作',
     detail: '详情',
+    edit: '编辑',
     delete: '删除',
     confirmDelete: '确认删除当前所选业务领域？',
     deleteSuccess: '删除成功',
@@ -33,5 +34,12 @@ export default {
     createSuccess: '创建成功',
     createFailed: '创建失败，请重试',
     formReset: '表单已重置',
+  },
+  edit: {
+    title: '编辑业务领域',
+    back: '返回',
+    updateSuccess: '更新成功',
+    updateFailed: '更新失败，请重试',
+    fetchFailed: '获取数据失败',
   },
 };

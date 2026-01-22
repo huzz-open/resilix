@@ -3,6 +3,7 @@ export default {
     create: 'Create API',
     selectedCount: '{count} selected',
     detail: 'Detail',
+    edit: 'Edit',
     delete: 'Delete',
     confirmDelete: 'Confirm Delete',
     confirmDeleteBody: 'This action cannot be undone. Delete this API?',
@@ -84,5 +85,11 @@ export default {
       pathRequired: 'Enter API path',
       bodyTypeRequired: 'Select body type',
     },
+  },
+  edit: {
+    back: 'Back',
+    createSuccess: 'Created successfully',
+    updateSuccess: 'Updated successfully',
+    fetchFailed: 'Failed to fetch data',
   },
 };

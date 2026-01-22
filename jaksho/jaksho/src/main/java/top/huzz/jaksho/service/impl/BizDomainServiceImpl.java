@@ -1,10 +1,12 @@
 package top.huzz.jaksho.service.impl;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.dubbo.config.annotation.DubboService;
 import jakarta.annotation.Resource;
 import org.springframework.transaction.annotation.Transactional;
 import top.huzz.jaksho.api.context.CreateRunContext;
+import top.huzz.jaksho.api.helper.QueryHelper;
 import top.huzz.jaksho.api.phase.CreatePhase;
 import top.huzz.jaksho.api.service.BizDomainService;
 import top.huzz.jaksho.common.entity.BasicProperties;
@@ -60,5 +62,38 @@ public class BizDomainServiceImpl implements BizDomainService {
     @Override
     public int delete(Integer id) {
         return bizDomainMapper.deleteById(id);
+    }
+
+    @Override
+    public BizDomain detail(Integer id) {
+        return bizDomainMapper.selectById(id);
+    }
+
+    @Override
+    @Transactional
+    public int update(Integer id, BizDomainService.UpdateBizDomainRequest request) {
+        int workspaceId = Session.currentWorkspaceId();
+        
+        // 检查业务领域是否存在
+        BizDomain bizDomain = bizDomainMapper.selectById(id);
+        if (bizDomain == null || !bizDomain.getWorkspaceId().equals(workspaceId)) {
+            throw new RuntimeException("业务领域不存在");
+        }
+        
+        // 检查名称唯一性（排除当前记录）
+        if (StringUtils.isNotBlank(request.getName())) {
+            List<BizDomain> existingDomains = QueryHelper.lambdaQuery(BizDomainMapper.class, wp -> wp.eq(BizDomain::getWorkspaceId, workspaceId)
+              .eq(BizDomain::getName, request.getName())
+              .ne(BizDomain::getId, id));
+            if (!existingDomains.isEmpty()) {
+                throw new RuntimeException("业务领域名称已存在");
+            }
+        }
+        
+        // 更新字段
+        bizDomain.setName(request.getName());
+        bizDomain.setDescription(request.getDescription());
+        
+        return bizDomainMapper.updateById(bizDomain);
     }
 }

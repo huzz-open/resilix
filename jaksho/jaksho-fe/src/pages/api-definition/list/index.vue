@@ -3,7 +3,7 @@
     <t-card class="list-card-container" :bordered="false">
       <t-row justify="space-between">
         <div class="left-operation-container">
-          <t-button theme="primary" @click="openDrawerForCreate">{{ t('pages.apiDefinition.list.create') }}</t-button>
+          <t-button theme="primary" @click="handleCreate">{{ t('pages.apiDefinition.list.create') }}</t-button>
           <p v-if="!!selectedRowKeys.length" class="selected-count">
             {{ t('pages.apiDefinition.list.selectedCount', { count: selectedRowKeys.length }) }}
           </p>
@@ -24,8 +24,8 @@
       >
         <template #op="slotProps">
           <t-space>
-            <t-link theme="primary" @click="openDrawerForDetail(slotProps.row)"
-              >{{ t('pages.apiDefinition.list.detail') }}
+            <t-link theme="primary" @click="goToDetail(slotProps.row.id)"
+              >{{ t('pages.apiDefinition.list.edit') }}
             </t-link>
             <t-link theme="danger" @click="confirmDelete(slotProps.row)"
               >{{ t('pages.apiDefinition.list.delete') }}
@@ -41,48 +41,21 @@
       :body="confirmBody"
       @confirm="onConfirmDelete"
     />
-
-    <!-- 创建：改用对话框；详情仍保留抽屉 -->
-    <t-dialog
-      v-model:visible="createDialogVisible"
-      :header="t('pages.apiDefinition.drawer.titleCreate')"
-      width="70%"
-      :footer="false"
-    >
-      <api-definition-drawer
-        v-if="createDialogVisible"
-        mode="create"
-        :value="null"
-        @success="onCreateSuccess"
-        @close="createDialogVisible = false"
-      />
-    </t-dialog>
-
-    <t-drawer v-model:visible="detailDrawerVisible" placement="right" size="70%" :footer="false">
-      <template #header>
-        <span>{{ t('pages.apiDefinition.drawer.titleDetail') }}</span>
-      </template>
-      <api-definition-drawer
-        v-if="detailDrawerVisible"
-        mode="detail"
-        :value="detailRecord"
-        @success="onDrawerSuccess"
-        @close="detailDrawerVisible = false"
-      />
-    </t-drawer>
   </div>
 </template>
 <script setup lang="ts">
 import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import { deleteApiDefinition, getApiDefinitionList } from '@/api/apiDefinition';
 import type { ApiDefinitionModel } from '@/api/model/apiDefinitionModel';
 import { prefix } from '@/config/global';
 import { t } from '@/locales';
-import ApiDefinitionDrawer from '@/pages/api-definition/components/ApiDefinitionDrawer.vue';
 import { useSettingStore } from '@/store';
+
+const router = useRouter();
 
 defineOptions({ name: 'ApiDefinitionList' });
 
@@ -161,27 +134,16 @@ async function onConfirmDelete() {
   }
 }
 
-const createDialogVisible = ref(false);
-const detailDrawerVisible = ref(false);
-const detailRecord = ref<ApiDefinitionModel | null>(null);
-
-function openDrawerForCreate() {
-  createDialogVisible.value = true;
+// 跳转到详情页面
+function goToDetail(id?: number) {
+  if (id) {
+    router.push({ name: 'ApiDefinitionEdit', params: { id } });
+  }
 }
 
-function openDrawerForDetail(row: ApiDefinitionModel) {
-  detailRecord.value = row;
-  detailDrawerVisible.value = true;
-}
-
-async function onCreateSuccess() {
-  createDialogVisible.value = false;
-  await fetchData();
-}
-
-async function onDrawerSuccess() {
-  detailDrawerVisible.value = false;
-  await fetchData();
+// 跳转到创建页面
+function handleCreate() {
+  router.push({ name: 'ApiDefinitionCreate' });
 }
 </script>
 <style lang="less" scoped>
@@ -203,15 +165,5 @@ async function onDrawerSuccess() {
     margin-left: var(--td-comp-margin-l);
     color: var(--td-text-color-secondary);
   }
-}
-</style>
-<style lang="less" scoped>
-/* 全局作用于 TDesign Dialog：隐藏横向滚动条（部分内容含栅格负边距会溢出） */
-
-/* 使用 :deep 以在 Teleport 到 body 的对话框中生效 */
-:deep(.t-dialog),
-:deep(.t-dialog__content),
-:deep(.t-dialog__body) {
-  overflow-x: hidden;
 }
 </style>

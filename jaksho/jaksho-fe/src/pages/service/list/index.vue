@@ -53,7 +53,7 @@
         </template>
         <template #op="slotProps">
           <t-space>
-            <t-link theme="primary" @click="handleClickEdit(slotProps)">编辑</t-link>
+            <t-link theme="primary" @click="goToEdit(slotProps.row.id)">编辑</t-link>
             <t-link theme="danger" @click="handleClickDelete(slotProps)">删除</t-link>
           </t-space>
         </template>
@@ -64,89 +64,23 @@
       v-model:visible="confirmVisible"
       header="确认删除"
       :body="confirmBody"
-      :on-cancel="onCancel"
+      :on-cancel="onCancelDeleteConfirm"
       @confirm="onConfirmDelete"
     />
-
-    <!-- 创建/编辑服务对话框 -->
-    <t-dialog
-      v-model:visible="dialogVisible"
-      :header="dialogMode === 'create' ? '新建服务' : '编辑服务'"
-      width="600px"
-      :footer="false"
-    >
-      <t-form
-        ref="formRef"
-        :data="formData"
-        :rules="formRules"
-        label-align="top"
-        label-width="120"
-        @submit="onSubmit"
-      >
-        <t-form-item label="服务码" name="serviceCode">
-          <t-input-number
-            v-model="formData.serviceCode"
-            :min="serviceCodeMinValue"
-            :max="serviceCodeMaxValue"
-            placeholder="请输入服务码"
-            theme="normal"
-            :disabled="dialogMode === 'edit'"
-          />
-          <template #tips>
-            <span v-if="dialogMode === 'edit'">服务码不可编辑</span>
-            <span v-else>服务码范围：{{ serviceCodeMinValue }} - {{ serviceCodeMaxValue }}（{{ serviceCodeLength }} 位数字）</span>
-          </template>
-        </t-form-item>
-        <t-form-item label="服务名称" name="name">
-          <t-input
-            v-model="formData.name"
-            placeholder="请输入服务名称"
-            :maxlength="100"
-            show-word-limit
-          />
-        </t-form-item>
-        <t-form-item label="服务描述" name="description">
-          <t-textarea
-            v-model="formData.description"
-            :height="120"
-            placeholder="请输入服务描述"
-            :maxlength="255"
-            show-word-limit
-          />
-        </t-form-item>
-        <t-form-item label="备注" name="remark">
-          <t-textarea
-            v-model="formData.remark"
-            :height="80"
-            placeholder="请输入备注"
-            :maxlength="255"
-            show-word-limit
-          />
-        </t-form-item>
-        <div class="dialog-footer">
-          <t-space>
-            <t-button theme="default" @click="onCancel">取消</t-button>
-            <t-button theme="primary" type="submit" :loading="submitLoading">提交</t-button>
-          </t-space>
-        </div>
-      </t-form>
-    </t-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
 import { SearchIcon } from 'tdesign-icons-vue-next'
-import type { FormInstanceFunctions, PageInfo, PrimaryTableCol } from 'tdesign-vue-next'
+import type { PageInfo, PrimaryTableCol } from 'tdesign-vue-next'
 import { computed, onMounted, ref } from 'vue'
 import { MessagePlugin } from 'tdesign-vue-next'
+import { useRouter } from 'vue-router'
 
-import { getServiceList, createService, deleteService, getServiceDetail, updateService } from '@/api/service'
+import { getServiceList, deleteService } from '@/api/service'
 import type { ServiceModel } from '@/api/model/serviceModel'
 
-// 从配置中获取服务码配置（可通过API获取，这里先硬编码）
-const serviceCodeLength = ref(4)
-const serviceCodeMinValue = ref(1000)
-const serviceCodeMaxValue = ref(9999)
+const router = useRouter()
 
 const COLUMNS: PrimaryTableCol<ServiceModel>[] = [
   { colKey: 'row-select', type: 'multiple', width: 50, fixed: 'left' },
@@ -278,115 +212,23 @@ const onConfirmDelete = async () => {
   }
 }
 
-const onCancel = () => {
+const onCancelDeleteConfirm = () => {
   confirmVisible.value = false
   deleteIdx.value = -1
 }
 
-// 创建/编辑对话框
-const dialogVisible = ref(false)
-const dialogMode = ref<'create' | 'edit'>('create')
-const editingId = ref<number>()
-const formRef = ref<FormInstanceFunctions>()
-const formData = ref<{
-  serviceCode: number | undefined
-  name: string
-  description: string
-  remark: string
-}>({
-  serviceCode: undefined,
-  name: '',
-  description: '',
-  remark: '',
-})
-const submitLoading = ref(false)
-
-// 动态表单验证规则
-const formRules = computed(() => ({
-  serviceCode: dialogMode.value === 'create' ? [
-    { required: true, message: '请输入服务码', type: 'error' as const },
-    {
-      validator: (val: number) => {
-        return val >= serviceCodeMinValue.value && val <= serviceCodeMaxValue.value
-      },
-      message: `服务码必须在 ${serviceCodeMinValue.value} - ${serviceCodeMaxValue.value} 之间`,
-      type: 'error' as const,
-    },
-  ] : [],
-  name: [
-    { required: true, message: '请输入服务名称', type: 'error' as const },
-    { max: 100, message: '服务名称最多100个字符', type: 'warning' as const },
-  ],
-  description: [{ max: 255, message: '服务描述最多255个字符', type: 'warning' as const }],
-  remark: [{ max: 255, message: '备注最多255个字符', type: 'warning' as const }],
-}))
+// 跳转到编辑页面
+const goToEdit = (id?: number) => {
+  if (id) {
+    router.push({ name: 'ServiceEdit', params: { id } })
+  } else {
+    router.push({ name: 'ServiceCreate' })
+  }
+}
 
 // 创建
 const handleCreate = () => {
-  dialogMode.value = 'create'
-  dialogVisible.value = true
-  formData.value = {
-    serviceCode: undefined,
-    name: '',
-    description: '',
-    remark: '',
-  }
-}
-
-// 编辑
-const handleClickEdit = async (slotProps: { row: ServiceModel }) => {
-  dialogMode.value = 'edit'
-  editingId.value = slotProps.row.id
-
-  try {
-    const detail = await getServiceDetail(slotProps.row.id!)
-    formData.value = {
-      serviceCode: detail.serviceCode,
-      name: detail.name,
-      description: detail.description || '',
-      remark: detail.remark || '',
-    }
-    dialogVisible.value = true
-  } catch (error) {
-    console.error('获取服务详情失败:', error)
-    MessagePlugin.error('获取服务详情失败')
-  }
-}
-
-// 提交（创建或编辑）
-const onSubmit = async ({ validateResult }: { validateResult: boolean }) => {
-  if (!validateResult) return
-
-  submitLoading.value = true
-  try {
-    if (dialogMode.value === 'create') {
-      if (formData.value.serviceCode === undefined) {
-        MessagePlugin.warning('请输入服务码')
-        return
-      }
-      await createService({
-        serviceCode: formData.value.serviceCode,
-        name: formData.value.name,
-        description: formData.value.description,
-        remark: formData.value.remark,
-      })
-      MessagePlugin.success('创建成功')
-    } else {
-      await updateService(editingId.value!, {
-        name: formData.value.name,
-        description: formData.value.description,
-        remark: formData.value.remark,
-      })
-      MessagePlugin.success('更新成功')
-    }
-    dialogVisible.value = false
-    fetchData()
-  } catch (error) {
-    console.error('操作失败:', error)
-    MessagePlugin.error(dialogMode.value === 'create' ? '创建失败' : '更新失败')
-  } finally {
-    submitLoading.value = false
-  }
+  goToEdit()
 }
 
 onMounted(() => {
@@ -417,12 +259,6 @@ onMounted(() => {
 
 .search-input {
   margin-bottom: 24px;
-}
-
-.dialog-footer {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 24px;
 }
 </style>
 

@@ -15,6 +15,7 @@ export default {
     updateTime: 'Update Time',
     operation: 'Operation',
     detail: 'Detail',
+    edit: 'Edit',
     addDomainField: 'Add Domain Field',
     addDomainDisabledTip: 'Cannot add domain field when basic type is OBJECT',
     delete: 'Delete',
@@ -44,6 +45,15 @@ export default {
     createSuccess: 'Created successfully',
     createFailed: 'Create failed, please retry',
   },
+  addDomain: {
+    title: 'Add Domain for Field',
+    bizDomainId: 'Select Domain',
+    bizDomainRequired: 'Please select domain',
+    submit: 'Confirm',
+    cancel: 'Cancel',
+    createSuccess: 'Added successfully',
+    createFailed: 'Add failed, please retry',
+  },
   detail: {
     title: 'Field Detail',
     basicInfo: 'Basic Info',
@@ -52,5 +62,10 @@ export default {
     domainDescription: 'Domain Description',
     createTime: 'Create Time',
     updateTime: 'Update Time',
+  },
+  edit: {
+    title: 'Field Detail',
+    back: 'Back',
+    fetchFailed: 'Failed to fetch data',
   },
 };

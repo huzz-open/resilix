@@ -29,6 +29,32 @@ export default [
           },
         },
       },
+      {
+        path: 'create',
+        name: 'BizFieldTypeCreate',
+        component: () => import('@/pages/biz-field-type/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '新建字段类型',
+            en_US: 'Create Field Type',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
+      {
+        path: 'edit/:id',
+        name: 'BizFieldTypeEdit',
+        component: () => import('@/pages/biz-field-type/edit/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '编辑字段类型',
+            en_US: 'Edit Field Type',
+          },
+          keepAlive: false,
+          hidden: true,
+        },
+      },
     ],
   },
 ];

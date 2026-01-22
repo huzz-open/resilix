@@ -3,7 +3,7 @@
     <t-card class="list-card-container" :bordered="false">
       <t-row justify="space-between">
         <div class="left-operation-container">
-          <t-button @click="handleCreate">{{ t('pages.bizFieldType.list.create') }}</t-button>
+          <t-button @click="goToCreate">{{ t('pages.bizFieldType.list.create') }}</t-button>
           <p v-if="!!selectedRowKeys.length" class="selected-count">
             {{ t('pages.bizFieldType.list.selectedCount', { count: selectedRowKeys.length }) }}
           </p>
@@ -32,9 +32,7 @@
       >
         <template #op="slotProps">
           <t-space>
-            <t-link theme="primary" @click="handleClickDetail(slotProps)"
-              >{{ t('pages.bizFieldType.list.detail') }}
-            </t-link>
+            <t-link theme="primary" @click="goToEdit(slotProps.row.id)">编辑</t-link>
             <t-link theme="danger" @click="handleClickDelete(slotProps)"
               >{{ t('pages.bizFieldType.list.delete') }}
             </t-link>
@@ -149,6 +147,7 @@
         <t-form-item v-if="createFormData.basicFieldType === 'OBJECT'" name="objectBizFieldTypeRefDTOList">
           <j-tree-data
             ref="jTreeRef"
+            v-model:tree-dto-list="createFormData.objectBizFieldTypeRefDTOList"
             :fetch-page="fetchBizFieldDomainPage"
             :columns="objectRefColumns"
             row-key="bizFieldDomain.id"
@@ -289,6 +288,7 @@ import { SearchIcon } from 'tdesign-icons-vue-next';
 import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
+import { useRouter } from 'vue-router';
 
 import {
   createBizFieldType,
@@ -306,6 +306,8 @@ import { prefix } from '@/config/global';
 import { t } from '@/locales';
 import { useSettingStore } from '@/store';
 import { request } from '@/utils/request';
+
+const router = useRouter();
 
 defineOptions({
   name: 'BizFieldTypeList',
@@ -563,18 +565,14 @@ const handleClickDetail = async (row: any) => {
   }
 };
 
-const handleCreate = () => {
-  createDialogVisible.value = true;
-  createFormData.value = {
-    name: '',
-    description: '',
-    minimum: undefined,
-    maximum: undefined,
-    collectionType: 'NONE',
-    basicFieldType: 'STRING',
-    objectBizFieldTypeRefDTOList: [],
-    valueDictId: undefined,
-  };
+// 路由跳转到创建页面
+const goToCreate = () => {
+  router.push({ name: 'BizFieldTypeCreate' });
+};
+
+// 路由跳转到编辑页面
+const goToEdit = (id: number) => {
+  router.push({ name: 'BizFieldTypeEdit', params: { id } });
 };
 
 const handleClickDelete = (row: { rowIndex: any }) => {

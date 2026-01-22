@@ -528,7 +528,9 @@ function buildTreeDTOList() {
 
   const dfs = (nodes: any[], parentUlid: string) => {
     nodes.forEach((n: any, idx: number) => {
+      // 保留原始数据的所有字段，然后更新树结构相关的字段
       const item = {
+        ...(n.data || {}),  // 保留原始数据（包含 bizFieldDomain, bizFieldType, bizField 等）
         ulid: n.value,
         parentUlid,
         sortOrder: idx,
@@ -578,14 +580,22 @@ function setTreeDTOList(list: Array<Record<string, any>>) {
 
 defineExpose({ getTreeDTOList: buildTreeDTOList });
 
+// 内部更新标志，防止拖动时的循环更新
+let isInternalUpdate = false;
+
 function emitCurrentDTOList() {
   try {
     void nextTick(() => {
+      isInternalUpdate = true;
       const dto = buildTreeDTOList();
       emit('update:treeDtoList', dto);
+      nextTick(() => {
+        isInternalUpdate = false;
+      });
     });
   } catch {
     // ignore
+    isInternalUpdate = false;
   }
 }
 
@@ -593,6 +603,8 @@ function emitCurrentDTOList() {
 watch(
   () => props.treeDtoList,
   (val) => {
+    // 如果是内部更新触发的 watch，则跳过，避免重新渲染
+    if (isInternalUpdate) return;
     if (Array.isArray(val)) setTreeDTOList(val as Array<Record<string, any>>);
   },
   { immediate: true },

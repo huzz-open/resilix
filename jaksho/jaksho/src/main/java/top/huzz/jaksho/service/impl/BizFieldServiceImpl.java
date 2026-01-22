@@ -71,4 +71,16 @@ public class BizFieldServiceImpl implements BizFieldService {
     public int delete(Integer id) {
         return bizFieldMapper.deleteById(id);
     }
+
+    @Override
+    public CombineResult detail(Integer id) {
+        int workspaceId = Session.currentWorkspaceId();
+        String sql = """
+                SELECT bf.*, bft.* FROM sr_biz_field bf
+                INNER JOIN sr_biz_field_type bft ON bf.biz_field_type_id = bft.id and bf.workspace_id = bft.workspace_id
+                WHERE bf.id = #{p.id} AND bf.workspace_id = #{p.workspaceId}
+                """;
+        List<CombineResult> rows = QueryHelper.query(sql, Map.of("id", id, "workspaceId", workspaceId));
+        return rows.isEmpty() ? null : rows.get(0);
+    }
 }
