@@ -7,7 +7,7 @@ export default [
   {
     path: '/dashboard',
     component: Layout,
-    redirect: '/standard-resource/field-type',
+    redirect: '/dashboard/base',
     name: 'dashboard',
     meta: {
       title: {
@@ -16,7 +16,20 @@ export default [
       },
       icon: shallowRef(DashboardIcon),
       orderNo: 0,
+      single: true,
     },
-    children: [],
+    children: [
+      {
+        path: 'base',
+        name: 'DashboardBase',
+        component: () => import('@/pages/dashboard/base/index.vue'),
+        meta: {
+          title: {
+            zh_CN: '概览',
+            en_US: 'Overview',
+          },
+        },
+      },
+    ],
   },
 ];
