@@ -7,7 +7,7 @@ export default [
   {
     path: '/dashboard',
     component: Layout,
-    redirect: '/api-definition/list',
+    redirect: '/standard-resource/field-type',
     name: 'dashboard',
     meta: {
       title: {
