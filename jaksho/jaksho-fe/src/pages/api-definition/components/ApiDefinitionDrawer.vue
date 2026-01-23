@@ -108,6 +108,10 @@
           </div>
           <t-alert v-else theme="info" message="请先创建接口后再关联业务码" style="margin-top: 16px;" />
         </t-tab-panel>
+        
+        <t-tab-panel label="响应配置" value="response">
+          <api-output-config v-model="responseFields" :workspace-id="form.workspaceId" />
+        </t-tab-panel>
       </t-tabs>
 
       <!-- 路径字段选择对话框：在路径输入包含"{"时弹出 -->
@@ -167,6 +171,7 @@ import JKvpTable from '@/components/j-kvp-table/index.vue';
 import JTreeData from '@/components/j-tree-data/index.vue';
 import { t } from '@/locales';
 import { request } from '@/utils/request';
+import ApiOutputConfig from './ApiOutputConfig.vue';
 
 // 详情模式：仅做初始回填（当前后端无详情接口，暂按传入行填充基本信息）
 const props = defineProps<{ mode: 'create' | 'detail'; value: ApiDefinitionModel | null }>();
@@ -175,8 +180,8 @@ const METHODS: HttpMethod[] = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'TRACE', 
 const BODY_TYPES: BodyType[] = ['NONE', 'FORM_DATA', 'FORM_URLENCODED', 'RAW_JSON', 'RAW_TEXT', 'BINARY'];
 
 const formRef = ref<FormInstanceFunctions>();
-// 类别页签：路径参数 / 请求参数 / 请求体 / 业务码
-const activeCategory = ref<'path' | 'params' | 'body' | 'bizCode'>('params');
+// 类别页签：路径参数 / 请求参数 / 请求体 / 业务码 / 响应配置
+const activeCategory = ref<'path' | 'params' | 'body' | 'bizCode' | 'response'>('params');
 const form = ref<CreateApiDefinitionRequest>({
   name: '',
   path: '',
@@ -186,6 +191,9 @@ const form = ref<CreateApiDefinitionRequest>({
   remark: '',
   apiDefinitionFieldDTOList: [],
 });
+
+// 响应字段配置
+const responseFields = ref<any[]>([]);
 
 // KVP 列表（form-data/x-www-form-urlencoded）
 interface KVPRow {
@@ -327,6 +335,20 @@ function buildFieldsByBodyType(): ApiDefinitionFieldDTO[] {
       });
     });
   }
+  
+  // 响应字段：RESPONSE_OK 类型
+  if (responseFields.value && responseFields.value.length > 0) {
+    (responseFields.value as any[]).forEach((x, idx) => {
+      list.push({
+        fieldType: 'RESPONSE_OK',
+        ulid: x.ulid,
+        parentUlid: x.parentUlid ?? null,
+        sortOrder: x.sortOrder ?? idx,
+        bizFieldDomainId: x.bizFieldDomainId,
+      });
+    });
+  }
+  
   return list;
 }
 
@@ -463,6 +485,30 @@ watch(
             minimum: f.bizFieldType?.minimum ?? null,
             maximum: f.bizFieldType?.maximum ?? null,
           }));
+          
+          // RESPONSE_OK → 响应字段树 DTO（包含完整对象结构）
+          const responseOk = sorted.filter((x) => x.api?.fieldType === 'RESPONSE_OK');
+          console.log('回显响应字段 - 过滤后的数据:', responseOk);
+          responseFields.value = responseOk.map((f) => ({
+            ulid: f.api.ulid,
+            parentUlid: f.api.parentUlid || null,
+            sortOrder: f.api.sortOrder ?? 0,
+            bizFieldDomainId: f.api.bizFieldDomainId,
+            // 保留完整对象以供列渲染使用
+            bizField: f.bizField || {},
+            bizFieldType: f.bizFieldType || {},
+            bizDomain: f.bizDomain || {},
+            bizFieldDomain: {
+              id: f.api.bizFieldDomainId,
+            },
+            // 扁平化字段（用于兼容）
+            name: f.bizField?.name ?? '',
+            basicFieldType: f.bizFieldType?.basicFieldType ?? '',
+            collectionType: f.bizFieldType?.collectionType ?? '',
+            minimum: f.bizFieldType?.minimum ?? null,
+            maximum: f.bizFieldType?.maximum ?? null,
+          }));
+          console.log('回显响应字段 - 映射后的 responseFields:', responseFields.value);
           form.value.bodyType = (data?.bodyType as BodyType) || 'RAW_JSON';
           activeCategory.value = 'body';
         } finally {

@@ -16,11 +16,12 @@
         <result column="workspace_id" property="workspaceId"  />
         <result column="create_time" property="createTime"  />
         <result column="update_time" property="updateTime"  />
+        <result column="slot_mappings" property="slotMappings"  />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, api_id, ulid, parent_ulid, sort_order, field_type, biz_field_domain_id, is_required, description, workspace_id, create_time, update_time
+        id, api_id, ulid, parent_ulid, sort_order, field_type, biz_field_domain_id, is_required, description, workspace_id, create_time, update_time, slot_mappings
     </sql>
 
 </mapper>

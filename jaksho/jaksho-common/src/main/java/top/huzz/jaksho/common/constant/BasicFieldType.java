@@ -18,5 +18,6 @@ public enum BasicFieldType {
     STRING,
     OBJECT,
     FILE,
+    SLOT,  // 插槽类型，可作为字段占位符
     ;
 }

@@ -77,6 +77,12 @@ public class BizFieldDomain extends BasicProperties implements Serializable {
     @TableField(value = "workspace_id", fill = FieldFill.INSERT)
     private Integer workspaceId;
 
+    /**
+     * 字段属性（位标识）：1=输入 2=输出 3=输入输出均可
+     */
+    @TableField("field_attributes")
+    private Integer fieldAttributes;
+
     @Override
     @SuppressWarnings("all")
     public Map<String, Object> properties() {
@@ -88,6 +94,7 @@ public class BizFieldDomain extends BasicProperties implements Serializable {
         props.put("createTime", createTime);
         props.put("updateTime", updateTime);
         props.put("workspaceId", workspaceId);
+        props.put("fieldAttributes", fieldAttributes);
         return props;
     }
 }

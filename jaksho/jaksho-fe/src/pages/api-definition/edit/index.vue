@@ -20,10 +20,9 @@
 
 <script setup lang="ts">
 import { MessagePlugin } from 'tdesign-vue-next';
-import { computed, onMounted, ref } from 'vue';
+import { computed } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 
-import { getApiDefinitionDetail } from '@/api/apiDefinition';
 import { t } from '@/locales';
 import { useTabsRouterStore } from '@/store';
 
@@ -36,19 +35,10 @@ const tabsRouterStore = useTabsRouterStore();
 const isEdit = computed(() => !!route.params.id);
 const editingId = computed(() => (route.params.id ? Number(route.params.id) : undefined));
 
-const detailRecord = ref<any | null>(null);
-
-// 加载详情（编辑模式）
-const loadDetail = async () => {
-  if (!editingId.value) return;
-
-  try {
-    detailRecord.value = await getApiDefinitionDetail(editingId.value);
-  } catch (error) {
-    console.error('获取API定义详情失败:', error);
-    MessagePlugin.error(t('pages.apiDefinition.edit.fetchFailed'));
-  }
-};
+// 传递给子组件的数据：子组件的watch会根据id自动加载详情，避免重复调用接口
+const detailRecord = computed(() => {
+  return editingId.value ? { id: editingId.value } : null;
+});
 
 // 成功回调
 const onSuccess = () => {
@@ -68,11 +58,7 @@ const handleBack = () => {
   router.push({ name: 'ApiDefinitionList' });
 };
 
-onMounted(() => {
-  if (isEdit.value) {
-    loadDetail();
-  }
-});
+// 不需要在onMounted中加载详情，子组件ApiDefinitionDrawer的watch会自动加载
 </script>
 
 <style lang="less" scoped>

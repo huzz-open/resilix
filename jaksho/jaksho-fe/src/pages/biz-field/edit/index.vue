@@ -50,6 +50,16 @@
             @select-change="onTypeSelectChange"
           />
         </t-form-item>
+
+        <t-form-item label="字段属性" name="fieldAttributes">
+          <t-checkbox-group v-model="fieldAttributesCheckbox" @change="onFieldAttributesChange">
+            <t-checkbox :value="1">可作为输入（请求参数）</t-checkbox>
+            <t-checkbox :value="2">可作为输出（响应数据）</t-checkbox>
+          </t-checkbox-group>
+          <div style="margin-top: 8px; color: var(--td-text-color-placeholder); font-size: 12px;">
+            用于区分字段的使用场景，便于在接口定义时自动过滤。默认推荐同时勾选输入和输出
+          </div>
+        </t-form-item>
         
         <!-- 详情展示区域（仅在编辑模式下显示）-->
         <template v-if="isEdit">
@@ -151,6 +161,7 @@ import type { CreateBizFieldDomainRequest } from '@/api/model/bizFieldDomainMode
 import type { BasicFieldType, BizFieldTypeModel, CollectionType } from '@/api/model/bizFieldTypeModel';
 import { t } from '@/locales';
 import { useTabsRouterStore } from '@/store';
+import { FieldAttribute } from '@/utils/fieldAttribute';
 
 const route = useRoute();
 const router = useRouter();
@@ -164,7 +175,24 @@ const formData = ref<CreateBizFieldRequest>({
   name: '',
   description: '',
   bizFieldTypeId: undefined as unknown as number,
+  fieldAttributes: 3, // 默认值：输入输出均可
 });
+
+// 字段属性复选框状态（位运算：1=输入, 2=输出）
+const fieldAttributesCheckbox = ref<number[]>(FieldAttribute.toCheckboxArray(FieldAttribute.DEFAULT));
+
+// 字段属性复选框变化处理
+const onFieldAttributesChange = (value: number[]) => {
+  if (value.length === 0) {
+    // 如果都不选，恢复默认值
+    formData.value.fieldAttributes = FieldAttribute.DEFAULT;
+    fieldAttributesCheckbox.value = FieldAttribute.toCheckboxArray(FieldAttribute.DEFAULT);
+    MessagePlugin.warning('至少需要选择一个字段属性，已恢复为默认值');
+  } else {
+    // 使用工具类进行位运算
+    formData.value.fieldAttributes = FieldAttribute.fromCheckboxArray(value);
+  }
+};
 
 const submitLoading = ref(false);
 
@@ -426,7 +454,13 @@ const loadDetail = async () => {
       name: bizFieldData.name,
       description: bizFieldData.description || '',
       bizFieldTypeId: bizFieldData.bizFieldTypeId,
+      fieldAttributes: bizFieldData.fieldAttributes || 3, // 如果没有值则默认为3
     };
+    
+    // 根据 fieldAttributes 值设置复选框状态（使用工具类）
+    fieldAttributesCheckbox.value = FieldAttribute.toCheckboxArray(
+      bizFieldData.fieldAttributes || FieldAttribute.DEFAULT,
+    );
     
     // 预选字段类型
     if (bizFieldTypeData?.id) {

@@ -4,11 +4,13 @@ CREATE TABLE IF NOT EXISTS `sr_biz_field`
     `name`              varchar(100)                   NOT NULL COMMENT '业务字段名称',
     `description`       varchar(255) DEFAULT ''        NOT NULL COMMENT '业务字段描述',
     `biz_field_type_id` int(11)                        NOT NULL COMMENT '业务字段的业务字段类型id（sr_biz_field_type数据库主键id）',
+    `field_attributes`  int(11)      DEFAULT 3         NOT NULL COMMENT '字段属性（位标识）：1=输入 2=输出 3=输入输出均可',
     `create_time`       datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`       datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
     `workspace_id`      int(11)                        NOT NULL COMMENT '工作空间ID',
     PRIMARY KEY (`id`),
-    UNIQUE uk_biz_field_name (`workspace_id`, `name`)
+    UNIQUE uk_biz_field_name (`workspace_id`, `name`),
+    INDEX idx_field_attributes (`field_attributes`)
 ) COMMENT '业务字段';
 
 CREATE TABLE IF NOT EXISTS `sr_biz_domain`
@@ -29,11 +31,13 @@ CREATE TABLE IF NOT EXISTS `sr_biz_field_domain`
     `biz_field_id`      int(11)                    NOT NULL COMMENT '业务字段id（sr_biz_field数据库主键id）',
     `biz_domain_id`     int(11)                    NOT NULL COMMENT '业务领域id（sr_biz_domain数据库主键id）',
     `biz_field_type_id` int(11)                    NOT NULL COMMENT '业务字段类型id（sr_biz_field_type数据库主键id）。业务领域字段可以拥有新的业务字段类型',
+    `field_attributes`  int(11) DEFAULT 3          NOT NULL COMMENT '字段属性（位标识）：1=输入 2=输出 3=输入输出均可',
     `create_time`       datetime DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`       datetime DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
     `workspace_id`      int(11)                    NOT NULL COMMENT '工作空间ID',
     PRIMARY KEY (`id`),
-    UNIQUE uk_biz_field_domain (`workspace_id`, `biz_field_id`, `biz_domain_id`, `biz_field_type_id`)
+    UNIQUE uk_biz_field_domain (`workspace_id`, `biz_field_id`, `biz_domain_id`, `biz_field_type_id`),
+    INDEX idx_field_attributes (`field_attributes`)
 ) COMMENT '业务字段领域';
 
 CREATE TABLE IF NOT EXISTS `sr_value_dict`
@@ -136,8 +140,9 @@ CREATE TABLE IF NOT EXISTS sr_api_definition_field
     `biz_field_domain_id` int(11)                        NOT NULL COMMENT '标准字段ID，引用sr_biz_field_domain.id',
     `is_required`         boolean      DEFAULT 0         NOT NULL COMMENT '是否必填：0-否，1-是',
     `description`         varchar(255) DEFAULT ''        NOT NULL COMMENT '字段说明',
+    `slot_mappings`       TEXT                           NULL COMMENT '插槽映射配置（JSON格式），格式：{"slotFieldName":targetFieldDomainId}',
     `workspace_id`        int(11)                        NOT NULL COMMENT '工作空间ID',
-    `create_time`         datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',44
+    `create_time`         datetime     DEFAULT CURTIME() NOT NULL COMMENT '创建时间',
     `update_time`         datetime     DEFAULT CURTIME() NOT NULL COMMENT '更新时间',
 
     PRIMARY KEY (`id`)
@@ -195,3 +200,10 @@ CREATE TABLE IF NOT EXISTS `sr_api_biz_code`
     INDEX `idx_biz_code_id` (`biz_code_id`),
     INDEX `idx_workspace_id` (`workspace_id`)
 ) COMMENT '接口业务码关联表';
+
+-- ========================================
+-- 预置数据：插槽领域
+-- ========================================
+INSERT INTO sr_biz_domain (id, name, description, workspace_id)
+VALUES (-2, 'SLOT', '插槽领域：用于定义可替换的字段占位符', 1)
+ON DUPLICATE KEY UPDATE description = '插槽领域：用于定义可替换的字段占位符';

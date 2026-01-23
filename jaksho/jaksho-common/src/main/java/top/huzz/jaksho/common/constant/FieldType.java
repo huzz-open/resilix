@@ -32,5 +32,10 @@ public enum FieldType {
      */
     RAW_TEXT,
 
+    /**
+     * 响应字段（成功响应）
+     */
+    RESPONSE_OK,
+
     ;
 }

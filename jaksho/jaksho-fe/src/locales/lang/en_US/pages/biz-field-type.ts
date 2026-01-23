@@ -48,6 +48,7 @@ export default {
       STRING: 'String',
       OBJECT: 'Object',
       FILE: 'File',
+      SLOT: 'Slot',
     },
     minimum: 'Minimum / Min Length',
     minValue: 'Minimum',

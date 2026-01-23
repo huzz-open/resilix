@@ -15,6 +15,4 @@ import top.huzz.jaksho.domain.entity.ValueDict;
 @Mapper
 public interface ValueDictMapper extends ExtBaseMapper<ValueDict> {
 
-
 }
-

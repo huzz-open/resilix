@@ -47,6 +47,9 @@ export default {
     selectField: 'Select Field',
     selectFieldPlaceholder: 'Click to select field',
     searchPlaceholder: 'Search by name/description',
+    fieldName: 'Field Name',
+    fieldType: 'Field Type',
+    fieldDescription: 'Field Description',
     selector: {
       name: 'Name',
       description: 'Description',

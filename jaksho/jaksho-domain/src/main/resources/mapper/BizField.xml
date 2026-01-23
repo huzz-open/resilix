@@ -11,11 +11,12 @@
         <result column="create_time" property="createTime"  />
         <result column="update_time" property="updateTime"  />
         <result column="workspace_id" property="workspaceId"  />
+        <result column="field_attributes" property="fieldAttributes"  />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, name, description, biz_field_type_id, create_time, update_time, workspace_id
+        id, name, description, biz_field_type_id, create_time, update_time, workspace_id, field_attributes
     </sql>
 
 </mapper>

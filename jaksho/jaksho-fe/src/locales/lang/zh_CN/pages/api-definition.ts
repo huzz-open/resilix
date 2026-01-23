@@ -47,6 +47,9 @@ export default {
     selectField: '选择字段',
     selectFieldPlaceholder: '点击选择字段',
     searchPlaceholder: '搜索字段名称/描述',
+    fieldName: '字段名称',
+    fieldType: '字段类型',
+    fieldDescription: '字段描述',
     selector: {
       name: '名称',
       description: '描述',

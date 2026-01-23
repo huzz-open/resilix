@@ -108,6 +108,12 @@ public class ApiDefinitionField extends BasicProperties implements Serializable 
     @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
     private LocalDateTime updateTime;
 
+    /**
+     * 插槽映射配置（JSON格式），格式：{"slotFieldName":targetFieldDomainId}
+     */
+    @TableField("slot_mappings")
+    private String slotMappings;
+
     @Override
     @SuppressWarnings("all")
     public Map<String, Object> properties() {
@@ -124,6 +130,7 @@ public class ApiDefinitionField extends BasicProperties implements Serializable 
         props.put("workspaceId", workspaceId);
         props.put("createTime", createTime);
         props.put("updateTime", updateTime);
+        props.put("slotMappings", slotMappings);
         return props;
     }
 }

@@ -48,6 +48,7 @@ export default {
       STRING: '字符串',
       OBJECT: '对象',
       FILE: '文件',
+      SLOT: '插槽',
     },
     minimum: '最小值/最小长度',
     minValue: '最小值',

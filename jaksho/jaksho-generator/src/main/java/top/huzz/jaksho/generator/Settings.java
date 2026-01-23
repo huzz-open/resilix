@@ -44,7 +44,6 @@ public class Settings {
         tableFiledTypeMap.put(TypeRegistryDelegate.calcKey("sr_api_definition", "raw_type"), RawType.class);
 
         tableFiledTypeMap.put(TypeRegistryDelegate.calcKey("sr_api_definition_field", "field_type"), FieldType.class);
-
     }
 
     static final List<String> listTableSuffix = List.of();    //设置 过滤 表的后缀

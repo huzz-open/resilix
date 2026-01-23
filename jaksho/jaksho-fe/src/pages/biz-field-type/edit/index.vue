@@ -171,7 +171,7 @@ const collectionTypeOptions = [
 ];
 
 const basicFieldTypeOptions = [
-  'BOOLEAN', 'INT8', 'INT16', 'INT32', 'INT64', 'FLOAT', 'DOUBLE', 'STRING', 'OBJECT', 'FILE',
+  'BOOLEAN', 'INT8', 'INT16', 'INT32', 'INT64', 'FLOAT', 'DOUBLE', 'STRING', 'OBJECT', 'FILE', 'SLOT',
 ].map((x) => ({ label: t(`pages.bizFieldType.create.basicFieldTypeOptions.${x}`), value: x }));
 
 const numericTypes = new Set(['INT8', 'INT16', 'INT32', 'INT64', 'FLOAT', 'DOUBLE']);
