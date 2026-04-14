@@ -25,6 +25,11 @@ public class ApiDefinitionFieldDTO implements TreeDTO {
 	@Length(max = 255)
 	private String description;
 
+	/**
+	 * 插槽映射配置（JSON格式），格式：{"slotFieldName":targetFieldDomainId}
+	 */
+	private String slotMappings;
+
 	@NotNull
 	@Length(min = 1, max = 26)
 	private String ulid;

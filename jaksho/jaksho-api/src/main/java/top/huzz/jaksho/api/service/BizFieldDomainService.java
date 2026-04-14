@@ -32,8 +32,7 @@ public interface BizFieldDomainService {
     @Setter
     @BizCheck.List({
             @BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.BizFieldDomain', bizFieldId, bizDomainId, bizFieldTypeId)"),
-            @BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.BizFieldDomain', bizFieldId, bizDomainId)"),
-            @BizCheck("#isBizFieldDomainMatched(bizFieldId, bizFieldTypeId)"),
+            @BizCheck("#__DB_UNIQUE('top.huzz.jaksho.domain.entity.BizFieldDomain', bizFieldId, bizDomainId)")
     })
     class CreateBizFieldDomainRequest {
         @BizCheck("#__DB_EXIST_WITH_ID('top.huzz.jaksho.domain.entity.BizField', #this)")

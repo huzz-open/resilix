@@ -110,7 +110,7 @@
         </t-tab-panel>
         
         <t-tab-panel label="响应配置" value="response">
-          <api-output-config v-model="responseFields" :workspace-id="form.workspaceId" />
+          <api-output-config ref="apiOutputConfigRef" v-model="responseFields" :workspace-id="form.workspaceId" />
         </t-tab-panel>
       </t-tabs>
 
@@ -194,6 +194,7 @@ const form = ref<CreateApiDefinitionRequest>({
 
 // 响应字段配置
 const responseFields = ref<any[]>([]);
+const apiOutputConfigRef = ref<InstanceType<typeof ApiOutputConfig>>();
 
 // KVP 列表（form-data/x-www-form-urlencoded）
 interface KVPRow {
@@ -339,12 +340,24 @@ function buildFieldsByBodyType(): ApiDefinitionFieldDTO[] {
   // 响应字段：RESPONSE_OK 类型
   if (responseFields.value && responseFields.value.length > 0) {
     (responseFields.value as any[]).forEach((x, idx) => {
+      // 如果是 SLOT 类型且有映射，保存映射信息
+      let slotMappings = null;
+      if (x.bizFieldType?.basicFieldType === 'SLOT' && x.slotMappedFieldDomainId) {
+        const fieldName = x.bizField?.name || '';
+        if (fieldName) {
+          slotMappings = JSON.stringify({
+            [fieldName]: x.slotMappedFieldDomainId,
+          });
+        }
+      }
+      
       list.push({
         fieldType: 'RESPONSE_OK',
         ulid: x.ulid,
         parentUlid: x.parentUlid ?? null,
         sortOrder: x.sortOrder ?? idx,
         bizFieldDomainId: x.bizFieldDomainId,
+        slotMappings,
       });
     });
   }
@@ -366,6 +379,16 @@ const onBizCodesChange = (bizCodes: any[]) => {
 async function onSubmit() {
   submitting.value = true;
   try {
+    // 验证响应字段中的 SLOT 映射
+    if (apiOutputConfigRef.value?.validateSlotMappings) {
+      const validation = apiOutputConfigRef.value.validateSlotMappings();
+      if (!validation.valid) {
+        MessagePlugin.warning(validation.message || '请配置所有插槽字段的映射');
+        submitting.value = false;
+        return;
+      }
+    }
+    
     const payload: CreateApiDefinitionRequest = { ...form.value };
     payload.apiDefinitionFieldDTOList = buildFieldsByBodyType();
     await createApiDefinition(payload);
@@ -489,25 +512,49 @@ watch(
           // RESPONSE_OK → 响应字段树 DTO（包含完整对象结构）
           const responseOk = sorted.filter((x) => x.api?.fieldType === 'RESPONSE_OK');
           console.log('回显响应字段 - 过滤后的数据:', responseOk);
-          responseFields.value = responseOk.map((f) => ({
-            ulid: f.api.ulid,
-            parentUlid: f.api.parentUlid || null,
-            sortOrder: f.api.sortOrder ?? 0,
-            bizFieldDomainId: f.api.bizFieldDomainId,
-            // 保留完整对象以供列渲染使用
-            bizField: f.bizField || {},
-            bizFieldType: f.bizFieldType || {},
-            bizDomain: f.bizDomain || {},
-            bizFieldDomain: {
-              id: f.api.bizFieldDomainId,
-            },
-            // 扁平化字段（用于兼容）
-            name: f.bizField?.name ?? '',
-            basicFieldType: f.bizFieldType?.basicFieldType ?? '',
-            collectionType: f.bizFieldType?.collectionType ?? '',
-            minimum: f.bizFieldType?.minimum ?? null,
-            maximum: f.bizFieldType?.maximum ?? null,
-          }));
+          responseFields.value = responseOk.map((f) => {
+            // 解析 slotMappings
+            let slotMappedFieldDomainId = null;
+            let slotMappedFieldName = null;
+            
+            if (f.api.slotMappings && f.bizFieldType?.basicFieldType === 'SLOT') {
+              try {
+                const mappings = JSON.parse(f.api.slotMappings);
+                const fieldName = f.bizField?.name;
+                if (fieldName && mappings[fieldName]) {
+                  slotMappedFieldDomainId = mappings[fieldName];
+                  // 查找映射目标字段的名称
+                  const targetField = rows.find((r) => r.bizFieldDomain?.id === slotMappedFieldDomainId);
+                  slotMappedFieldName = targetField?.bizField?.name || null;
+                }
+              } catch (e) {
+                console.error('解析 slotMappings 失败:', e);
+              }
+            }
+            
+            return {
+              ulid: f.api.ulid,
+              parentUlid: f.api.parentUlid || null,
+              sortOrder: f.api.sortOrder ?? 0,
+              bizFieldDomainId: f.api.bizFieldDomainId,
+              // 保留完整对象以供列渲染使用
+              bizField: f.bizField || {},
+              bizFieldType: f.bizFieldType || {},
+              bizDomain: f.bizDomain || {},
+              bizFieldDomain: {
+                id: f.api.bizFieldDomainId,
+              },
+              // 扁平化字段（用于兼容）
+              name: f.bizField?.name ?? '',
+              basicFieldType: f.bizFieldType?.basicFieldType ?? '',
+              collectionType: f.bizFieldType?.collectionType ?? '',
+              minimum: f.bizFieldType?.minimum ?? null,
+              maximum: f.bizFieldType?.maximum ?? null,
+              // SLOT 映射信息
+              slotMappedFieldDomainId,
+              slotMappedFieldName,
+            };
+          });
           console.log('回显响应字段 - 映射后的 responseFields:', responseFields.value);
           form.value.bodyType = (data?.bodyType as BodyType) || 'RAW_JSON';
           activeCategory.value = 'body';
