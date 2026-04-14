@@ -5,7 +5,7 @@
 # 使用 Ctrl+C 可同时停止所有服务
 #
 
-set -euo pipefail
+set -uo pipefail
 
 # ============================================================
 #  配置区域 - 按需修改以下参数
@@ -53,26 +53,29 @@ log_warn()  { echo -e "${YELLOW}[WARN]${NC}  $*"; }
 log_error() { echo -e "${RED}[ERROR]${NC} $*"; }
 log_step()  { echo -e "${CYAN}[STEP]${NC}  $*"; }
 
+CLEANING_UP=false
 cleanup() {
+    if [[ "$CLEANING_UP" == true ]]; then return; fi
+    CLEANING_UP=true
     echo ""
     log_info "正在停止所有服务..."
 
-    if [[ -n "$FRONTEND_PID" ]] && kill -0 "$FRONTEND_PID" 2>/dev/null; then
-        kill -- -"$FRONTEND_PID" 2>/dev/null || kill "$FRONTEND_PID" 2>/dev/null || true
-        log_info "前端服务已停止 (PID: $FRONTEND_PID)"
-    fi
-
     if [[ -n "$BACKEND_PID" ]] && kill -0 "$BACKEND_PID" 2>/dev/null; then
-        kill -- -"$BACKEND_PID" 2>/dev/null || kill "$BACKEND_PID" 2>/dev/null || true
+        kill "$BACKEND_PID" 2>/dev/null || true
+        wait "$BACKEND_PID" 2>/dev/null || true
         log_info "后端服务已停止 (PID: $BACKEND_PID)"
     fi
 
-    wait 2>/dev/null || true
+    if [[ -n "$FRONTEND_PID" ]] && kill -0 "$FRONTEND_PID" 2>/dev/null; then
+        kill "$FRONTEND_PID" 2>/dev/null || true
+        wait "$FRONTEND_PID" 2>/dev/null || true
+        log_info "前端服务已停止 (PID: $FRONTEND_PID)"
+    fi
+
     log_info "所有服务已停止，再见！"
-    exit 0
 }
 
-trap cleanup SIGINT SIGTERM
+trap cleanup SIGINT SIGTERM EXIT
 
 check_command() {
     if ! command -v "$1" &>/dev/null; then
@@ -95,9 +98,35 @@ if [[ -z "$JAVA_VER" ]] || [[ "$JAVA_VER" -lt 17 ]]; then
     exit 1
 fi
 
+NODE_VER_FULL=$(node -v 2>/dev/null || echo "none")
+NODE_MAJOR=$(echo "$NODE_VER_FULL" | sed 's/^v//' | cut -d. -f1)
+if [[ "$NODE_VER_FULL" == "none" ]] || [[ -z "$NODE_MAJOR" ]] || [[ "$NODE_MAJOR" -lt 18 ]]; then
+    if [[ "$NODE_VER_FULL" == "none" ]]; then
+        log_error "未安装 Node.js（需要 18+）"
+    else
+        log_error "需要 Node.js 18+，当前版本: $NODE_VER_FULL"
+    fi
+    read -rp "$(echo -e "${YELLOW}[ASK]${NC}  是否自动安装 Node.js 22（通过 nvm）？[Y/n] ")" INSTALL_NODE
+    INSTALL_NODE="${INSTALL_NODE:-Y}"
+    if [[ "$INSTALL_NODE" =~ ^[Yy]$ ]]; then
+        log_step "安装 nvm + Node.js 22 ..."
+        export NVM_DIR="$HOME/.nvm"
+        if [[ ! -s "$NVM_DIR/nvm.sh" ]]; then
+            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.1/install.sh | bash
+        fi
+        \. "$NVM_DIR/nvm.sh"
+        nvm install 22
+        NODE_VER_FULL=$(node -v)
+        log_info "Node.js 已安装: $NODE_VER_FULL"
+    else
+        log_error "已取消，请手动安装 Node.js 18+ 后重试"
+        exit 1
+    fi
+fi
+
 log_info "Java $(echo "$JAVA_VER_LINE" | awk -F '"' '{print $2}')"
 log_info "Maven $(mvn -version 2>&1 | grep 'Apache Maven' | awk '{print $3}')"
-log_info "Node  $(node -v)"
+log_info "Node  $NODE_VER_FULL"
 
 # --- 构建后端启动参数（仅在配置了对应值时才覆盖） ---
 JVM_ARGS=""
@@ -129,7 +158,10 @@ fi
 # --- 编译后端 ---
 log_step "编译后端模块..."
 cd "$SCRIPT_DIR"
-mvn -pl jaksho -am compile $MVN_EXTRA_ARGS
+if ! mvn -pl jaksho -am compile $MVN_EXTRA_ARGS; then
+    log_error "后端编译失败"
+    exit 1
+fi
 
 # --- 启动后端 ---
 log_step "启动后端服务..."
@@ -153,7 +185,10 @@ cd "$SCRIPT_DIR/jaksho-fe"
 
 if [[ "$RUN_NPM_INSTALL" == true ]]; then
     log_info "安装前端依赖..."
-    npm install --silent
+    if ! npm install; then
+        log_error "npm install 失败，请检查网络或 package.json"
+        exit 1
+    fi
 fi
 
 FE_CMD=(npm run dev)
@@ -180,4 +215,5 @@ echo -e "  按 ${YELLOW}Ctrl+C${NC} 停止所有服务"
 echo -e "${GREEN}========================================${NC}"
 echo ""
 
-wait
+# 等待任意后台进程退出；若某个崩溃，cleanup 会通过 EXIT trap 清理另一个
+wait -n "$BACKEND_PID" "$FRONTEND_PID" 2>/dev/null || true
