@@ -101,13 +101,36 @@ vi start.sh
 | `RUN_NPM_INSTALL` | `true` | 启动前是否执行 `npm install` |
 | `MVN_EXTRA_ARGS` | `-DskipTests` | Maven 额外参数 |
 
+所有参数也可通过环境变量外部指定，无需修改脚本：
+
+```bash
+DB_PASSWORD=mypassword FRONTEND_PORT=3003 ./start.sh
+```
+
 2. 运行启动脚本：
 
 ```bash
+# 前台模式（Ctrl+C 停止所有服务）
 ./start.sh
+
+# 后台守护模式
+./start.sh -d
 ```
 
-脚本会自动启动后端和前端，按 `Ctrl+C` 同时停止所有服务。
+3. 服务管理命令：
+
+```bash
+./start.sh status   # 查看服务状态
+./start.sh logs     # 实时查看日志（tail -f）
+./start.sh stop     # 停止所有服务
+```
+
+日志文件位于 `logs/` 目录下：
+
+| 文件 | 说明 |
+|------|------|
+| `logs/backend.log` | 后端服务完整日志 |
+| `logs/frontend.log` | 前端服务完整日志 |
 
 启动成功后：
 
@@ -211,8 +234,11 @@ jaksho/
 │   ├── frontend.Dockerfile #   前端镜像构建（Nginx 托管）
 │   ├── nginx.conf          #   Nginx 配置（API 代理 + SPA 路由）
 │   └── initdb/             #   数据库初始化脚本
+├── logs/                   # 运行日志（自动生成，已 gitignore）
+│   ├── backend.log         #   后端服务日志
+│   └── frontend.log        #   前端服务日志
 ├── docker-start.sh         # Docker 一键启动脚本（自动生成 docker-compose.generated.yml）
-├── start.sh                # 本地一键启动脚本
+├── start.sh                # 本地一键启动脚本（支持 -d 后台模式 / stop / status / logs）
 ├── http-request/           # HTTP 接口测试文件
 └── pom.xml                 # Maven 父 POM
 ```

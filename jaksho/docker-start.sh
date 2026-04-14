@@ -11,25 +11,29 @@ set -euo pipefail
 #  配置区域 - 按需修改以下参数
 # ============================================================
 
-# 是否使用内置数据库（true = 启动一个 MariaDB 容器并自动初始化；false = 使用外部数据库）
-USE_BUILTIN_DB=true
+# 是否使用内置数据库（true = 启动一个数据库容器并自动初始化；false = 使用外部数据库）
+USE_BUILTIN_DB="${USE_BUILTIN_DB:-true}"
+
+# 数据库类型：mariadb 或 mysql（影响 Docker 镜像、环境变量和健康检查命令）
+# JDBC URL 始终使用 jdbc:mariadb:// 前缀（MariaDB Connector/J 3.x 兼容连接 MySQL）
+DB_TYPE="${DB_TYPE:-mariadb}"
 
 # 数据库密码（使用内置数据库时会作为 root 密码；使用外部数据库时需填写对应密码）
-DB_PASSWORD="jaksho123"
+DB_PASSWORD="${DB_PASSWORD:-jaksho123}"
 
 # 数据库连接信息
 # 使用内置数据库时：DB_HOST 会自动设为容器服务名，无需手动填写
 # 使用外部数据库时：请填写实际的数据库地址
-DB_HOST=""
-DB_PORT="3306"
-DB_NAME="jaksho_new"
-DB_USER="root"
+DB_HOST="${DB_HOST:-}"
+DB_PORT="${DB_PORT:-3306}"
+DB_NAME="${DB_NAME:-jaksho_new}"
+DB_USER="${DB_USER:-root}"
 
 # 后端服务映射到宿主机的端口
-BACKEND_PORT="8080"
+BACKEND_PORT="${BACKEND_PORT:-8080}"
 
 # 前端服务映射到宿主机的端口
-FRONTEND_PORT="3002"
+FRONTEND_PORT="${FRONTEND_PORT:-3002}"
 
 # ============================================================
 #  以下内容一般不需要修改
@@ -86,6 +90,7 @@ else
     log_info "使用外部数据库: ${DB_HOST}:${DB_PORT}/${DB_NAME}"
 fi
 
+# MariaDB Connector/J 3.x 只接受 jdbc:mariadb:// 前缀，但可兼容连接 MySQL 服务器
 JDBC_URL="jdbc:mariadb://${DB_HOST}:${DB_PORT}/${DB_NAME}?useUnicode=true&characterEncoding=utf-8&serverTimezone=UTC&useInformationSchema=true"
 
 # --- 生成 docker-compose.yml ---
@@ -93,12 +98,21 @@ log_step "生成 docker-compose.yml ..."
 
 DB_SECTION=""
 if [[ "$USE_BUILTIN_DB" == true ]]; then
+    if [[ "$DB_TYPE" == "mysql" ]]; then
+        DB_IMAGE="mysql:8"
+        DB_ENV_ROOT_PASSWORD="MYSQL_ROOT_PASSWORD"
+        DB_ENV_DATABASE="MYSQL_DATABASE"
+    else
+        DB_IMAGE="mariadb:11"
+        DB_ENV_ROOT_PASSWORD="MARIADB_ROOT_PASSWORD"
+        DB_ENV_DATABASE="MARIADB_DATABASE"
+    fi
 DB_SECTION="
   db:
-    image: mariadb:11
+    image: ${DB_IMAGE}
     environment:
-      MARIADB_ROOT_PASSWORD: \"${DB_PASSWORD}\"
-      MARIADB_DATABASE: \"${DB_NAME}\"
+      ${DB_ENV_ROOT_PASSWORD}: \"${DB_PASSWORD}\"
+      ${DB_ENV_DATABASE}: \"${DB_NAME}\"
     volumes:
       - db-data:/var/lib/mysql
       - ./jaksho-generator/src/main/resources/sql:/sql:ro
@@ -146,7 +160,12 @@ if [[ "$USE_BUILTIN_DB" == true ]]; then
     log_info "等待数据库就绪..."
     RETRIES=0
     MAX_RETRIES=30
-    until docker-compose -f "$COMPOSE_FILE" exec -T db mariadb -u root -p"${DB_PASSWORD}" -e "SELECT 1" &>/dev/null; do
+    if [[ "$DB_TYPE" == "mysql" ]]; then
+        DB_CHECK_CMD="mysql -u root -p\"${DB_PASSWORD}\" -e \"SELECT 1\""
+    else
+        DB_CHECK_CMD="mariadb -u root -p\"${DB_PASSWORD}\" -e \"SELECT 1\""
+    fi
+    until docker-compose -f "$COMPOSE_FILE" exec -T db sh -c "$DB_CHECK_CMD" &>/dev/null; do
         RETRIES=$((RETRIES + 1))
         if [[ $RETRIES -ge $MAX_RETRIES ]]; then
             log_error "数据库启动超时，请检查日志: docker-compose -f $COMPOSE_FILE logs db"
