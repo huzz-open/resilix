@@ -69,10 +69,10 @@ vi docker-start.sh
 
 ```bash
 # 停止服务
-docker-compose down
+docker-compose -f docker-compose.generated.yml down
 
 # 停止服务并删除数据库数据卷（完全重置）
-docker-compose down -v
+docker-compose -f docker-compose.generated.yml down -v
 ```
 
 ---
@@ -211,8 +211,7 @@ jaksho/
 │   ├── frontend.Dockerfile #   前端镜像构建（Nginx 托管）
 │   ├── nginx.conf          #   Nginx 配置（API 代理 + SPA 路由）
 │   └── initdb/             #   数据库初始化脚本
-├── docker-compose.yml      # Docker Compose 编排
-├── docker-start.sh         # Docker 一键启动脚本
+├── docker-start.sh         # Docker 一键启动脚本（自动生成 docker-compose.generated.yml）
 ├── start.sh                # 本地一键启动脚本
 ├── http-request/           # HTTP 接口测试文件
 └── pom.xml                 # Maven 父 POM
