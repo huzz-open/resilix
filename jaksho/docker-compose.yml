@@ -1,7 +1,8 @@
+version: '3.8'
+
 services:
   db:
     image: mariadb:11
-    profiles: ["with-db"]
     environment:
       MARIADB_ROOT_PASSWORD: "${DB_PASSWORD}"
       MARIADB_DATABASE: "${DB_NAME}"
@@ -10,7 +11,7 @@ services:
       - ./jaksho-generator/src/main/resources/sql:/sql:ro
       - ./docker/initdb:/docker-entrypoint-initdb.d:ro
     healthcheck:
-      test: ["CMD", "healthcheck.sh", "--connect", "--innodb_initialized"]
+      test: ["CMD", "mariadb", "-u", "root", "-p${DB_PASSWORD}", "-e", "SELECT 1"]
       interval: 5s
       timeout: 5s
       retries: 10

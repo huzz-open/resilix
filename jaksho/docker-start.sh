@@ -78,21 +78,17 @@ export DB_PASSWORD DB_HOST DB_PORT DB_NAME DB_USER
 export BACKEND_PORT FRONTEND_PORT
 
 # --- 启动服务 ---
-COMPOSE_CMD=(docker-compose)
-
 if [[ "$USE_BUILTIN_DB" == true ]]; then
-    COMPOSE_CMD+=(--profile with-db)
-
     log_step "启动数据库..."
-    "${COMPOSE_CMD[@]}" up -d db
+    docker-compose up -d db
 
     log_info "等待数据库就绪..."
     RETRIES=0
     MAX_RETRIES=30
-    until docker-compose --profile with-db exec db mariadb -u root -p"${DB_PASSWORD}" -e "SELECT 1" &>/dev/null; do
+    until docker-compose exec db mariadb -u root -p"${DB_PASSWORD}" -e "SELECT 1" &>/dev/null; do
         RETRIES=$((RETRIES + 1))
         if [[ $RETRIES -ge $MAX_RETRIES ]]; then
-            log_error "数据库启动超时，请检查日志: docker-compose --profile with-db logs db"
+            log_error "数据库启动超时，请检查日志: docker-compose logs db"
             exit 1
         fi
         sleep 2
@@ -101,5 +97,4 @@ if [[ "$USE_BUILTIN_DB" == true ]]; then
 fi
 
 log_step "构建并启动应用服务..."
-"${COMPOSE_CMD[@]}" up --build
-
+docker-compose up --build backend frontend

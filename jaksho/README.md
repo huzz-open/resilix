@@ -69,10 +69,10 @@ vi docker-start.sh
 
 ```bash
 # 停止服务
-docker-compose --profile with-db down
+docker-compose down
 
 # 停止服务并删除数据库数据卷（完全重置）
-docker-compose --profile with-db down -v
+docker-compose down -v
 ```
 
 ---
