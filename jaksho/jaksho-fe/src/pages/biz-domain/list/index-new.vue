@@ -157,7 +157,7 @@ const dialogTitle = computed(() => {
 })
 
 const formRules = {
-  name: [{ required: true, message: t('pages.bizDomain.create.nameRequired'), trigger: 'blur' }],
+  name: [{ required: true, message: t('pages.bizDomain.create.nameRequired'), trigger: 'blur' as const }],
 }
 
 // ========== 事件处理 ==========

@@ -146,7 +146,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
+import type { CheckboxGroupValue, FormInstanceFunctions, FormRule, PageInfo, PrimaryTableCol } from 'tdesign-vue-next';
 import { MessagePlugin, Tooltip } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -182,7 +182,7 @@ const formData = ref<CreateBizFieldRequest>({
 const fieldAttributesCheckbox = ref<number[]>(FieldAttribute.toCheckboxArray(FieldAttribute.DEFAULT));
 
 // 字段属性复选框变化处理
-const onFieldAttributesChange = (value: number[]) => {
+const onFieldAttributesChange = (value: CheckboxGroupValue) => {
   if (value.length === 0) {
     // 如果都不选，恢复默认值
     formData.value.fieldAttributes = FieldAttribute.DEFAULT;
@@ -190,7 +190,7 @@ const onFieldAttributesChange = (value: number[]) => {
     MessagePlugin.warning('至少需要选择一个字段属性，已恢复为默认值');
   } else {
     // 使用工具类进行位运算
-    formData.value.fieldAttributes = FieldAttribute.fromCheckboxArray(value);
+    formData.value.fieldAttributes = FieldAttribute.fromCheckboxArray(value as number[]);
   }
 };
 

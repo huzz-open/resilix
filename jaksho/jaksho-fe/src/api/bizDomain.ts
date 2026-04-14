@@ -28,7 +28,7 @@ export function createBizDomain(data: CreateBizDomainRequest) {
 }
 
 export function deleteBizDomain(id: number) {
-  return request.delete<number>({
+  return request.delete<void>({
     url: `${Api.DeleteBizDomain}/${id}`,
   });
 }

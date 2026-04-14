@@ -179,7 +179,7 @@ const pagination = ref({
 })
 
 const dataLoading = ref(false)
-const rowKey = (row: any) => row?.bizCode?.id ?? row?.id
+const rowKey = 'id'
 const headerAffixedTop = ref({ offsetTop: 0, container: '.main-content' })
 
 const searchForm = ref<{
@@ -232,7 +232,7 @@ const fetchData = async () => {
       httpStatus: searchForm.value.httpStatus || undefined,
       shortDesc: searchForm.value.shortDesc || undefined,
     })
-    listData.value = rows
+    listData.value = rows.map((r) => ({ ...r, id: r.bizCode?.id ?? r.id }))
     pagination.value.total = total
   } catch (error) {
     console.error('获取业务码列表失败:', error)

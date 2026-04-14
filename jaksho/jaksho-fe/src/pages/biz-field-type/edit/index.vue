@@ -129,7 +129,7 @@ import { ref, computed, onMounted } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import { ChevronLeftIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import type { FormInstanceFunctions, FormRule, PrimaryTableCol } from 'tdesign-vue-next';
+import type { FormInstanceFunctions, FormRule, PrimaryTableCol, SubmitContext } from 'tdesign-vue-next';
 import { createBizFieldType, getBizFieldTypeDetail, updateBizFieldType } from '@/api/bizFieldType';
 import type { BizFieldTypeDetailResponse, CreateBizFieldTypeRequest } from '@/api/model/bizFieldTypeModel';
 import type { ValueDictModel } from '@/api/model/valueDictModel';
@@ -276,8 +276,8 @@ const goBack = () => {
   router.push({ name: 'BizFieldTypeList' });
 };
 
-const onSubmit = async ({ validateResult }: { validateResult: boolean }) => {
-  if (!validateResult) return;
+const onSubmit = async ({ validateResult }: SubmitContext) => {
+  if (validateResult !== true) return;
 
   try {
     submitLoading.value = true;

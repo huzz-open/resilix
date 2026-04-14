@@ -82,7 +82,7 @@ import type { ServiceModel } from '@/api/model/serviceModel'
 
 const router = useRouter()
 
-const COLUMNS: PrimaryTableCol<ServiceModel>[] = [
+const COLUMNS: PrimaryTableCol[] = [
   { colKey: 'row-select', type: 'multiple', width: 50, fixed: 'left' },
   {
     title: '服务码',

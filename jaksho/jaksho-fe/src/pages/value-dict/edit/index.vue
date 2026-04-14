@@ -79,9 +79,9 @@ import { useRoute, useRouter } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { ChevronLeftIcon } from 'tdesign-icons-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
-import type { FormInstanceFunctions, FormRule } from 'tdesign-vue-next';
+import type { FormInstanceFunctions, FormRule, SubmitContext } from 'tdesign-vue-next';
 import { getValueDictDetail, createValueDict, updateValueDict } from '@/api/valueDict';
-import type { ValueDictItemModel } from '@/api/model/valueDictModel';
+import type { ValueDictItemModel, ValueDictType } from '@/api/model/valueDictModel';
 import { useTabsRouterStore } from '@/store';
 import DictItemManager from '../components/DictItemManager.vue';
 
@@ -100,7 +100,7 @@ interface FormData {
   id?: number;
   name: string;
   description: string;
-  type: string;
+  type: ValueDictType;
   remark: string;
   items: ValueDictItemModel[];
 }
@@ -164,8 +164,8 @@ const goBack = () => {
 };
 
 // 提交表单
-const onSubmit = async ({ validateResult }: { validateResult: boolean }) => {
-  if (!validateResult) return;
+const onSubmit = async ({ validateResult }: SubmitContext) => {
+  if (validateResult !== true) return;
 
   try {
     submitLoading.value = true;

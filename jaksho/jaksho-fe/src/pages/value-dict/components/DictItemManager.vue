@@ -200,7 +200,7 @@ const columns = computed(() => [
     colKey: 'op',
     title: t('pages.valueDict.list.operation'),
     width: 150,
-    fixed: 'right',
+    fixed: 'right' as const,
   },
 ]);
 
@@ -209,6 +209,7 @@ const handleAdd = () => {
     name: '',
     rawValue: '',
     description: '',
+    sortOrder: items.value.length,
     editing: true,
     tempId: `temp-${Date.now()}`,
   });

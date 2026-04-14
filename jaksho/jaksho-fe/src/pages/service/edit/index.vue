@@ -67,7 +67,7 @@
 </template>
 
 <script setup lang="ts">
-import type { FormInstanceFunctions } from 'tdesign-vue-next';
+import type { FormInstanceFunctions, SubmitContext } from 'tdesign-vue-next';
 import { MessagePlugin } from 'tdesign-vue-next';
 import { computed, onMounted, ref } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
@@ -143,8 +143,8 @@ const loadDetail = async () => {
 };
 
 // 提交（创建或编辑）
-const onSubmit = async ({ validateResult }: { validateResult: boolean }) => {
-  if (!validateResult) return;
+const onSubmit = async ({ validateResult }: SubmitContext) => {
+  if (validateResult !== true) return;
 
   submitLoading.value = true;
   try {

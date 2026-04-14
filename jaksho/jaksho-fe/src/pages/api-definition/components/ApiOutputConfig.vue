@@ -286,7 +286,6 @@ async function loadMappingCandidates() {
       current: mappingPagination.current,
       pageSize: mappingPagination.pageSize,
       keyword: mappingKeyword.value,
-      workspaceId: props.workspaceId,
     });
     
     // 过滤：1）可作为输出 2）非 SLOT 类型

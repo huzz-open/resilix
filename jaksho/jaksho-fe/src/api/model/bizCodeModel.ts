@@ -13,6 +13,8 @@ export interface BizCodeModel {
   createTime?: string
   updateTime?: string
   workspaceId?: number
+  bizCode?: BizCodeModel
+  service?: { id?: number; name?: string; serviceCode?: number }
 }
 
 export interface BizCodeListParams {

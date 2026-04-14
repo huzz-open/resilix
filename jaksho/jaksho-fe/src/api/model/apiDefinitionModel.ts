@@ -2,7 +2,7 @@ import type { TreeDTO } from '@/api/model/basic/treeDTO';
 
 export type BodyType = 'NONE' | 'FORM_DATA' | 'FORM_URLENCODED' | 'RAW_JSON' | 'RAW_TEXT' | 'BINARY';
 
-export type FieldType = 'QUERY' | 'PATH' | 'FORM_DATA' | 'FORM_URLENCODED' | 'RAW_JSON' | 'RAW_TEXT';
+export type FieldType = 'QUERY' | 'PATH' | 'FORM_DATA' | 'FORM_URLENCODED' | 'RAW_JSON' | 'RAW_TEXT' | 'RESPONSE_OK';
 
 export type HttpMethod = 'GET' | 'POST' | 'PUT' | 'DELETE' | 'HEAD' | 'TRACE' | 'OPTIONS' | 'PATCH';
 
@@ -29,6 +29,7 @@ export interface ApiDefinitionFieldDTO extends TreeDTO {
   bizFieldDomainId?: number | string;
   isRequired?: boolean;
   description?: string;
+  slotMappings?: string | null;
 }
 
 export interface CreateApiDefinitionRequest {
@@ -38,5 +39,6 @@ export interface CreateApiDefinitionRequest {
   bodyType: BodyType;
   description?: string;
   remark?: string;
+  workspaceId?: number;
   apiDefinitionFieldDTOList?: ApiDefinitionFieldDTO[];
 }

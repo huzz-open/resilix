@@ -174,7 +174,7 @@ import { request } from '@/utils/request';
 import ApiOutputConfig from './ApiOutputConfig.vue';
 
 // 详情模式：仅做初始回填（当前后端无详情接口，暂按传入行填充基本信息）
-const props = defineProps<{ mode: 'create' | 'detail'; value: ApiDefinitionModel | null }>();
+const props = defineProps<{ mode: 'create' | 'detail'; value: Partial<ApiDefinitionModel> | null }>();
 const emit = defineEmits<{ (e: 'success'): void; (e: 'close'): void }>();
 const METHODS: HttpMethod[] = ['GET', 'POST', 'PUT', 'DELETE', 'HEAD', 'TRACE', 'OPTIONS', 'PATCH'];
 const BODY_TYPES: BodyType[] = ['NONE', 'FORM_DATA', 'FORM_URLENCODED', 'RAW_JSON', 'RAW_TEXT', 'BINARY'];
@@ -514,8 +514,8 @@ watch(
           console.log('回显响应字段 - 过滤后的数据:', responseOk);
           responseFields.value = responseOk.map((f) => {
             // 解析 slotMappings
-            let slotMappedFieldDomainId = null;
-            let slotMappedFieldName = null;
+            let slotMappedFieldDomainId: number | null = null;
+            let slotMappedFieldName: string | null = null;
             
             if (f.api.slotMappings && f.bizFieldType?.basicFieldType === 'SLOT') {
               try {

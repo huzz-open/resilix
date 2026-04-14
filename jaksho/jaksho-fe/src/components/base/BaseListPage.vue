@@ -91,7 +91,7 @@
 <script setup lang="ts" generic="T extends Record<string, any> = any">
 import { ref, computed, watch } from 'vue'
 import { AddIcon, DeleteIcon, RefreshIcon, SearchIcon } from 'tdesign-icons-vue-next'
-import type { PrimaryTableCol, PageInfo, TableRowData } from 'tdesign-vue-next'
+import type { PrimaryTableCol, PageInfo, RowEventContext, TableRowData } from 'tdesign-vue-next'
 import { useTableList } from '@/composables/useTableList'
 import { useDeleteConfirm } from '@/composables/useDeleteConfirm'
 import type { PageParams, PageResult } from '@/types/common'
@@ -240,7 +240,7 @@ const handleSelectChange = (value: Array<string | number>, context: { selectedRo
 /**
  * 行点击
  */
-const handleRowClick = (context: { row: TableRowData; index: number; e: MouseEvent }) => {
+const handleRowClick = (context: RowEventContext<TableRowData>) => {
   emit('rowClick', context.row as T)
 }
 

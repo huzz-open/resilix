@@ -80,7 +80,7 @@ const columns = computed(() => [
   { colKey: 'description', title: t('pages.valueDict.list.description'), ellipsis: true },
   { colKey: 'type', title: t('pages.valueDict.list.type'), width: 100 },
   { colKey: 'createTime', title: t('pages.valueDict.list.createTime'), width: 180 },
-  { colKey: 'op', title: t('pages.valueDict.list.operation'), width: 150, fixed: 'right' },
+  { colKey: 'op', title: t('pages.valueDict.list.operation'), width: 150, fixed: 'right' as const },
 ]);
 
 // 加载列表数据
@@ -139,8 +139,10 @@ const handleDelete = async (row: ValueDictModel) => {
 };
 
 // 辅助函数
-const getTypeTheme = (type: string) => {
-  const themeMap: Record<string, string> = {
+type TagTheme = 'default' | 'success' | 'primary' | 'warning' | 'danger';
+
+const getTypeTheme = (type: string): TagTheme => {
+  const themeMap: Record<string, TagTheme> = {
     STR: 'primary',
     INT: 'success',
     CHAR: 'warning',
