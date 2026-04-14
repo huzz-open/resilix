@@ -16,15 +16,68 @@ Jaksho 是基于 Resilix 框架的 API 定义管理平台，提供业务字段�
 
 ## 环境要求
 
+**本地开发：**
+
 - **Java** 17+
 - **Maven** 3.8+
 - **Node.js** >= 18.18.0 (推荐 22.x)
 - **npm** 10.x
 - **MariaDB** 10.x / 11.x
 
+**Docker 启动：**
+
+- **Docker** 20.10+
+- **Docker Compose** V2
+
 ---
 
-## 一键启动
+## Docker 启动（推荐）
+
+> 无需本地安装 Java / Node / MariaDB，Docker 环境即可运行。
+
+1. 编辑 `docker-start.sh` 顶部的配置区域：
+
+```bash
+vi docker-start.sh
+```
+
+| 参数 | 默认值 | 说明 |
+|------|--------|------|
+| `USE_BUILTIN_DB` | `true` | `true` = 自动启动 MariaDB 容器并初始化数据；`false` = 连接外部数据库 |
+| `DB_PASSWORD` | `jaksho123` | 数据库密码（内置数据库时为 root 密码） |
+| `DB_HOST` | 留空（内置时自动设为容器名） | 外部数据库地址（`USE_BUILTIN_DB=false` 时必填） |
+| `DB_PORT` | `3306` | 数据库端口 |
+| `DB_NAME` | `jaksho_new` | 数据库名称 |
+| `DB_USER` | `root` | 数据库用户名 |
+| `BACKEND_PORT` | `8080` | 后端映射到宿主机的端口 |
+| `FRONTEND_PORT` | `3002` | 前端映射到宿主机的端口 |
+
+2. 运行启动脚本：
+
+```bash
+./docker-start.sh
+```
+
+脚本会自动构建镜像并启动所有服务，内置数据库模式下会自动执行 SQL 初始化。按 `Ctrl+C` 停止所有服务。
+
+启动成功后：
+
+- 前端页面：`http://localhost:3002`
+- 后端服务：`http://localhost:8080` (Dubbo Triple 协议)
+
+**停止并清理：**
+
+```bash
+# 停止服务
+docker compose --profile with-db down
+
+# 停止服务并删除数据库数据卷（完全重置）
+docker compose --profile with-db down -v
+```
+
+---
+
+## 本地一键启动
 
 > 适用于首次搭建或快速验证，需要先完成[数据库初始化](#1-初始化数据库)。
 
@@ -153,6 +206,14 @@ jaksho/
 ├── jaksho-common/          # 公共工具模块
 ├── jaksho-generator/       # 代码生成器（含数据库初始化 SQL）
 ├── jaksho-fe/              # 前端应用（Vue 3 + Vite + TDesign）
+├── docker/                 # Docker 相关文件
+│   ├── backend.Dockerfile  #   后端镜像构建
+│   ├── frontend.Dockerfile #   前端镜像构建（Nginx 托管）
+│   ├── nginx.conf          #   Nginx 配置（API 代理 + SPA 路由）
+│   └── initdb/             #   数据库初始化脚本
+├── docker-compose.yml      # Docker Compose 编排
+├── docker-start.sh         # Docker 一键启动脚本
+├── start.sh                # 本地一键启动脚本
 ├── http-request/           # HTTP 接口测试文件
 └── pom.xml                 # Maven 父 POM
 ```
