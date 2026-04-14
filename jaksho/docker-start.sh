@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 #
 # Jaksho Docker 一键启动脚本
-# 使用 docker compose 启动前端 + 后端，可选内置数据库
+# 使用 docker-compose 启动前端 + 后端，可选内置数据库
 # 使用 Ctrl+C 停止所有服务
 #
 
@@ -55,12 +55,12 @@ if ! command -v docker &>/dev/null; then
     log_error "未找到 docker，请先安装 Docker"
     exit 1
 fi
-if ! docker compose version &>/dev/null; then
-    log_error "未找到 docker compose，请安装 Docker Compose V2"
+if ! command -v docker-compose &>/dev/null; then
+    log_error "未找到 docker-compose，请先安装 Docker Compose"
     exit 1
 fi
 log_info "Docker $(docker --version | awk '{print $3}' | tr -d ',')"
-log_info "Compose $(docker compose version --short)"
+log_info "Compose $(docker-compose version --short)"
 
 # --- 组装环境变量 ---
 if [[ "$USE_BUILTIN_DB" == true ]]; then
@@ -78,7 +78,7 @@ export DB_PASSWORD DB_HOST DB_PORT DB_NAME DB_USER
 export BACKEND_PORT FRONTEND_PORT
 
 # --- 启动服务 ---
-COMPOSE_CMD=(docker compose)
+COMPOSE_CMD=(docker-compose)
 
 if [[ "$USE_BUILTIN_DB" == true ]]; then
     COMPOSE_CMD+=(--profile with-db)
@@ -89,10 +89,10 @@ if [[ "$USE_BUILTIN_DB" == true ]]; then
     log_info "等待数据库就绪..."
     RETRIES=0
     MAX_RETRIES=30
-    until docker compose --profile with-db exec db mariadb -u root -p"${DB_PASSWORD}" -e "SELECT 1" &>/dev/null; do
+    until docker-compose --profile with-db exec db mariadb -u root -p"${DB_PASSWORD}" -e "SELECT 1" &>/dev/null; do
         RETRIES=$((RETRIES + 1))
         if [[ $RETRIES -ge $MAX_RETRIES ]]; then
-            log_error "数据库启动超时，请检查日志: docker compose --profile with-db logs db"
+            log_error "数据库启动超时，请检查日志: docker-compose --profile with-db logs db"
             exit 1
         fi
         sleep 2

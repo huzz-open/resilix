@@ -27,7 +27,7 @@ Jaksho 是基于 Resilix 框架的 API 定义管理平台，提供业务字段�
 **Docker 启动：**
 
 - **Docker** 20.10+
-- **Docker Compose** V2
+- **Docker Compose**
 
 ---
 
@@ -69,10 +69,10 @@ vi docker-start.sh
 
 ```bash
 # 停止服务
-docker compose --profile with-db down
+docker-compose --profile with-db down
 
 # 停止服务并删除数据库数据卷（完全重置）
-docker compose --profile with-db down -v
+docker-compose --profile with-db down -v
 ```
 
 ---
